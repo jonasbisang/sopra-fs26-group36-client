@@ -65,6 +65,7 @@ const EditProfile: React.FC = () => {
       setLoading(true);
 
       const updateData: Partial<UserData & { password?: string }> = {};
+      let passwordChanged = false;
 
       if (values.username !== userData.username) {
         updateData.username = values.username;
@@ -74,6 +75,7 @@ const EditProfile: React.FC = () => {
       }
       if (values.password && values.password.trim() !== "") {
         updateData.password = values.password;
+        passwordChanged = true;
       }
       if (Object.keys(updateData).length === 0) {
         message.info("No changes detected.");
@@ -82,11 +84,18 @@ const EditProfile: React.FC = () => {
       }
 
       await apiService.updateUserById(userId, updateData);
-      message.success("Profile updated successfully!");
-
-      setTimeout(() => {
+      if (passwordChanged) {
+        message.success("Password changed! Please log in again.");
+        // Session beenden
+        localStorage.removeItem("token");
+        localStorage.removeItem("userId");
+        setTimeout(() => router.push("/login"), 1500);
+      } else {
+        message.success("Profile updated successfully!");
+        setTimeout(() => {
         router.push(`/users/${userId}`);
       }, 1500);
+    }
 
     } catch (error) {
       console.error("Could not save profile data.", error);
