@@ -31,6 +31,15 @@ const EditProfile: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
+
+        //AUTH CHECKKKK
+        const loggedInUser = localStorage.getItem("userId"); 
+        if (!loggedInUser || loggedInUser != userId) {
+          message.error("You are not authorized to edit this profile.");
+          router.push(`/users/${userId}`);
+          return;
+        }
+
         const data = await apiService.getUserById<UserData>(userId);
         setUserData({
           username: data.username,
@@ -45,7 +54,7 @@ const EditProfile: React.FC = () => {
     };
 
     if (userId) fetchUserData();
-  }, [userId, form]);
+  }, [userId, form, router]);
 
   // Watcher für das Passwort-Feld (für das dynamische Confirm-Feld)
   const passwordValue = Form.useWatch("password", form);
@@ -74,12 +83,11 @@ const EditProfile: React.FC = () => {
 
       await apiService.updateUserById(userId, updateData);
       message.success("Profile updated successfully!");
-      setUserData({ 
-        username: values.username, 
-        bio: values.bio 
-      });
-    
-      setIsEditing(false);
+
+      setTimeout(() => {
+        router.push(`/users/${userId}`);
+      }, 1500);
+
     } catch (error) {
       console.error("Could not save profile data.", error);
       const errorMessage = error instanceof Error ? error.message : "Update failed.";
