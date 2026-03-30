@@ -122,7 +122,6 @@ const Register: React.FC = () => {
 
         </Form.Item>
 
-        
 
         <Form.Item
 
@@ -145,7 +144,7 @@ const Register: React.FC = () => {
         <Form.Item
           name="bio"
           label={<span style={{ color: "blue" }}>Biography</span>}
-          rules={[{ required: true, message: "Please input your bio!" }]}
+          rules={[{ message: "Please input your bio!" }]}
         >
 
           <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." />
