@@ -12,7 +12,8 @@ interface NeededFields {
   name: string; 
   username: string; 
   password: string; 
-  bio: string; 
+  email: string; 
+  bio?: string; 
 
 }
 
@@ -52,6 +53,7 @@ const Register: React.FC = () => {
         setUserId(response.id.toString());
       }
 
+
       // Navigate to the user overview
       router.push("/users");
     } catch (error) { 
@@ -68,10 +70,12 @@ const Register: React.FC = () => {
   return (
     <div className="login-container" 
         style={{ 
-            backgroundColor: '#f3e5f5', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
-            //display: "flex", by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
-            //alignItems: "center",
-            //justifyContent: "center",
+            backgroundColor: '#c9ca7f', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
+            display: "flex",// by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
+            flexDirection: 'column',
+            alignItems: "center",
+            justifyContent: "center",
+
             }}
     >
         <div //everything inside of this beheaves in a certain way 
@@ -80,9 +84,18 @@ const Register: React.FC = () => {
             flexDirection: "column",
             width: "100%",
             maxWidth: 500,
+            backgroundColor: "blue", // you can change this to any color you like, or even add a background image (POSIBBLE FUTURE FEATURE???)
+            borderRadius: '12px',
+            padding: '30px',
+
         }}
     >
-        <h2 style={{ marginBottom: 20, color:"blue" }}>Create Account</h2>
+        <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, textAlign: 'center', color: 'white' }}>
+          Friendler
+        </h1>
+        <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
+          CREATE YOUR ACCOUNT
+        </p>
 
       <Form
         //form={form} //not really needed 
@@ -92,20 +105,29 @@ const Register: React.FC = () => {
         layout="vertical"
       >
 
+        <Form.Item
+            name="email"
+            label={<span style={{ color: "white" }}>Email</span>}
+            rules={[{ required: true, type: 'email', message: "Valid email required" }]}
+        > 
+            <Input placeholder="Email"/> 
+          </Form.Item>
 
         <Form.Item
           name="name"
-          label={<span style={{ color: "blue" }}>Full name</span>}
+          label={<span style={{ color: "white" }}>Full name</span>}
           rules={[{ required: true, message: "Please input your full name!" }]}
         >
           <Input placeholder="Enter your name" />
 
         </Form.Item>
 
+        
+
         <Form.Item
 
           name="username"
-          label={<span style={{ color: "blue" }}>Username</span>}
+          label={<span style={{ color: "white" }}>Username</span>}
           rules={[{ required: true, message: "Please input your username!" }]}
       >
           <Input placeholder="Enter username" />
@@ -114,7 +136,7 @@ const Register: React.FC = () => {
         
         <Form.Item
           name="password"
-          label={<span style={{ color: "blue" }}>Password</span>}
+          label={<span style={{ color: "white" }}>Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password placeholder="Enter password" />
