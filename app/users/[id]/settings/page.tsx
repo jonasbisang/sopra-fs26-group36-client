@@ -3,7 +3,12 @@ import React, { useEffect, useState } from "react";
 import { Card, Button, Typography, Space, Divider, Input, Form, Spin, message } from "antd";
 import { useRouter, useParams } from "next/navigation";
 import { EditOutlined, ArrowLeftOutlined } from "@ant-design/icons";
-import { apiService } from "@/api/apiService";  
+import { apiService } from "@/api/apiService"; 
+
+interface UserData {
+  username: string;
+  bio: string;
+}
 
 const { Title, Text } = Typography;
 
@@ -26,7 +31,7 @@ const EditProfile: React.FC = () => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-        const data = await apiService.getUserById<any>(userId);
+        const data = await apiService.getUserById<UserData>(userId);
         setUserData({
           username: data.username,
           bio: data.bio || "",
@@ -46,11 +51,11 @@ const EditProfile: React.FC = () => {
   const passwordValue = Form.useWatch("password", form);
 
   // PUT request zum Speichern der Änderungen
-  const handleSave = async (values: any) => {
+  const handleSave = async (values: Record<string, string>) => {
     try {
       setLoading(true);
 
-      const updateData: any = {};
+      const updateData: Partial<UserData & { password?: string }> = {};
 
       if (values.username !== userData.username) {
         updateData.username = values.username;
@@ -75,9 +80,10 @@ const EditProfile: React.FC = () => {
       });
     
       setIsEditing(false);
-    } catch (error: any) {
+    } catch (error) {
       console.error("Could not save profile data.", error);
-      message.error(error.message || "Update failed.");
+      const errorMessage = error instanceof Error ? error.message : "Update failed.";
+      message.error(errorMessage);
     } finally {
       setLoading(false);
     }
@@ -141,14 +147,14 @@ const EditProfile: React.FC = () => {
                       return Promise.resolve();
                     }
                     try {
-                      const users = await apiService.get<any[]>("/users");
+                      const users = await apiService.get<UserData[]>("/users");
                       const isTaken = users.some(u => u.username.toLowerCase() === value.toLowerCase());
 
                       if (isTaken) {
                         return Promise.reject(new Error('Username is already taken!'));
                       }
                       return Promise.resolve();
-                    } catch (error) {
+                    } catch {
                       // Falls der Aufruf fehlschlägt (z.B. 401 oder 404)
                       return Promise.resolve(); 
                     }
