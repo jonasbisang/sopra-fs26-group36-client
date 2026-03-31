@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation"; // use NextJS router for navigation
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
-import { Button, Form, Input} from "antd";
+import { Button, Form, Input, message} from "antd";
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
 
@@ -21,6 +21,8 @@ const Register: React.FC = () => {
   const router = useRouter();
   const apiService = useApi();
   //const [form] = Form.useForm();
+
+  const [messageApi, contextHolder] = message.useMessage();
   
   // useLocalStorage hook example use
   // The hook returns an object with the value and two functions
@@ -68,32 +70,30 @@ const Register: React.FC = () => {
   
 
   return (
-    <div className="login-container" 
-        style={{ 
-            backgroundColor: '#c9ca7f', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
+      <div style={{
+            backgroundColor: '#ffffff', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
+            minHeight: '100vh"',
             display: "flex",// by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
             flexDirection: 'column',
             alignItems: "center",
             justifyContent: "center",
 
-            }}
-    >
-        <div //everything inside of this beheaves in a certain way 
-            style={{
-            display: "flex",
-            flexDirection: "column",
-            width: "100%",
-            maxWidth: 500,
-            backgroundColor: "blue", // you can change this to any color you like, or even add a background image (POSIBBLE FUTURE FEATURE???)
-            borderRadius: '12px',
-            padding: '30px',
+            }}>
 
-        }}
-    >
-        <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, textAlign: 'center', color: 'white' }}>
+          {contextHolder}
+
+        <div style={{ 
+          width: '100%', 
+          maxWidth: 400, //again similar to log in 
+          padding: '30px', 
+          backgroundColor: 'rgba(29, 28, 28, 0.1)', // adding the lgo in properties 
+          borderRadius: '12px' 
+        }}>
+      
+        <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, textAlign: 'center', color: 'blue' }}>
           Friendler
         </h1>
-        <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
+        <p style={{ color: 'blue', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
           CREATE YOUR ACCOUNT
         </p>
 
@@ -107,7 +107,7 @@ const Register: React.FC = () => {
 
         <Form.Item
             name="email"
-            label={<span style={{ color: "white" }}>Email</span>}
+            label={<span style={{ color: "blue" }}>Email</span>}
             rules={[{ required: true, type: 'email', message: "Valid email required" }]}
         > 
             <Input placeholder="Email"/> 
@@ -115,7 +115,7 @@ const Register: React.FC = () => {
 
         <Form.Item
           name="name"
-          label={<span style={{ color: "white" }}>Full name</span>}
+          label={<span style={{ color: "blue" }}>Full name</span>}
           rules={[{ required: true, message: "Please input your full name!" }]}
         >
           <Input placeholder="Enter your name" />
@@ -126,7 +126,7 @@ const Register: React.FC = () => {
         <Form.Item
 
           name="username"
-          label={<span style={{ color: "white" }}>Username</span>}
+          label={<span style={{ color: "blue" }}>Username</span>}
           rules={[{ required: true, message: "Please input your username!" }]}
       >
           <Input placeholder="Enter username" />
@@ -135,7 +135,7 @@ const Register: React.FC = () => {
         
         <Form.Item
           name="password"
-          label={<span style={{ color: "white" }}>Password</span>}
+          label={<span style={{ color: "blue" }}>Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password placeholder="Enter password" />
@@ -151,11 +151,16 @@ const Register: React.FC = () => {
         </Form.Item>
 
         <Form.Item>
-          <Button type="primary" htmlType="submit" className="login-button">
-            Register
-          </Button>
+            <Button type="primary" htmlType="submit" block style={{ height: '45px', fontWeight: 'bold' }}>
+              Register
+            </Button>
+          </Form.Item>
 
-        </Form.Item>
+          <div style={{ textAlign: 'center' }}>
+             <a onClick={() => router.push('/login')} style={{ color: 'blue', fontSize: '12px', cursor: 'pointer' }}>
+               Already have an account? Sign in
+             </a>
+          </div>
 
 
         </Form>
