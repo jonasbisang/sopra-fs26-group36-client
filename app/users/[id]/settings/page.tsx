@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Card, Button, Typography, Space, Divider, Input, Form, Spin, message } from "antd";
+import { Card, Button, Typography, Space, Divider, Input, Form, Spin, message, Popconfirm } from "antd";
 import { useRouter, useParams } from "next/navigation";
 import { EditOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 import { apiService } from "@/api/apiService"; 
@@ -101,6 +101,20 @@ const EditProfile: React.FC = () => {
       console.error("Could not save profile data.", error);
       const errorMessage = error instanceof Error ? error.message : "Update failed.";
       message.error(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAccount = async () => {
+    try {
+      setLoading(true);
+      await apiService.delete(`/users/${userId}`);
+      message.success("Account permanently deleted.");
+      localStorage.clear(); 
+      router.push("/login");
+    } catch (error) {
+      message.error("Could not delete account.");
     } finally {
       setLoading(false);
     }
@@ -214,7 +228,8 @@ const EditProfile: React.FC = () => {
                 </Form.Item>
               )}
 
-              <Space style={{ marginTop: "20px" }}>
+              <Space style={{ marginTop: "20px", width: "100%", justifyContent: "space-between"  }}>
+                <Space>
                 <Button type="primary" htmlType="submit">
                   Save Changes
                 </Button>
@@ -222,6 +237,26 @@ const EditProfile: React.FC = () => {
                   Cancel
                 </Button>
               </Space>
+
+              {/* Task #36: am rechten Rand */}
+                <Popconfirm
+                  title={
+                    <Text strong style={{ color: "#000" }}>Delete Account?</Text>
+                  }
+                  description={
+                    <Text style= {{ color: "#666"}}>
+                      This action cannot be undone. Are you sure?</Text>
+                  }
+                  onConfirm={handleDeleteAccount}
+                  okText="Yes, delete"
+                  cancelText="No"
+                  okButtonProps={{ danger: true, loading: loading }}
+                >
+                  <Button danger type="text">
+                    Delete Account
+                  </Button>
+                </Popconfirm>
+                </Space>
             </Form>
           )}
         </Space>
