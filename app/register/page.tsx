@@ -72,7 +72,7 @@ const Register: React.FC = () => {
   return (
       <div style={{
             backgroundColor: '#ffffff', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
-            minHeight: '100vh"',
+            minHeight: '100vh',
             display: "flex",// by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
             flexDirection: 'column',
             alignItems: "center",
