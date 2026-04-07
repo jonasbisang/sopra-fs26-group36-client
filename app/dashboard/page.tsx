@@ -51,7 +51,7 @@ const Dashboard: React.FC = () => { //creating the dashboard component
 
     const handleJoinGroup = async (values: JoinGroupValues) => { // for handling the join group form 
     try {
-      //!!!!!!!!!!!!!!!!!// LOOK AT AGAIN FOR WHEN THE BACKEND GROUP JOINING GETS CREATED
+      //!!!!!!!!!!!!!!!!! LOOK AT AGAIN FOR WHEN THE BACKEND GROUP JOINING GETS CREATED
       // Example: await apiService.post("/groups/join", values);
       console.log("Joining group with values:", values);
       messageApi.success(`Successfully requested to join: ${values.groupName}`);
@@ -174,17 +174,87 @@ const Dashboard: React.FC = () => { //creating the dashboard component
                       <div style={{ color: '#aaa', fontSize: '14px' }}>{group.members} members</div>
                     </div>
                   </div>
-                  <RightOutlined style={{ color: '#555' }} /> // Right arrow icon to indicate it's clickable
+                  <RightOutlined style={{ color: '#555' }} /> {/* Right arrow icon to indicate it's clickable */}
                 </div>
               ))}
             </div>
+          
+          </div>{/* --- RIGHT COLUMN: FORMS --- */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '30px' }}>
+            
+            {/* Join group form  */}
+            <div style={glassBoxStyle}>
+              <h3 style={{ color: 'white', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <LogoutOutlined rotate={180} /> Join a Group
+              </h3>
+              <Form 
+                form={joinForm} // helps control the form 
+                layout="vertical" 
+                onFinish={handleJoinGroup} // when form is submitted successfully thene call handleJoinGroup and then the info is passed on correctly 
+                requiredMark={false}
+              >
+                <Form.Item 
+                  name="groupName" 
+                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>GROUP NAME</span>} // span is used to be able to style the label of the form item
+                  rules={[{ required: true, message: "Please enter the group name" }]}
+                >
+                  <Input placeholder="e.g., Weekend Warriors" />
+                </Form.Item>
+
+                <Form.Item 
+                  name="password" 
+                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>PASSWORD (IF ANY)</span>}
+                >
+                  <Input.Password placeholder="Enter password"/>
+                </Form.Item>
+
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <Button type="primary" htmlType="submit" size="large" style={{ backgroundColor: "white", color: "black", width: '100%', fontWeight: 'bold' }}>
+                    Join Group
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+
+            {/* CREATE GROUP FORM */}
+            <div style={glassBoxStyle}>
+              <h3 style={{ color: 'white', margin: '0 0 20px 0', display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <PlusOutlined /> Create Group {/* PlusOutlined shows the plus icon */} 
+              </h3>
+              <Form 
+                form={createForm} 
+                layout="vertical" 
+                onFinish={handleCreateGroup} 
+                requiredMark={false}
+              >
+                <Form.Item 
+                  name="newGroupName" 
+                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>NEW GROUP NAME</span>}
+                  rules={[{ required: true, message: "Please enter a new group name" }]}
+                >
+                  <Input placeholder="My New Group"/>
+                </Form.Item>
+
+                <Form.Item 
+                  name="password" 
+                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>PASSWORD (OPTIONAL)</span>}
+                >
+                  <Input.Password placeholder="Set a password" />
+                </Form.Item>
+
+                <Form.Item style={{ marginBottom: 0 }}>
+                  <Button htmlType="submit" size="large" style={{ backgroundColor: "rgba(255,255,255,0.1)", color: "white", border: "1px solid #555", width: '100%', fontWeight: 'bold' }}>
+                    Create Group
+                  </Button>
+                </Form.Item>
+              </Form>
+            </div>
+
           </div>
-
+        </div>
+      </div>
     </div>
-    </div>
-    </div>
-
-    );
-}; 
+  );
+};
 
 export default Dashboard;
