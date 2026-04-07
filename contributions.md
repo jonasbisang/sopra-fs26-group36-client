@@ -47,7 +47,7 @@ reason).
 |                    | 31.03.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c592744c8ddfa6691e4dffc3271f4f22037be261 | Frontend implementation for account deletion | Allows user to delete account |
 ---
 
-## Contributions Week 2 - [Begin Date] to [End Date]https:
+## Contributions Week 2 - 01.04.2026 to 07.04.2026 
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
