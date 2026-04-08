@@ -9,13 +9,30 @@
 // Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
 import React from "react";
+import { Card, Button } from "antd";
+import { useParams, useRouter } from "next/navigation";
 
 const Profile: React.FC = () => {
+  const params = useParams();
+  const router = useRouter();
+  const userId = params.id;
+
   return (
-    <div className="card-container">
-      <p>
-        <strong>SampleUser</strong>
-      </p>
+    <div className="card-container" style={{ padding: "20px"}}>
+      <Card 
+        title = "User Profile"
+        extra = {
+          <Button 
+            type="primary" 
+            onClick={() => router.push(`/users/${userId}/settings`)}
+          >
+            Edit Profile
+          </Button>
+        }
+   >
+        <p><strong>Username:</strong> SampleUser</p>
+        {/* Hier kommen später die echten Daten hin */}
+      </Card>
     </div>
   );
 };
