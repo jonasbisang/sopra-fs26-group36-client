@@ -7,7 +7,7 @@ import { useRouter } from "next/navigation";  //use NextJS router for navigation
 import { Button, Form, Input, message } from "antd";
 import { 
   CalendarOutlined, 
-  SettingOutlined, 
+  UserOutlined, 
   LogoutOutlined,  
   RightOutlined,
   PlusOutlined
@@ -43,6 +43,7 @@ const Dashboard: React.FC = () => { //creating the dashboard component
 
     const { clear: clearToken } = useLocalStorage<string>("token", ""); // removing the token as this will be used for logging out 
     const { clear: clearUserId } = useLocalStorage<string>("userId", "");
+    const { value: userId } = useLocalStorage<string>("userId", "");
 
     const [joinForm] = Form.useForm(); //created controlers to join groups 
     const [createForm] = Form.useForm();
@@ -134,7 +135,7 @@ const Dashboard: React.FC = () => { //creating the dashboard component
 
         <div style={{ display: 'flex', gap: '20px' }}>
           <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>Calendar</Button>
-          <Button type="text" icon={<SettingOutlined />} style={{ color: "white" }}>Settings</Button>
+          <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: "white" }}>Logout</Button>
         </div>
     </div>
