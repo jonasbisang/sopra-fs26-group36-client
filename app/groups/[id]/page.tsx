@@ -60,7 +60,7 @@ const GroupPage: React.FC = () => {
     if (!token) {
       router.push("/login");
     }
-  }, [token]);
+  }, [token, router]);
 
   // Fetch all data
   useEffect(() => {
@@ -113,7 +113,7 @@ const GroupPage: React.FC = () => {
     };
 
     fetchData();
-  }, [groupId, token]);
+  }, [groupId, token, apiService]);
 
   const handleLeaveGroup = async () => {
     try {
