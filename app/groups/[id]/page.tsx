@@ -55,12 +55,12 @@ const GroupPage: React.FC = () => {
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
-  // Auth check
-  //useEffect(() => {
-  //  if (!token) {
-  //    router.push("/login");
-  //  }
-  //}, [token]);
+  //Auth check
+  useEffect(() => {
+    if (!token) {
+      router.push("/login");
+    }
+  }, [token]);
 
   // Fetch all data
   useEffect(() => {
