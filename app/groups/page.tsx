@@ -14,12 +14,6 @@ import {
 } from "@ant-design/icons"; // Ant Design icons for the UI
 import { useState } from "react";
 
-
-interface JoinGroupValues { // creating case for joinging a group 
-    groupId: string;
-    joinPassword: string;
-}
-
 interface JoinGroupValues { // creating case for joinging a group
     groupId: string;
     joinPassword: string;
@@ -48,7 +42,7 @@ const Dashboard: React.FC = () => { //creating the dashboard component
     const [joinForm] = Form.useForm(); //created controlers to join groups 
     const [createForm] = Form.useForm();
 
-    const [groups, setGroups] = useState([ // test code to be able to use for the design 
+    const [groups] = useState([ // test code to be able to use for the design 
         { id: 1, name: "Weekend Warriors", members: 2 },
         { id: 2, name: "Book Club", members: 1 }
         ]);
@@ -207,15 +201,15 @@ const Dashboard: React.FC = () => { //creating the dashboard component
                 requiredMark={false}
               >
                 <Form.Item 
-                  name="groupName" 
-                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>GROUP NAME</span>} // span is used to be able to style the label of the form item
-                  rules={[{ required: true, message: "Please enter the group name" }]}
+                  name="groupId" 
+                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>GROUP ID</span>} // span is used to be able to style the label of the form item
+                  rules={[{ required: true, message: "Please enter the group ID" }]}
                 >
-                  <Input placeholder="e.g., Weekend Warriors" />
+                  <Input placeholder="e.g., 42" />
                 </Form.Item>
 
                 <Form.Item 
-                  name="password" 
+                  name="joinPassword" 
                   label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>PASSWORD (IF ANY)</span>}
                 >
                   <Input.Password placeholder="Enter password"/>
