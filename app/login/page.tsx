@@ -46,7 +46,7 @@ const Login: React.FC = () => {
       messageApi.success("Login successful! Welcome back.");
 
       // Navigate to the user overview
-      router.push("/users");
+      router.push("/groups");
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the login:\n${error.message}`);
