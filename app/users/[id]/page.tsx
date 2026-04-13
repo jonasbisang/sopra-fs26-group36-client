@@ -8,7 +8,7 @@
 // SSR (server side rendering) has to be disabled.
 // Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Input, Form, Spin, message, Divider, Avatar } from "antd";
 import { useParams, useRouter } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
@@ -50,7 +50,69 @@ const UserprofilePage: React.FC = () => {
 
   const [userData, setUserData] = useState<UserProfile | null>(null); //state for the user data if it changes should also be changed; should alwyas pertray the current stored data 
   const [userGroups, setUserGroups] = useState<Group[]>([]);
+  
+  const isOwnProfile = loggedInUserId === profileId; //check if the user is looking at their own profile or someone elses
+  
+      //Shared style matching the already existign pages
+    const fieldBoxStyle: React.CSSProperties = {
+    backgroundColor: "rgba(255,255,255,0.05)",
+    border: "1px solid rgba(255,255,255,0.1)",
+    borderRadius: "8px",
+    padding: "14px 18px",
+    color: "white",
+    fontSize: "15px",
+    lineHeight: "1.5",
+    minHeight: "48px",
+    wordBreak: "break-word",
+  };
 
+  const glassBoxStyle: React.CSSProperties = {
+    backgroundColor: "rgba(126, 126, 126, 0.2)",
+    borderRadius: "12px",
+    padding: "28px 30px",
+    width: "100%",
+    border: "1px solid rgba(255,255,255,0.08)",
+  };
+
+  const labelStyle: React.CSSProperties = {
+    color: "rgba(255,255,255,0.5)",
+    fontSize: "11px",
+    fontWeight: "bold",
+    letterSpacing: "1px",
+    textTransform: "uppercase",
+    marginBottom: "8px",
+    display: "block",
+  };
+
+  useEffect(() => { //  talking to the backend to get the user data and the groups that the user is in
+    const fetchAll = async () => {
+      try {
+        const data = await apiService.get<UserProfile>(`/users/${profileId}`);
+        setUserData(data);
+      } catch (error) {
+        messageApi.error("Could not load profile.");
+        console.error(error);
+      }
+
+      try {
+        const groups = await apiService.get<Group[]>(`/users/${profileId}/groups`);
+        setUserGroups(groups);
+      } catch (error) {
+        console.error("Could not load groups count:", error);
+        setUserGroups([]);
+      }
+    };
+
+    if (profileId) fetchAll();
+  }, [profileId, apiService]);
+
+    
+    const handleLogout = () => {
+    clearToken();
+    clearUserId();
+    messageApi.success("Logged out successfully.");
+    router.push("/login");
+  };
 
 
 
@@ -74,4 +136,4 @@ const UserprofilePage: React.FC = () => {
   );
 };
 
-export default Profile;
+export default UserprofilePage;
