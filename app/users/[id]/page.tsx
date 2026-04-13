@@ -8,14 +8,51 @@
 // SSR (server side rendering) has to be disabled.
 // Read more here: https://nextjs.org/docs/pages/building-your-application/rendering/server-side-rendering
 
-import React from "react";
-import { Card, Button } from "antd";
+import React, { useState } from "react";
+import { Button, Input, Form, Spin, message, Divider, Avatar } from "antd";
 import { useParams, useRouter } from "next/navigation";
+import { useApi } from "@/hooks/useApi";
+import useLocalStorage from "@/hooks/useLocalStorage"; //cor clearing data after logout
+import {
+  CalendarOutlined,
+  LogoutOutlined,
+  UserOutlined,
+  EditOutlined,
+  ArrowLeftOutlined,
+  TeamOutlined,
+  ClockCircleOutlined,
+  MailOutlined,
+  InfoCircleOutlined,
+} from "@ant-design/icons"; // icons that ive been using lately 
 
-const Profile: React.FC = () => {
+interface UserProfile {//what teh user profiel should looke like 
+  id: number;
+  username: string;
+  email: string;
+  bio?: string;
+}
+
+interface Group {
+  id: number;
+  name: string;
+}
+
+const UserprofilePage: React.FC = () => {
   const params = useParams();
   const router = useRouter();
-  const userId = params.id;
+  const profileId = params.id;
+  const apiService = useApi(); //TLAKIGN TO BACKEND
+  const [messageApi, contextHolder] = message.useMessage(); //for messages
+
+  const { value: loggedInUserId } = useLocalStorage<string>("userId", ""); // for if the page refreshes and we need to check if the user is still logged in 
+  const { clear: clearToken } = useLocalStorage<string>("token", "");
+  const { clear: clearUserId } = useLocalStorage<string>("userId", "");
+
+  const [userData, setUserData] = useState<UserProfile | null>(null); //state for the user data if it changes should also be changed; should alwyas pertray the current stored data 
+  const [userGroups, setUserGroups] = useState<Group[]>([]);
+
+
+
 
   return (
     <div className="card-container" style={{ padding: "20px"}}>
@@ -24,7 +61,7 @@ const Profile: React.FC = () => {
         extra = {
           <Button 
             type="primary" 
-            onClick={() => router.push(`/users/${userId}/settings`)}
+            onClick={() => router.push(`/users/${profileId}/settings`)}
           >
             Edit Profile
           </Button>
