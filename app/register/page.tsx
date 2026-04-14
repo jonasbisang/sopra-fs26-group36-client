@@ -71,7 +71,7 @@ const Register: React.FC = () => {
 
   return (
       <div style={{
-            backgroundColor: '#ffffff', position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
+            backgroundColor: '#000000', top: 0, left: 0, right: 0, bottom: 0, //https://ant.design/docs/spec/colors
             minHeight: '100vh',
             display: "flex",// by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
             flexDirection: 'column',
@@ -84,16 +84,33 @@ const Register: React.FC = () => {
 
         <div style={{ 
           width: '100%', 
-          maxWidth: 400, //again similar to log in 
+          maxWidth: 600, //again similar to log in 
           padding: '30px', 
-          backgroundColor: 'rgba(29, 28, 28, 0.1)', // adding the lgo in properties 
+          backgroundColor: 'rgba(0, 0, 0, 0.1)', // adding the lgo in properties 
           borderRadius: '12px' 
         }}>
       
-        <h1 style={{ fontSize: '48px', fontWeight: 'bold', margin: 0, textAlign: 'center', color: 'blue' }}>
-          Friendler
+        <h1 style={{ 
+            fontSize: '64px', 
+            textAlign: 'center', 
+            color: 'white', 
+            margin: 0,
+            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
+            letterSpacing: '2px',
+            whiteSpace: 'nowrap' 
+          }}>
+            F<span style={{ color: '#ff4238' }}>·</span>
+            R<span style={{ color: '#ffdc00' }}>·</span>
+            I<span style={{ color: '#42a2d6' }}>·</span>
+            E<span style={{ color: '#ff4238' }}>·</span>
+            N<span style={{ color: '#ffdc00' }}>·</span>
+            D<span style={{ color: '#42a2d6' }}>·</span>
+            L<span style={{ color: '#ff4238' }}>·</span>
+            E<span style={{ color: '#ffdc00' }}>·</span>
+            R
         </h1>
-        <p style={{ color: 'blue', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
+
+        <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
           CREATE YOUR ACCOUNT
         </p>
 
@@ -103,11 +120,21 @@ const Register: React.FC = () => {
         variant="outlined"
         onFinish={handleRegister} // this is the key that calls the function when it want to send the data to the back end 
         layout="vertical"
+        requiredMark={false}
+        style={{ 
+          maxWidth: '300px', 
+          margin: '0 auto' 
+        }}
       >
+
+      <div style={{ //cointainer for log in form like in the mockups 
+        width: '100%', maxWidth: 600, padding: '30px', 
+        backgroundColor: 'rgba(126, 126, 126, 0.2)', borderRadius: '12px', marginBottom: '30px'
+      }}>
 
         <Form.Item
             name="email"
-            label={<span style={{ color: "blue" }}>Email</span>}
+            label={<span style={{ color: "white" }}>Email</span>}
             rules={[{ required: true, type: 'email', message: "Valid email required" }]}
         > 
             <Input placeholder="Email"/> 
@@ -115,18 +142,17 @@ const Register: React.FC = () => {
 
         <Form.Item
           name="name"
-          label={<span style={{ color: "blue" }}>Full name</span>}
+          label={<span style={{ color: "white" }}>Full name</span>}
           rules={[{ required: true, message: "Please input your full name!" }]}
         >
           <Input placeholder="Enter your name" />
 
         </Form.Item>
 
-
         <Form.Item
 
           name="username"
-          label={<span style={{ color: "blue" }}>Username</span>}
+          label={<span style={{ color: "white" }}>Username</span>}
           rules={[{ required: true, message: "Please input your username!" }]}
       >
           <Input placeholder="Enter username" />
@@ -135,7 +161,7 @@ const Register: React.FC = () => {
         
         <Form.Item
           name="password"
-          label={<span style={{ color: "blue" }}>Password</span>}
+          label={<span style={{ color: "white" }}>Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
           <Input.Password placeholder="Enter password" />
@@ -143,26 +169,29 @@ const Register: React.FC = () => {
 
         <Form.Item
           name="bio"
-          label={<span style={{ color: "blue" }}>Biography</span>}
+          label={<span style={{ color: "white" }}>Biography</span>}
           rules={[{ message: "Please input your bio!" }]}
         >
 
           <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." />
         </Form.Item>
 
-        <Form.Item>
-            <Button type="primary" htmlType="submit" block style={{ height: '45px', fontWeight: 'bold' }}>
+        <Form.Item style={{ marginBottom: 0 }}>
+            <Button type="primary" htmlType="submit" block style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold' }}>
               Register
             </Button>
           </Form.Item>
 
-          <div style={{ textAlign: 'center' }}>
-             <a onClick={() => router.push('/login')} style={{ color: 'blue', fontSize: '12px', cursor: 'pointer' }}>
-               Already have an account? Sign in
-             </a>
           </div>
 
-
+          <div style={{ textAlign: 'center' }}>
+        
+          <Form.Item>
+            <Button size = "middle" block onClick={() => router.push('/login')} style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold'}}>
+              Already have an account? 
+            </Button>
+          </Form.Item>
+          </div>
         </Form>
 
 

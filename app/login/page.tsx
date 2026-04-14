@@ -46,7 +46,7 @@ const Login: React.FC = () => {
       messageApi.success("Login successful! Welcome back.");
 
       // Navigate to the user overview
-      router.push("/users");
+      router.push("/groups");
     } catch (error) {
       if (error instanceof Error) {
         alert(`Something went wrong during the login:\n${error.message}`);
@@ -58,7 +58,7 @@ const Login: React.FC = () => {
 
   return (
     <div style = {{
-      backgroundColor: "#ffffff",
+      backgroundColor: "#000000",
       minHeight: '100vh', // full viewport height
       display: 'flex', //type of design 
       flexDirection:'column', //important for the design to work, fo rwhen we want to create a header adn so on 
@@ -69,48 +69,77 @@ const Login: React.FC = () => {
       {contextHolder} {/* This is required for the message component to work */}
 
       <div style={{ //cointainer for log in form like in the mockups 
-        width: '100%', maxWidth: 400, padding: '30px', 
-        backgroundColor: 'rgba(29, 28, 28, 0.2)', borderRadius: '12px' 
+        width: '100%', maxWidth: 600, padding: '30px', 
+        backgroundColor: 'rgba(126, 126, 126, 0.2)', borderRadius: '12px' 
       }}>
 
-      <Form
-        form={form} // connected to Use the form instance created by Form.useForm() to manage form state and validation
-        onFinish={handleLogin}
-        layout="vertical"
-        requiredMark={false} // show the red asterisk for required fields
-      >
-        <h1 style={{ fontSize: '48px', fontWeight: 'bold', textAlign: 'center', color: 'blue', margin: 0 }}>
-          Friendler
-        </h1>
+      <h1 style={{ 
+          fontSize: '64px', 
+          textAlign: 'center', 
+          color: 'white', 
+          margin: 0,
+    
+          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', // custom font for logo 
+          letterSpacing: '2px'
+        }}>
+          F<span style={{ color: '#ff4238' }}>·</span>
+          R<span style={{ color: '#ffdc00' }}>·</span>
+          I<span style={{ color: '#42a2d6' }}>·</span>
+          E<span style={{ color: '#ff4238' }}>·</span>
+          N<span style={{ color: '#ffdc00' }}>·</span>
+          D<span style={{ color: '#42a2d6' }}>·</span>
+          L<span style={{ color: '#ff4238' }}>·</span>
+          E<span style={{ color: '#ffdc00' }}>·</span>
+          R
+      </h1>
 
-        <p style={{ color: 'blue', textAlign: 'center', marginBottom: '30px', fontWeight: 'bold' }}>
+        <p style={{ color: 'white', textAlign: 'center', marginBottom: '30px', fontWeight: 'bold' }}>
           SIGN IN
         </p>
 
-        <Form.Item
-          name="username"
-          label={<span style={{ color: "blue" }}>Username</span>}
-          rules={[{ required: true, message: "Please input your username!" }]}
+      <Form
+          form={form} 
+          onFinish={handleLogin}
+          layout="vertical"
+          requiredMark={false}
+          style={{ 
+            maxWidth: '300px', // Makes the inputs and buttons much shorter!
+            margin: '0 auto'   // Centers the shorter form perfectly inside the wide grey box
+          }} 
         >
-          <Input placeholder="Enter username" />
-        </Form.Item>
-        <Form.Item
-          name="password"
-          label={<span style={{ color: "blue" }}>Password</span>}
-          rules={[{ required: true, message: "Please input your password!" }]}
-        >
-          <Input placeholder="Enter password" />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit" className="login-button">
-            Login
-          </Button>
-        </Form.Item>
+
+          <Form.Item
+            name="username"
+            label={<span style={{ color: "white" }}>Username</span>}
+            rules={[{ required: true, message: "Please input your username!" }]}
+          >
+            <Input placeholder="Enter username" />
+          </Form.Item>
+
+          <Form.Item
+            name="password"
+            label={<span style={{ color: "white" }}>Password</span>}
+            rules={[{ required: true, message: "Please input your password!" }]}
+          >
+            <Input placeholder="Enter password" />
+          </Form.Item>
+          
+          <Form.Item>
+            <Button type="primary" size = "large" htmlType="submit" className="login-button"
+              style = {{ backgroundColor: "white", color: 'black'}}>
+              Login
+            </Button>
+          </Form.Item>
+          <Form.Item>
+            <Button className="login-button" size = "large" onClick = {() => router.push("/register")} 
+            style = {{ backgroundColor: "white", color: 'black'}}>
+              Register
+            </Button>
+          </Form.Item>
       </Form>
     </div>
-    </div>
+  </div>
   );
-  
 };
 
 export default Login;
