@@ -61,6 +61,9 @@ reason).
 |                    | 13.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/pull/70/changes/8d1a1c82f9724fb9854e8c02b7df8e11107cfc56 | Creation of My Profile Dashboard | Contains the users information and allows the user to change his password |
 | **[@jonasbisang]** | [14.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/71/commits/fb14d8e2a29f4c3e3d24a6c63a54b93daf203f2e] | [Added landing page for the website] | [Gives user an overview of the application and a brief overview of its functionality] |
 |                    | [14.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/72/commits/8696cb9c5cf71255b244403488c667d89a708fbf] | [Information page which can be accessed via the landing page.] | [An information page where the user can read about what he/she can do] |
+| **[@CiaranHendriks]** | [09.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/2bf030c0ea738b4d886924ff4723c4f92288ec23] | [Backend implementation of manual calendar entrys/unavailabilities] | [Store unavailabilites from users, which they add to their calendar] |
+|                    | [14.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/323e53f89535cd8cea6d58a32a1893599128381d] | [Connect to Google Calendar] | [Backend implementation to sign in to ones google calendar, to sync calendar events] |
+
 ---
 
 ## Contributions Week 3 - [Begin Date] to [End Date]
