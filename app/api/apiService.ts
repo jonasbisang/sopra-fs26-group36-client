@@ -3,15 +3,27 @@ import { ApplicationError } from "@/types/error";
 
 export class ApiService {
   private baseURL: string;
-  private defaultHeaders: HeadersInit;
 
   constructor() {
     this.baseURL = getApiDomain();
-    this.defaultHeaders = {
+  }
+
+  private getHeaders(): HeadersInit {
+    const headers: Record<string, string> = {
       "Content-Type": "application/json",
       "Access-Control-Allow-Origin": "*",
     };
+
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("token");
+      if (token) {
+        headers["Authorization"] = token;
+      }
+    }
+
+    return headers;
   }
+
 
   /**
    * Helper function to check the response, parse JSON,
@@ -50,6 +62,13 @@ export class ApiService {
       error.status = res.status;
       throw error;
     }
+
+    // Fix für 204 No Content (erfolgreiche PUT-Requests senden oft keinen Body)
+    if (res.status === 204) {
+      return {} as T;
+    }
+
+
     return res.headers.get("Content-Type")?.includes("application/json")
       ? (res.json() as Promise<T>)
       : Promise.resolve(res as T);
@@ -64,7 +83,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "GET",
-      headers: this.defaultHeaders,
+      headers: this.getHeaders(),
     });
     return this.processResponse<T>(
       res,
@@ -82,7 +101,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "POST",
-      headers: this.defaultHeaders,
+      headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     return this.processResponse<T>(
@@ -101,7 +120,7 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "PUT",
-      headers: this.defaultHeaders,
+      headers: this.getHeaders(),
       body: JSON.stringify(data),
     });
     return this.processResponse<T>(
@@ -119,11 +138,40 @@ export class ApiService {
     const url = `${this.baseURL}${endpoint}`;
     const res = await fetch(url, {
       method: "DELETE",
-      headers: this.defaultHeaders,
+      headers: this.getHeaders(),
     });
     return this.processResponse<T>(
       res,
       "An error occurred while deleting the data.\n",
     );
   }
+
+  /*GET request user[ID] */
+  public async getUserById<T>(id: string): Promise<T> {
+    const url = `${this.baseURL}/users/${id}`;
+    const res = await fetch(url, {
+      method: "GET",
+      headers: this.getHeaders(),
+    });
+    return this.processResponse<T>(
+      res,
+      "An error occurred while fetching the user data.\n",
+    );
+  }
+
+  /*PUT request user[ID] */
+  public async updateUserById<T>(id: string, data: unknown): Promise<T> {
+    const url = `${this.baseURL}/users/${id}`;
+    const res = await fetch(url, {
+      method: "PUT",
+      headers: this.getHeaders(),
+      body: JSON.stringify(data),
+    });
+    return this.processResponse<T>(
+      res,
+      "An error occurred while updating the user data.\n",
+    );
+  }
 }
+
+export const apiService = new ApiService();
