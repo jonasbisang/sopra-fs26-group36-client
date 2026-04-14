@@ -28,6 +28,10 @@ interface Activity {
   status: string;
   scheduledTime?: string;
   location?: string;
+  minSize?: number;
+  maxSize?: number;
+  duration?: number;
+  isWeatherDependent?: boolean;
 }
 
 interface CalendarEvent {
@@ -56,11 +60,11 @@ const GroupPage: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   //Auth check
-  useEffect(() => {
-    if (!token) {
-      router.push("/login");
-    }
-  }, [token, router]);
+  //useEffect(() => {
+   // if (!token) {
+   //   router.push("/login");
+    //}
+  //}, [token, router]);
 
   // Fetch all data
   useEffect(() => {
@@ -114,6 +118,17 @@ const GroupPage: React.FC = () => {
 
     fetchData();
   }, [groupId, token, apiService]);
+
+  const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
+    try {
+      await apiService.post(`/activities/${activityId}/votes`, { voteType });
+      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      messageApi.success(voteType === "ACCEPT" ? "Liked! 👍" : "Passed.");
+    } catch (error) {
+      messageApi.error("Failed to submit vote.");
+      console.error(error);
+    }
+  };
 
   const handleLeaveGroup = async () => {
     try {
@@ -246,18 +261,86 @@ const GroupPage: React.FC = () => {
             padding: "24px",
           }}>
             <h3 style={{ color: "white", marginBottom: "16px" }}>💡 Upcoming Ideas</h3>
-            <List
-              dataSource={pendingActivities}
-              renderItem={(activity) => (
-                <List.Item style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "10px 0" }}>
-                  <List.Item.Meta
-                    title={<span style={{ color: "white" }}>{activity.name}</span>}
-                  />
-                  <Tag color="blue">Pending</Tag>
-                </List.Item>
-              )}
-              locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No pending activities</span> }}
-            />
+            
+            {pendingActivities.length === 0 ? (
+              <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", padding: "40px 0" }}>
+                No pending activities
+              </div>
+            ) : (
+              <>
+                {/* Card */}
+                <div style={{
+                  backgroundColor: "rgba(60,60,60,0.6)",
+                  borderRadius: "12px",
+                  padding: "20px",
+                }}>
+                  <h4 style={{ color: "white", margin: "0 0 12px", fontSize: "20px", fontWeight: 600 }}>
+                    {pendingActivities[0].name}
+                  </h4>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {pendingActivities[0].location && (
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
+                        📍 {pendingActivities[0].location}
+                      </span>
+                    )}
+                    {(pendingActivities[0].minSize || pendingActivities[0].maxSize) && (
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
+                        👥 Min {pendingActivities[0].minSize ?? "?"} · Max {pendingActivities[0].maxSize ?? "?"} participants
+                      </span>
+                    )}
+                    {pendingActivities[0].duration && (
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
+                        ⏱ {pendingActivities[0].duration} hours
+                      </span>
+                    )}
+                    <div style={{ marginTop: "8px", display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      <Tag color="blue">Pending votes</Tag>
+                      {pendingActivities[0].isWeatherDependent && (
+                        <Tag color="cyan">Weather-dependent</Tag>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Vote buttons */}
+                <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
+                  <Button
+                    block
+                    size="large"
+                    onClick={() => handleVote(pendingActivities[0].id, "DECLINE")}
+                    style={{
+                      background: "rgba(255,66,56,0.15)",
+                      color: "#ff4238",
+                      border: "1px solid rgba(255,66,56,0.4)",
+                      borderRadius: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ✕ Pass
+                  </Button>
+                  <Button
+                    block
+                    size="large"
+                    onClick={() => handleVote(pendingActivities[0].id, "ACCEPT")}
+                    style={{
+                      background: "rgba(66,214,120,0.15)",
+                      color: "#42d678",
+                      border: "1px solid rgba(66,214,120,0.4)",
+                      borderRadius: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ♥ Like
+                  </Button>
+                </div>
+
+                {/* Counter */}
+                <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px", textAlign: "center", marginTop: "10px" }}>
+                  {pendingActivities.length} activit{pendingActivities.length === 1 ? "y" : "ies"} remaining
+                </div>
+              </>
+            )}
           </div>
         </div>
 
