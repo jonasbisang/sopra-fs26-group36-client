@@ -51,7 +51,6 @@ reason).
 
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-<<<<<<< HEAD
 | **[@vonhollym-art]** | 06.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/e59fa26f0cc974ea59ac107e964a0511a3d4fd7c https://github.com/jonasbisang/sopra-fs26-group36-server/commit/f54e746b69a366b3bd66aa521e430553b550abcb https://github.com/jonasbisang/sopra-fs26-group36-server/commit/02a71f46cf97045d804b0f388e4d173ddfad936c https://github.com/jonasbisang/sopra-fs26-group36-server/commit/cb52aea3fcf16db9a8e83c94b69ce8a183d46527 | Created a Group and groupMember entity and repository, the group post and get dtos and their translation to the entity in the mapper | Having a group and groupmember entity in db is necessary to create groups, join groups and for all further implementation such as creating activitie |
 |                    | 07.04.2026 | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/b14b047d08a671507c7e4d12058ff6c87be8d301 | Implemented group creation logic that automatically generates a unique ID and assigns creator as admin creating. Needed to create group controller and group service for this task. | Being able to create a group is neccessary to then be able to join a group and post activities |
 |                    | 10.04.2026 | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/6807b316151eba93ca6fdb0bd4692c0a368ae3e6 https://github.com/jonasbisang/sopra-fs26-group36-server/commit/5345c80e9259ef5297f3e9462a6e9e2e859c9ff5 | Implemented functionality to join and leave groups. | Joining groups is vital to post activities and leaving them gives the user options. |
@@ -59,23 +58,23 @@ reason).
 |                    | 08.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/f1ec76ecb21ef9fbc41a75b9938b32dec5512f57 | add leave group button to group id page with redirect | Users need to have the option to leave a group they are a part of |
 | **[@ananis299]** | 07.04.2026  | https://github.com/jonasbisang/sopra-fs26-group36-client/pull/70/changes/5ff31b52d71b1067dec0fe47aae5a1b8849a49d8 | Created dahsboard with relevant groups for users as well as possbility to enter in groups | Relevant because thats how users access groups and are able to start the whole process; The groups overview is important to decide in which group they want to partake in that moment |
 |                    | 13.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/pull/70/changes/8d1a1c82f9724fb9854e8c02b7df8e11107cfc56 | Creation of My Profile Dashboard | Contains the users information and allows the user to change his password |
-=======
-| **[@jonasbisang]]** | [14.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/71/commits/fb14d8e2a29f4c3e3d24a6c63a54b93daf203f2e] | [Added landing page for the website] | [Gives user an overview of the application and a brief overview of its functionality] |
+| **[@jonasbisang]** | [14.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/71/commits/fb14d8e2a29f4c3e3d24a6c63a54b93daf203f2e] | [Added landing page for the website] | [Gives user an overview of the application and a brief overview of its functionality] |
 |                    | [14.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/72/commits/8696cb9c5cf71255b244403488c667d89a708fbf] | [Information page which can be accessed via the landing page.] | [An information page where the user can read about what he/she can do] |
+---
+
+## Contributions Week 3 - [Begin Date] to [End Date]
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@elisabettade]** | 08.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/5f6909e1d65cc9c55b5d250909aa025e389cb6c1 | Created a group home page which displays a list of all users in the group, a group calendar and all the activities (planned and scheduled), with auth check | users of a group need a home page for the group to see all the relevant things |
+|                    | 14.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/3549b83b84c26b8dbbbf5633a6137c1bcedbaaf6| Added tinder style voting for pending activities, frontend | users need to be able to vote on proposed activities |
 | **[@githubUser2]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 | **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
->>>>>>> e7d6d97 (Added contrictuions)
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-
----
-
-## Contributions Week 3 - [Begin Date] to [End Date]
-
-_Continue with the same table format as above._
-
+| **[@githubUser5]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 ---
 
 ## Contributions Week 4 - [Begin Date] to [End Date]
