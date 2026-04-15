@@ -7,6 +7,8 @@ import { User } from "@/types/user";
 import { Button, Form, Input, message} from "antd";
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
+import NextImage from 'next/image';
+import logo from '../friendlerLogo.png';
 
 interface NeededFields { 
   name: string; 
@@ -90,7 +92,7 @@ const Register: React.FC = () => {
           borderRadius: '12px' 
         }}>
       
-        <h1 style={{ 
+        {/* <h1 style={{ 
             fontSize: '64px', 
             textAlign: 'center', 
             color: 'white', 
@@ -108,7 +110,17 @@ const Register: React.FC = () => {
             L<span style={{ color: '#ff4238' }}>·</span>
             E<span style={{ color: '#ffdc00' }}>·</span>
             R
-        </h1>
+        </h1> */}
+
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <NextImage
+                  src={logo}
+                  alt="Friendler Logo"
+                  height={160}
+                  width={480}
+                />
+                </div>
+        
 
         <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
           CREATE YOUR ACCOUNT
