@@ -26,13 +26,13 @@ const EditProfile: React.FC = () => {
       try {
         setLoading(true);
 
-        //AUTH CHECKKKK
-        const loggedInUser = localStorage.getItem("userId"); 
-        if (!loggedInUser || loggedInUser != userId) {
-          message.error("You are not authorized to edit this profile.");
-          router.push(`/users/${userId}`);
-          return;
-        }
+        // //AUTH CHECKKKK
+        // const loggedInUser = localStorage.getItem("userId"); 
+        // if (!loggedInUser || loggedInUser != userId) {
+        //   message.error("You are not authorized to edit this profile.");
+        //   router.push(`/users/${userId}`);
+        //   return;
+        // }
 
         const data = await apiService.getUserById<UserData>(userId);
         setUserData({
