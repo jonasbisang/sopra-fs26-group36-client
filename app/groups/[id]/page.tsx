@@ -13,7 +13,10 @@ import {
 import { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
-import "react-big-calendar/lib/css/react-big-calendar.css";
+//import "react-big-calendar/lib/css/react-big-calendar.css";
+
+import NextImage from 'next/image';
+import logo from '../friendlerLogo.png';
 
 const localizer = momentLocalizer(moment);
 
@@ -152,7 +155,7 @@ const GroupPage: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          <h1 style={{
+          {/* <h1 style={{
             fontSize: "32px",
             color: "white",
             margin: 0,
@@ -168,8 +171,17 @@ const GroupPage: React.FC = () => {
             L<span style={{ color: "#ff4238" }}>·</span>
             E<span style={{ color: "#ffdc00" }}>·</span>
             R
-          </h1>
+          </h1> */}
         </div>
+
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <NextImage
+                  src={logo}
+                  alt="Friendler Logo"
+                  height={160}
+                  width={480}
+                />
+                </div>
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
