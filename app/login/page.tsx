@@ -7,7 +7,7 @@ import { User } from "@/types/user";
 import { Button, Form, Input, message } from "antd"; //added message as i also want the server to communicate with user 
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
-//import friendlerLogo from "@/assets/friendler-logo.png"; // example of how to import an image asset
+import { useState } from "react";
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
 
@@ -56,7 +56,7 @@ const Login: React.FC = () => {
 
       messageApi.success("Login successful! Welcome back.");
 
-      // Navigate to the user overview
+      // Navigate to the groups/ dashboard overview
       router.push("/groups");
     } catch (error) {
       if (error instanceof Error) {

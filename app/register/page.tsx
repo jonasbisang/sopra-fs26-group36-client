@@ -7,8 +7,10 @@ import { User } from "@/types/user";
 import { Button, Form, Input, message} from "antd";
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
+import { useState } from "react";
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
+
 
 interface NeededFields { 
   name: string; 
@@ -103,35 +105,36 @@ const Register: React.FC = () => {
           borderRadius: '12px' 
         }}>
       
-        {/* <h1 style={{ 
-            fontSize: '64px', 
-            textAlign: 'center', 
-            color: 'white', 
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: '2px',
-            whiteSpace: 'nowrap' 
-          }}>
-            F<span style={{ color: '#ff4238' }}>·</span>
-            R<span style={{ color: '#ffdc00' }}>·</span>
-            I<span style={{ color: '#42a2d6' }}>·</span>
-            E<span style={{ color: '#ff4238' }}>·</span>
-            N<span style={{ color: '#ffdc00' }}>·</span>
-            D<span style={{ color: '#42a2d6' }}>·</span>
-            L<span style={{ color: '#ff4238' }}>·</span>
-            E<span style={{ color: '#ffdc00' }}>·</span>
-            R
-        </h1> */}
+{/* <h1 style={{ 
+          fontSize: '64px', 
+          textAlign: 'center', 
+          color: 'white', 
+          margin: 0,
+    
+          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', // custom font for logo 
+          letterSpacing: '2px'
+        }}>
+          F<span style={{ color: '#ff4238' }}>·</span>
+          R<span style={{ color: '#ffdc00' }}>·</span>
+          I<span style={{ color: '#42a2d6' }}>·</span>
+          E<span style={{ color: '#ff4238' }}>·</span>
+          N<span style={{ color: '#ffdc00' }}>·</span>
+          D<span style={{ color: '#42a2d6' }}>·</span>
+          L<span style={{ color: '#ff4238' }}>·</span>
+          E<span style={{ color: '#ffdc00' }}>·</span>
+          R
+      </h1> */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <NextImage
+          src={logo}
+          alt="Friendler Logo"
+          height={160}
+          width={480}
+        />
+        </div>
 
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <NextImage
-                  src={logo}
-                  alt="Friendler Logo"
-                  height={160}
-                  width={480}
-                />
-                </div>
-        
+      {/* <img src={friendlerLogo.src} alt="Friendler Logo" style={{ width: '200px', marginBottom: '20px' }} /> */}
+
 
         <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
           CREATE YOUR ACCOUNT
