@@ -8,6 +8,8 @@ import { Button, Form, Input, message } from "antd"; //added message as i also w
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
 import { useState } from "react";
+import NextImage from 'next/image';
+import logo from '../friendlerLogo.png';
 
 interface LoginValues {
   username: string;
@@ -94,7 +96,7 @@ const Login: React.FC = () => {
         backgroundColor: 'rgba(126, 126, 126, 0.2)', borderRadius: '12px' 
       }}>
 
-      <h1 style={{ 
+      {/* <h1 style={{ 
           fontSize: '64px', 
           textAlign: 'center', 
           color: 'white', 
@@ -112,7 +114,17 @@ const Login: React.FC = () => {
           L<span style={{ color: '#ff4238' }}>·</span>
           E<span style={{ color: '#ffdc00' }}>·</span>
           R
-      </h1>
+      </h1> */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <NextImage
+          src={logo}
+          alt="Friendler Logo"
+          height={160}
+          width={480}
+        />
+        </div>
+
+      {/* <img src={friendlerLogo.src} alt="Friendler Logo" style={{ width: '200px', marginBottom: '20px' }} /> */}
 
         <p style={{ color: 'white', textAlign: 'center', marginBottom: '30px', fontWeight: 'bold' }}>
           SIGN IN
