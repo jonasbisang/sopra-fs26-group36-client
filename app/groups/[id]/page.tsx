@@ -66,58 +66,86 @@ const GroupPage: React.FC = () => {
     //}
   //}, [token, router]);
 
-  // Fetch all data
-  useEffect(() => {
-    if (!groupId || !token) return;
+  // Fetch all data (OG BLOCK)
+  //useEffect(() => {
+  //  if (!groupId || !token) return;
 
-    const fetchData = async () => {
-      try {
-        // Fetch group members
-        const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
-        setMembers(users);
-      } catch (error) {
-        console.error("Failed to fetch members:", error);
-      }
+  //  const fetchData = async () => {
+  //    try {
+  //      // Fetch group members
+  //      const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
+  //      setMembers(users);
+  //    } catch (error) {
+  //      console.error("Failed to fetch members:", error);
+  //    }
 
-      try {
+  //    try {
         // Fetch pending activities
-        const pending = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=PENDING`
-        );
-        setPendingActivities(pending);
-      } catch (error) {
-        console.error("Failed to fetch pending activities:", error);
-      }
+  //      const pending = await apiService.get<Activity[]>(
+  //        `/groups/${groupId}/activities?status=PENDING`
+  //      );
+  //      setPendingActivities(pending);
+  //    } catch (error) {
+  //      console.error("Failed to fetch pending activities:", error);
+  //    }
 
-      try {
+  //    try {
         // Fetch planned activities
-        const planned = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=PLANNED`
-        );
-        setPlannedActivities(planned);
-      } catch (error) {
-        console.error("Failed to fetch planned activities:", error);
-      }
+  //      const planned = await apiService.get<Activity[]>(
+  //        `/groups/${groupId}/activities?status=PLANNED`
+  //      );
+  //      setPlannedActivities(planned);
+  //    } catch (error) {
+  //      console.error("Failed to fetch planned activities:", error);
+  //    }
 
-      try {
-        // Fetch calendar events
-        const events = await apiService.get<CalendarEvent[]>(
-          `/groups/${groupId}/calendar`
-        );
-        // Convert date strings to Date objects for react-big-calendar
-        const formatted = events.map((e) => ({
-          ...e,
-          start: new Date(e.start),
-          end: new Date(e.end),
-        }));
-        setCalendarEvents(formatted);
-      } catch (error) {
-        console.error("Failed to fetch calendar:", error);
-      }
-    };
+  //    try {
+  //      // Fetch calendar events
+  //      const events = await apiService.get<CalendarEvent[]>(
+  //        `/groups/${groupId}/calendar`
+  //      );
+  //      // Convert date strings to Date objects for react-big-calendar
+  //      const formatted = events.map((e) => ({
+  //        ...e,
+  //        start: new Date(e.start),
+  //        end: new Date(e.end),
+  //      }));
+  //      setCalendarEvents(formatted);
+  //    } catch (error) {
+  //      console.error("Failed to fetch calendar:", error);
+  //    }
+  //  };
 
-    fetchData();
-  }, [groupId, token, apiService]);
+  //  fetchData();
+  //}, [groupId, token, apiService]);
+
+  //-------START MOCKDATA BLOCK-------//
+  useEffect(() => {
+  if (!groupId) return; // token check entfernen für lokalen Test
+
+  setMembers([
+    { id: 1, username: "Tim" },
+    { id: 2, username: "Tom" },
+    { id: 3, username: "Tam" },
+  ]);
+
+  setPendingActivities([
+    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" },
+    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" },
+    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" },
+  ]);
+  
+
+  setPlannedActivities([
+    { id: 4, name: "Movie Night", scheduledTime: "2026-05-10T19:00:00", location: "Kino Houdini", status: "PLANNED" },
+  ]);
+
+  setCalendarEvents([
+    { id: 4, title: "Movie Night", start: new Date("2026-05-10T19:00:00"), end: new Date("2026-05-10T22:00:00"), location: "Kino Houdini" },
+  ]);
+
+}, [groupId]);
+//-------END MOCKDATA BLOCK-------//
 
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
     try {
@@ -269,7 +297,9 @@ const GroupPage: React.FC = () => {
             ) : (
               <>
                 {/* Card */}
-                <div style={{
+                <div 
+                  key={pendingActivities[0].id}
+                  style={{
                   backgroundColor: "rgba(60,60,60,0.6)",
                   borderRadius: "12px",
                   padding: "20px",
