@@ -7,6 +7,7 @@ import { User } from "@/types/user";
 import { Button, Form, Input, message } from "antd"; //added message as i also want the server to communicate with user 
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
+import { useState } from "react";
 
 interface LoginValues {
   username: string;
@@ -19,6 +20,7 @@ const Login: React.FC = () => {
   const [form] = Form.useForm();
   // useLocalStorage hook example use
   const [messageApi, contextHolder] = message.useMessage(); // use the message component from antd to display success or error messages
+  const [loading, setLoading] = useState(false); // State to manage loading state of the login process
 
   // The hook returns an object with the value and two functions
   // Simply choose what you need from the hook:
@@ -32,11 +34,18 @@ const Login: React.FC = () => {
   const {set: setUserId} = useLocalStorage<string>("userId", ""); // we need this method to set the value of the userId to the one we receive from the POST request to the backend server API
  
   const handleLogin = async (values: LoginValues) => {
+    setLoading(true); // Set loading state to true when the login process starts
     try {
       // Call the API service and let it handle JSON serialization and error handling
       const response = await apiService.post<User>("/login", values);
 
       // Use the useLocalStorage hook that returned a setter function (setToken in line 41) to store the token if available
+      if (!response.token || !response.id) {
+      messageApi.error("Invalid server response. Please try again.");
+      setLoading(false);
+      return; // Stop further execution if the response is not valid from the backend
+      }
+
       if (response.token) {
         setToken(response.token);
       }
@@ -45,15 +54,27 @@ const Login: React.FC = () => {
 
       messageApi.success("Login successful! Welcome back.");
 
-      // Navigate to the user overview
-      router.push("/users");
+      // Navigate to the groups/ dashboard overview
+      router.push("/groups");
     } catch (error) {
       if (error instanceof Error) {
-        alert(`Something went wrong during the login:\n${error.message}`);
-      } else {
-        console.error("An unknown error occurred during login.");
+        if (error.message.includes("401") || error.message.includes("Unauthorized")) {
+            messageApi.error("Invalid username or password");
+          } else if (error.message.includes("Network")) {
+            messageApi.error("Network error. Please check your connection and try again.");
+          } else if (error.message.includes("404")) {
+            messageApi.error("User not found. Please check your username.");
+          } else {
+            messageApi.error(`Login failed: ${error.message}`);
+          }
+        } else {
+        messageApi.error("An unknown error occurred during login.");
+        }
+      } finally {
+        setLoading(false);
+      
       }
-    }
+    
   };
 
   return (
@@ -121,11 +142,11 @@ const Login: React.FC = () => {
             label={<span style={{ color: "white" }}>Password</span>}
             rules={[{ required: true, message: "Please input your password!" }]}
           >
-            <Input placeholder="Enter password" />
+            <Input.Password placeholder="Enter password" />
           </Form.Item>
           
           <Form.Item>
-            <Button type="primary" size = "large" htmlType="submit" className="login-button"
+            <Button type="primary" size = "large" htmlType="submit" loading={loading} className="login-button"
               style = {{ backgroundColor: "white", color: 'black'}}>
               Login
             </Button>
