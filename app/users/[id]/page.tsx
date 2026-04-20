@@ -45,6 +45,10 @@ const UserprofilePage: React.FC = () => {
   const apiService = useApi(); //TLAKIGN TO BACKEND
   const [messageApi, contextHolder] = message.useMessage(); //for messages
 
+  const {value: token} = useLocalStorage<string>("token", "");
+  const [mounted, setMounted] = useState(false);
+
+
   const { value: loggedInUserId } = useLocalStorage<string>("userId", ""); // for if the page refreshes and we need to check if the user is still logged in 
   const { clear: clearToken } = useLocalStorage<string>("token", "");
   const { clear: clearUserId } = useLocalStorage<string>("userId", "");
@@ -116,6 +120,17 @@ const UserprofilePage: React.FC = () => {
     router.push("/login");
   };
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  
+  useEffect(() => {
+    if (mounted && (!token || token === "")) {
+      router.replace("/login");
+    }
+  }, [mounted, token, router]);
+
 
 
   return (
@@ -159,6 +174,7 @@ const UserprofilePage: React.FC = () => {
             type="text"
             icon={<CalendarOutlined />}
             style={{ color: "white" }}
+            onClick={() => router.push(`/users/[id]/calendar`)}
           >
             Calendar
           </Button>

@@ -13,7 +13,7 @@ import {
   RightOutlined,
   PlusOutlined
 } from "@ant-design/icons"; // Ant Design icons for the UI
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
 interface JoinGroupValues { // creating case for joinging a group 
@@ -33,6 +33,10 @@ const Dashboard: React.FC = () => { //creating the dashboard component
 
     const { clear: clearToken } = useLocalStorage<string>("token", ""); // removing the token as this will be used for logging out 
     const { clear: clearUserId } = useLocalStorage<string>("userId", "");
+
+    const {value: token} = useLocalStorage<string>("token", "");
+    const [mounted, setMounted] = useState(false);
+
 
     const [joinForm] = Form.useForm(); //created controlers to join groups 
     const [createForm] = Form.useForm();
@@ -80,6 +84,17 @@ const Dashboard: React.FC = () => { //creating the dashboard component
         width: '100%'
     };
 
+    useEffect(() => {
+    setMounted(true);
+    }, []);
+
+  
+    useEffect(() => {
+    if (mounted && (!token || token === "")) {
+      router.replace("/login");
+    }
+    }, [mounted, token, router]);
+
 
     return (
     <div style = {{ // same as login page
@@ -121,8 +136,8 @@ const Dashboard: React.FC = () => { //creating the dashboard component
         </div>
 
         <div style={{ display: 'flex', gap: '20px' }}>
-          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>Calendar</Button>
-          <Button type="text" icon={<SettingOutlined />} style={{ color: "white" }}>Settings</Button>
+          <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/[id]/calendar`)} style={{ color: "white" }}>Calendar</Button>
+          <Button type="text" icon={<SettingOutlined />} onClick={() => router.push(`/users/[id]/settings`)} style={{ color: "white" }}>Settings</Button>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: "white" }}>Logout</Button>
         </div>
     </div>
