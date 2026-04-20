@@ -1,8 +1,8 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Card, Button, Typography, Space, Divider, Input, Form, Spin, message, Popconfirm } from "antd";
+import { Button, Typography, Space, Divider, Input, Form, Spin, message, Popconfirm } from "antd";
 import { useRouter, useParams } from "next/navigation";
-import { EditOutlined, ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { apiService } from "@/api/apiService"; 
 
 interface UserData {
@@ -10,21 +10,15 @@ interface UserData {
   bio: string;
 }
 
-const { Title, Text } = Typography;
+const { Title } = Typography;
 
 const EditProfile: React.FC = () => {
   const router = useRouter();
-  const params = useParams();
-  const userId = params.id as string;
+  const { id: userId } = useParams() as { id: string };
   const [form] = Form.useForm();  
-
   //states for daten
   const [loading, setLoading] = useState(true);
-  const [isEditing, setIsEditing] = useState(false);
-  const [userData, setUserData] = useState({
-    username: "",
-    bio: "",
-  });
+  const [userData, setUserData] = useState<UserData>({ username: "", bio: "" });
 
   //Daten vom server laden beim start
   useEffect(() => {
@@ -79,7 +73,6 @@ const EditProfile: React.FC = () => {
       }
       if (Object.keys(updateData).length === 0) {
         message.info("No changes detected.");
-        setIsEditing(false);
         return; 
       }
 
@@ -120,147 +113,154 @@ const EditProfile: React.FC = () => {
     }
   };
 
-  if (loading && !isEditing) {
-    return <div style={{ display: 'flex', justifyContent: 'center', marginTop: '100px' }}><Spin size="large" /></div>;
+  if (loading) {
+    return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000' }}>
+      <Spin size="large" />
+      </div>
+    );
   }
 
-  return (
-    <div style={{ display: "flex", justifyContent: "center", padding: "40px" }}>
-      <Card style={{ width: 600, borderRadius: "12px" }}>
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          <Button 
-            icon={<ArrowLeftOutlined />} 
-            type="text" 
+  const inputStyle = { backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' };
+  const labelStyle = { color: "rgba(255,255,255,0.7)", fontSize: '12px', textTransform: 'uppercase' as const };
+
+return (
+    <div style={{
+      backgroundColor: "#000000",
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      alignItems: 'center',
+      justifyContent: 'center',
+      padding: "20px"
+    }}>
+
+    <div style={{
+        width: '100%',
+        maxWidth: 600,
+        padding: '40px',
+        backgroundColor: 'rgba(126, 126, 126, 0.2)',
+        borderRadius: '12px',
+        border: '1px solid rgba(255, 255, 255, 0.1)'
+      }}>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Button
+            icon={<ArrowLeftOutlined />}
+            type="text"
+            style={{ color: 'rgba(255,255,255,0.6)', padding: 0 }}
             onClick={() => router.push(`/users/${userId}`)}
           >
             Back to Profile
           </Button>
           
-          <Title level={2}>Settings</Title>
-          <Divider />
+        {/* Titel */}
+        <Title level={1} style={{ 
+          color: 'white', 
+          textAlign: 'center', 
+          fontSize: '42px', 
+          fontWeight: 'bold',
+          marginBottom: '40px' 
+        }}>
+          Settings
+        </Title>
 
-          {!isEditing ? (
-            /* --- watch mode --- */
-            <div style={{ padding: "10px" }}>
-              <div style={{ marginBottom: "20px" }}>
-                <Text type="secondary">Username</Text>
-                <div style={{ fontSize: "18px", fontWeight: "bold" }}>{userData.username}</div>
-              </div>
-              
-              <div style={{ marginBottom: "30px" }}>
-                <Text type="secondary">Bio</Text>
-                <div style={{ fontSize: "16px" }}>{userData.bio || "No Bio available."}</div>
-              </div>
 
-              <Button 
-                type="primary" 
-                icon={<EditOutlined />} 
-                onClick={() => setIsEditing(true)}
-              >
-                Edit Profile
-              </Button>
-            </div>
-          ) : (
-            /* --- edit mode --- */
-            <Form
-              form={form}
-              layout="vertical"
-              initialValues={userData}
-              onFinish={handleSave}
+          <Form
+            form={form}
+            layout="vertical"
+            requiredMark={false}
+            onFinish={handleSave}
+            initialValues={userData}
+          >
+            {/* Username Field */}
+            <Form.Item
+              label={<span style={labelStyle}>Username</span>}
+              name="username"
+              rules={[{ required: true, message: 'Username is required' }]}
             >
-              <Form.Item 
-                label="Username" 
-                name="username" 
-                rules={[
-                  { required: true, message: 'Please input your username!'},
-                  { validator: async (_, value) => {
-                    if (!value || value === userData.username) {
-                      return Promise.resolve();
-                    }
-                    try {
-                      const users = await apiService.get<UserData[]>("/users");
-                      const isTaken = users.some(u => u.username.toLowerCase() === value.toLowerCase());
+              <Input 
+                size="large" 
+                placeholder="Enter username" 
+                style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+              />
+            </Form.Item>
 
-                      if (isTaken) {
-                        return Promise.reject(new Error('Username is already taken!'));
-                      }
-                      return Promise.resolve();
-                    } catch {
-                      // Falls der Aufruf fehlschlägt (z.B. 401 oder 404)
-                      return Promise.resolve(); 
-                    }
-                  }
-                }
-                ]}
-                hasFeedback>
-                <Input size="large" />
-              </Form.Item>
+            {/* Bio Field */}
+            <Form.Item 
+              label={<span style={labelStyle}>Bio</span>} 
+              name="bio"
+            >
+              <Input.TextArea 
+                rows={4} 
+                placeholder="Tell us about yourself..." 
+                style={inputStyle}/>
+            </Form.Item>
 
-              <Form.Item label="Bio" name="bio">
-                <Input.TextArea rows={4} />
-              </Form.Item>
+            <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '24px 0' }} />
 
-              <Form.Item 
-                label="Password" 
-                name="password"
-              >
-                <Input.Password placeholder="Leave empty to keep current password" />
-              </Form.Item>
+            {/* Password Field */}
+            <Form.Item 
+              label={<span style={labelStyle}>Change Password</span>} 
+              name="password"
+            >
+              <Input.Password 
+                placeholder="Type to set new password" 
+                style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+              />
+            </Form.Item>
 
-            {passwordValue && (
+            {/* Confirm Password Field - Erscheint nur, wenn oben etwas steht */}
+            {passwordValue && passwordValue.length > 0 && (
               <Form.Item
-                label="Confirm New Password"
+                label={<span style={{ color: "white" }}>Confirm New Password</span>}
                 name="confirm"
                 dependencies={['password']}
                 rules={[
-                    { required: true, message: 'Please confirm your password!' },
-                    ({ getFieldValue }) => ({
-                      validator(_, value) {
-                        if (!value || getFieldValue('password') === value) {
-                          return Promise.resolve();
-                        }
-                        return Promise.reject(new Error('The two passwords do not match!'));
-                      },
-                    }),
-                  ]}
-                >
-                  <Input.Password placeholder="Repeat your new password" />
-                </Form.Item>
-              )}
+                  { required: true, message: 'Please confirm your password!' },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || getFieldValue('password') === value) return Promise.resolve();
+                      return Promise.reject(new Error('Passwords do not match!'));
+                    },
+                  }),
+                ]}
+              >
+                <Input.Password 
+                  placeholder="Repeat your new password" 
+                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid #42a2d6' }}
+                />
+              </Form.Item>
+            )}
 
-              <Space style={{ marginTop: "20px", width: "100%", justifyContent: "space-between"  }}>
-                <Space>
-                <Button type="primary" htmlType="submit">
-                  Save Changes
-                </Button>
-                <Button onClick={() => setIsEditing(false)}>
-                  Cancel
-                </Button>
-              </Space>
+            <Space direction="vertical" style={{ width: '100%', marginTop: '20px' }} size="middle">
+              <Button
+                block
+                type="primary"
+                size="large"
+                htmlType="submit"
+                loading={loading}
+                icon={<SaveOutlined />}
+                style={{ backgroundColor: 'white', color: 'black', fontWeight: 'bold', border: 'none', height: '50px' }}
+              >
+                SAVE ALL CHANGES
+              </Button>
 
-              {/* Task #36: am rechten Rand */}
                 <Popconfirm
-                  title={
-                    <Text strong style={{ color: "#000" }}>Delete Account?</Text>
-                  }
-                  description={
-                    <Text style= {{ color: "#666"}}>
-                      This action cannot be undone. Are you sure?</Text>
-                  }
+                  title="Delete Account?"
+                  description={<span style={{ color: 'black'}}>This action is permanent. All your data will be lost.</span>}
                   onConfirm={handleDeleteAccount}
                   okText="Yes, delete"
-                  cancelText="No"
-                  okButtonProps={{ danger: true, loading: loading }}
+                  cancelText="Cancel"
+                  okButtonProps={{ danger: true }}
                 >
-                  <Button danger type="text">
-                    Delete Account
-                  </Button>
-                </Popconfirm>
-                </Space>
-            </Form>
-          )}
+                <Button danger type="text" block style={{ marginTop: '10px', opacity: 0.6 }}>
+                  Delete Account
+                </Button>
+              </Popconfirm>
+            </Space>
+          </Form>
         </Space>
-      </Card>
+      </div>
     </div>
   );
 };

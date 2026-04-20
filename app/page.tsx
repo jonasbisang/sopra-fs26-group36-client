@@ -12,12 +12,14 @@ export default function Home() {
     <div className={styles.page}>
       <nav style={{
 }}>
-  <NextImage
-    src={logo}
-    alt="Friendler Logo"
-    height={160}
-    width={480}
-  />
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <NextImage
+                  src={logo}
+                  alt="Friendler Logo"
+                  height={160}
+                  width={480}
+                />
+                </div>
       </nav>
 
       <section style={{
