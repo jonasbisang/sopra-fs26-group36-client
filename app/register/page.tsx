@@ -25,7 +25,7 @@ const Register: React.FC = () => {
   //const [form] = Form.useForm();
 
   const [messageApi, contextHolder] = message.useMessage();
-  
+  const [loading, setLoading] = useState(false);
   // useLocalStorage hook example use
   // The hook returns an object with the value and two functions
   // Simply choose what you need from the hook:
@@ -43,6 +43,7 @@ const Register: React.FC = () => {
   } = useLocalStorage<string>("userId", "");
 
   const handleRegister = async (values: NeededFields) => {
+    setLoading(true);
     try {
 
       // Call the API service and let it handle JSON serialization and error handling
@@ -52,21 +53,31 @@ const Register: React.FC = () => {
       if (response.token) {
         setToken(response.token);
       }
-
       if (response.id) {
         setUserId(response.id.toString());
       }
-
-
-      // Navigate to the user overview
-      router.push("/users");
+      // Navigate to the groups dashboard overview
+      messageApi.success("Account successfully created!");
+      router.push("/groups");
+    
     } catch (error) { 
       if (error instanceof Error) {
-        alert(`Something went wrong during the registration:\n${error.message}`);
+        if (error.message.includes("409")) {
+        messageApi.error("Username already exists.");
+      } else if (error.message.includes("400")) {
+        messageApi.error("Invalid input. Please check your data.");
+      } else if (error.message.includes("Network")) {
+        messageApi.error("Network error. Please try again.");
       } else {
-        console.error("An unknown error occurred during register.");
+        messageApi.error(`Registration failed: ${error.message}`);//shows the original message to the user
       }
+    } else {
+      messageApi.error("An unknown error occurred.");
     }
+
+  } finally {
+    setLoading(false); // always stop loading
+  }
   };
 
   
@@ -189,7 +200,7 @@ const Register: React.FC = () => {
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold' }}>
+            <Button type="primary" htmlType="submit" block   loading={loading} disabled={loading} style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold' }}>
               Register
             </Button>
           </Form.Item>
