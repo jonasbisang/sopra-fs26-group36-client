@@ -40,7 +40,7 @@ export default function Home() {
 
         <p style={{
           fontSize: '20px',
-          color: '#6b7280',
+          color: '#d6d6d6',
           lineHeight: 1.7,
           marginBottom: '2rem',
         }}>
@@ -61,13 +61,13 @@ export default function Home() {
             type="primary"
             size="large"
             onClick={() => router.push('/register')}
-            style={{ backgroundColor: '#000000b8',borderRadius: '999px'}}
+            style={{ backgroundColor: '#ffffffb8',borderRadius: '999px'}}
           >
             Register
           </Button>
           
           <Button size="large" onClick={() => router.push('/information')}
-          style={{ backgroundColor: '#f9f7f7b8',borderRadius: '999px'}}>
+          style={{ backgroundColor: '#ffffff',borderRadius: '999px'}}>
             Information
           </Button>
         </div>
@@ -78,7 +78,7 @@ export default function Home() {
       }}>
         <p style={{
           fontSize: '30px',
-          color: '#000000',
+          color: '#ffffff',
           fontWeight: 800,
           textAlign: 'center',
           letterSpacing: '0.05em',
@@ -118,7 +118,7 @@ export default function Home() {
             },
           ].map((feature) => (
             <div key={feature.title} style={{
-              backgroundColor: '#02020220',
+              backgroundColor: '#ffffff20',
               borderRadius: '12px',
               padding: '1.25rem',
             }}>
@@ -139,7 +139,7 @@ export default function Home() {
               <h3 style={{ fontSize: '15px', fontWeight: 500, marginBottom: '6px' }}>
                 {feature.title}
               </h3>
-              <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: 1.6 }}>
+              <p style={{ fontSize: '13px', color: '#f5f5f5', lineHeight: 1.6 }}>
                 {feature.desc}
               </p>
             </div>
@@ -149,10 +149,10 @@ export default function Home() {
 
       <footer style={{
         padding: '2rem',
-        paddingTop:'8rem',
+        paddingTop:'3rem',
         textAlign: 'center',
         fontSize: '13px',
-        color: '#00000088',
+        color: '#c0b1b1d4',
         width: '100%',
         marginTop: '2rem',
       }}>

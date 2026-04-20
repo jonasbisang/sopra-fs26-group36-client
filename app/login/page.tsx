@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation"; // use NextJS router for navigation
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
+import React, { useState } from "react";
 import { Button, Form, Input, message } from "antd"; //added message as i also want the server to communicate with user 
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
