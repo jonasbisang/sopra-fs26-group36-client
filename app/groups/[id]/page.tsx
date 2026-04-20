@@ -13,10 +13,10 @@ import {
 import { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
-//import "react-big-calendar/lib/css/react-big-calendar.css";
+import "react-big-calendar/lib/css/react-big-calendar.css";
 
 import NextImage from 'next/image';
-import logo from '../friendlerLogo.png';
+import logo from '../../friendlerLogo.png';
 
 const localizer = momentLocalizer(moment);
 
