@@ -14,6 +14,9 @@ import {
 } from "@ant-design/icons"; // Ant Design icons for the UI
 import { useState } from "react";
 
+import NextImage from 'next/image';
+import logo from '../friendlerLogo.png';
+
 interface JoinGroupValues { // creating case for joinging a group
     groupId: string;
     joinPassword: string;
@@ -108,7 +111,7 @@ const Dashboard: React.FC = () => { //creating the dashboard component
     }}>
 
     <div style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}> 
-          <h1 style={{ // the logo should take you to the dashboard when clicked
+          {/* <h1 style={{ // the logo should take you to the dashboard when clicked
             fontSize: '32px', // Smaller than login page, suitable for header
             color: 'white', 
             margin: 0,
@@ -124,8 +127,17 @@ const Dashboard: React.FC = () => { //creating the dashboard component
             L<span style={{ color: '#ff4238' }}>·</span>
             E<span style={{ color: '#ffdc00' }}>·</span>
             R
-          </h1>
+          </h1> */}
         </div>
+
+                        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                        <NextImage
+                          src={logo}
+                          alt="Friendler Logo"
+                          height={160}
+                          width={480}
+                        />
+                        </div>
 
         <div style={{ display: 'flex', gap: '20px' }}>
           <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>Calendar</Button>
