@@ -8,7 +8,6 @@ import React, { useState } from "react";
 import { Button, Form, Input, message } from "antd"; //added message as i also want the server to communicate with user 
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
-import { useState } from "react";
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
 
