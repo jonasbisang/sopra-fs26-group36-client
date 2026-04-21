@@ -5,6 +5,8 @@ import { useApi } from "@/hooks/useApi";
 import { Button, message, Spin, TimePicker } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
+import useLocalStorage from "@/hooks/useLocalStorage";
+
 
 interface UnavailabilityPostDTO {
   startDateTime: string;
@@ -153,7 +155,7 @@ const CalendarPage: React.FC = () => {
         icon={<ArrowLeftOutlined />}
         type="text"
         style={{ color: "white", marginBottom: 24 }}
-        onClick={() => router.push(`/users/${userId}`)}
+        onClick={() => router.back()}
       >
         Back
       </Button>
