@@ -9,11 +9,14 @@ import {
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
+
+import CreateActivityModal from "@/forms/CreateActivityModal";
 
 const localizer = momentLocalizer(moment);
 
@@ -63,6 +66,8 @@ const GroupPage: React.FC = () => {
   const [votedCount, setVotedCount] = useState<number>(0);
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
 
   //Auth check
   //useEffect(() => {
@@ -153,6 +158,21 @@ const GroupPage: React.FC = () => {
 
 }, [groupId]);
 //-------END MOCKDATA BLOCK-------//
+
+  //conect to backend and update the list of pending activities
+  const handleActivityCreated = async () => {
+    setIsCreateModalVisible(false);
+
+    if (!groupId) return;
+    try {
+      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+      setPendingActivities(pending);
+     
+    } catch (error) {
+      console.error("Failed to fetch pending activities after creation:", error);
+    }
+    
+  };
 
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
     setFeedbackType(voteType);
@@ -247,9 +267,21 @@ const GroupPage: React.FC = () => {
         </div>
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
+          
+          <Button 
+            type="primary" 
+            shape="round" 
+            icon={<PlusOutlined />} 
+            onClick={() => setIsCreateModalVisible(true)}
+            style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
+          >
+            New Activity
+          </Button>
+
+          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} >
             Calendar
           </Button>
+
           <Button
             type="text"
             icon={<UserOutlined />}
@@ -495,6 +527,12 @@ const GroupPage: React.FC = () => {
         </div>
 
       </div>
+      <CreateActivityModal 
+        visible={isCreateModalVisible}
+        onClose={() => setIsCreateModalVisible(false)} // triggers the whole pope up when set to true 
+        groupId={groupId as string}
+        onSuccess={handleActivityCreated}
+      />
     </div>
   );
 };
