@@ -9,13 +9,23 @@ import {
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
+  SettingOutlined
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
+import NextImage from 'next/image';
+import logo from '../../friendlerLogo.png';
+
 const localizer = momentLocalizer(moment);
+
+interface Group { // needed to check if current user is admin
+  id: number;
+  name: string;
+  adminId: number;
+}
 
 interface User {
   id: number;
@@ -50,23 +60,35 @@ const GroupPage: React.FC = () => {
   const { clear: clearToken } = useLocalStorage<string>("token", "");
   const { clear: clearUserId } = useLocalStorage<string>("userId", "");
 
+  const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
-  //Auth check
-  useEffect(() => {
-    if (!token) {
-      router.push("/login");
-    }
-  }, [token, router]);
+
+  
+  // //Auth check
+  // useEffect(() => {
+  //   if (!token) {
+  //     router.push("/login");
+  //   }
+  // }, [token, router]);
 
   // Fetch all data
   useEffect(() => {
     if (!groupId || !token) return;
 
     const fetchData = async () => {
+
+      // Fetch group information 
+      try {
+        const groupData = await apiService.get<Group>(`/groups/${groupId}`);
+        setGroup(groupData);
+      } catch (error) {
+        console.error("Failed to fetch group details:", error);
+      }
+
       try {
         // Fetch group members
         const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
@@ -152,7 +174,7 @@ const GroupPage: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          <h1 style={{
+          {/* <h1 style={{
             fontSize: "32px",
             color: "white",
             margin: 0,
@@ -168,10 +190,32 @@ const GroupPage: React.FC = () => {
             L<span style={{ color: "#ff4238" }}>·</span>
             E<span style={{ color: "#ffdc00" }}>·</span>
             R
-          </h1>
+          </h1> */}
         </div>
 
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+                <NextImage
+                  src={logo}
+                  alt="Friendler Logo"
+                  height={160}
+                  width={480}
+                />
+                </div>
+
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+      
+          {group?.adminId.toString() === userId && ( 
+
+            <Button
+              type="primary"
+              icon={<SettingOutlined />}
+              onClick={() => router.push(`/groups/${groupId}/settings`)}
+            >
+              Admin Group Settings
+            </Button>
+
+          )}
+          
           <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
             Calendar
           </Button>

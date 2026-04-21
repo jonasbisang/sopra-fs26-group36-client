@@ -1,0 +1,11 @@
+[33mcommit 1b3033148642dd4f370f351f4513254bc190b11b[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mdev-task-6[m[33m)[m
+Author: Ana Nistal <aanies0101@gmail.com>
+Date:   Mon Apr 13 14:55:52 2026 +0200
+
+    starting the profile id code with teh correct needed concepts
+
+ app/groups/[id]/page.tsx         |   2 [32m+[m[31m-[m
+ app/users/[id]/page.tsx          | 425 [32m+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++[m[31m-------------[m
+ app/users/[id]/settings/page.tsx |  12 [32m+++[m[31m---[m
+ package-lock.json                | 128 [32m++++++++++++++++++++++++++++[m[31m-----------------------------[m
+ 4 files changed, 468 insertions(+), 99 deletions(-)
