@@ -10,7 +10,7 @@ import {
   LogoutOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -59,6 +59,11 @@ const GroupPage: React.FC = () => {
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
+  const [totalPending, setTotalPending] = useState<number>(0);
+  const [votedCount, setVotedCount] = useState<number>(0);
+  const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
+  const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   //Auth check
   //useEffect(() => {
    // if (!token) {
@@ -66,7 +71,7 @@ const GroupPage: React.FC = () => {
     //}
   //}, [token, router]);
 
-  // Fetch all data (OG BLOCK)
+  // Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
   //useEffect(() => {
   //  if (!groupId || !token) return;
 
@@ -134,6 +139,8 @@ const GroupPage: React.FC = () => {
     { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" },
     { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" },
   ]);
+
+  setTotalPending(3);
   
 
   setPlannedActivities([
@@ -148,9 +155,14 @@ const GroupPage: React.FC = () => {
 //-------END MOCKDATA BLOCK-------//
 
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
+    setFeedbackType(voteType);
+    if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
+    feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600); 
+
     try {
       await apiService.post(`/activities/${activityId}/votes`, { voteType });
       setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setVotedCount((prev) => prev + 1);
       messageApi.success(voteType === "ACCEPT" ? "Liked! 👍" : "Passed.");
     } catch (error) {
       messageApi.error("Failed to submit vote.");
@@ -176,6 +188,8 @@ const GroupPage: React.FC = () => {
     router.push("/login");
   };
 
+  const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
+
   return (
     <div style={{
       backgroundColor: "#000000",
@@ -184,6 +198,24 @@ const GroupPage: React.FC = () => {
       flexDirection: "column",
     }}>
       {contextHolder}
+
+       {/* Feedback Flash Overlay */}
+      {feedbackType && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 999,
+          pointerEvents: "none",
+          backgroundColor: feedbackType === "ACCEPT" ? "rgba(66,214,120,0.12)" : "rgba(255,66,56,0.12)",
+          animation: "flashFade 0.6s ease-out forwards",
+        }} />
+      )}
+      <style>{`
+        @keyframes flashFade {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
 
       {/* Header */}
       <div style={{
@@ -290,12 +322,39 @@ const GroupPage: React.FC = () => {
           }}>
             <h3 style={{ color: "white", marginBottom: "16px" }}>💡 Upcoming Ideas</h3>
             
-            {pendingActivities.length === 0 ? (
-              <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", padding: "40px 0" }}>
-                No pending activities
+            {totalPending > 0 && (
+             <div style={{ marginBottom: "16px" }}>
+               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                 <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>Voting progress</span>
+                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>{votedCount} / {totalPending}</span>
               </div>
-            ) : (
-              <>
+              <div style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
+                <div style={{
+                  height: "100%",
+                  width: `${progressPercent}%`,                    
+                  backgroundColor: progressPercent === 100 ? "#42d678" : "#42a2d6",
+                  borderRadius: "2px",
+                  transition: "width 0.4s ease",
+                }} />
+              </div>
+            </div>
+          )}
+
+          {pendingActivities.length === 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "50px 20px", gap: "12px" }}>                
+            <span style={{ fontSize: "48px" }}></span>
+               <p style={{ color: "white", fontSize: "18px", fontWeight: 600, margin: 0, textAlign: "center" }}>
+                {votedCount > 0 ? "You're all caught up!" : "No proposals yet"}
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", margin: 0, textAlign: "center" }}>
+                {votedCount > 0
+                  ? `You voted on all ${votedCount} activit${votedCount === 1 ? "y" : "ies"}. Check back later for new proposals.`                    
+                  : "No one has proposed an activity yet. Be the first!"}
+              </p>
+            </div>
+          ) : (
+            <>
+
                 {/* Card */}
                 <div 
                   key={pendingActivities[0].id}
