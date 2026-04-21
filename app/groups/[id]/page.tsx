@@ -331,7 +331,8 @@ const GroupPage: React.FC = () => {
               <div style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
                 <div style={{
                   height: "100%",
-                  width: `${progressPercent}%`,                    backgroundColor: progressPercent === 100 ? "#42d678" : "#42a2d6",
+                  width: `${progressPercent}%`,                    
+                  backgroundColor: progressPercent === 100 ? "#42d678" : "#42a2d6",
                   borderRadius: "2px",
                   transition: "width 0.4s ease",
                 }} />
