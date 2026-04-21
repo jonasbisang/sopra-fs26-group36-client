@@ -76,8 +76,12 @@ reason).
 | **@vonhollym-art** | 18.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/issues/114?issue=jonasbisang%7Csopra-fs26-group36-server%7C114 | added promoting to admin and kickinf functionality for groups | The admin can only leave the group if there is min 1 other admin. Thus there needs to be a way to promote members to admins. Kicking people from a group is practical if e.g. a member doesn't participate or posts inappropiate activities. |
 |                    | 19.04.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/issues/115?issue=jonasbisang%7Csopra-fs26-group36-server%7C115 | added group password change and delete logic | These are useful functionalities of any group based application and gives the admin special rights over other members. |
 |                    | 21.04.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/pull/165 | added fetching list of all groups that a specific user is currently a member of | necessary for your groups dashboard |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@CiaranHendriks]** | [17.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/155] | [data cleanup, when a User deletes their profile, all data associated with them (like groupmembership etc.) are also deleted] [needed for a clean database]|
+|                    | [20.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/159] | [Database for activities in the server repository / saving activity proposals] [needed to store activities]|
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/161] | [Implement activity creation endpoint (POST) with validation logic for inputs] | [Connection from client side to database] |
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/164] | [time-slot parser for activitys] | [needed for scheduling, to unify time blocks and custom time slots] |
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/166] | [unified calendar API that fetches data from the DB as well as from the google calendar
+] | [needed for scheduling, to take into account both manually added unavailabilities and the ones in google calendar] |
 | **[@githubUser5]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
 ---
