@@ -32,6 +32,7 @@ interface Activity {
   maxSize?: number;
   duration?: number;
   isWeatherDependent?: boolean;
+  acceptVotes?: number;
 }
 
 interface CalendarEvent {
@@ -135,9 +136,9 @@ const GroupPage: React.FC = () => {
   ]);
 
   setPendingActivities([
-    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" },
-    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" },
-    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" },
+    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" , acceptVotes: 1},
+    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" , acceptVotes: 0},
+    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" , acceptVotes: 2},
   ]);
 
   setTotalPending(3);
@@ -161,9 +162,29 @@ const GroupPage: React.FC = () => {
 
     try {
       await apiService.post(`/activities/${activityId}/votes`, { voteType });
-      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
-      setVotedCount((prev) => prev + 1);
-      messageApi.success(voteType === "ACCEPT" ? "Liked! 👍" : "Passed.");
+      if (voteType === "DECLINE") {
+        setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+        setVotedCount((prev) => prev + 1);
+        messageApi.success("Passed.");
+      } else {
+        try {
+          const updated = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+          const updatedActivity = updated.find((a) => a.id === activityId);
+          if (!updatedActivity) {
+            setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+            setVotedCount((prev) => prev + 1);
+            messageApi.success("Minimum reached — looking for the best time slot!")
+          } else {
+            setPendingActivities((prev) => prev.map((a) => a.id === activityId ? updatedActivity : a));
+          setVotedCount((prev) => prev + 1);
+          messageApi.success("Liked! 👍");
+          }
+        } catch {
+          setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+          setVotedCount((prev) => prev + 1);
+          messageApi.success("Liked! 👍");
+        }
+      }
     } catch (error) {
       messageApi.error("Failed to submit vote.");
       console.error(error);
@@ -389,6 +410,26 @@ const GroupPage: React.FC = () => {
                         <Tag color="cyan">Weather-dependent</Tag>
                       )}
                     </div>
+                    {pendingActivities[0].minSize && (
+                      <div style={{ marginTop: "10px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                          <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>Interest</span>
+                          <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>
+                            {pendingActivities[0].acceptVotes ?? 0} / {pendingActivities[0].minSize} needed
+                          </span>
+                        </div>
+                      <div style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${Math.min(((pendingActivities[0].acceptVotes ?? 0) / pendingActivities[0].minSize) * 100, 100)}%`,
+                        backgroundColor: (pendingActivities[0].acceptVotes ?? 0) >= pendingActivities[0].minSize
+                          ? "#42d678" : "#ff9f43",
+                        borderRadius: "2px",
+                        transition: "width 0.4s ease",
+                      }} />
+                    </div>
+                  </div>
+                )}
                   </div>
                 </div>
 
