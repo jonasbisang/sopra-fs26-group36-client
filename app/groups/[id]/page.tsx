@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag } from "antd";
+import { Button, message, List, Avatar, Tag , Modal} from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -32,6 +32,7 @@ interface Activity {
   maxSize?: number;
   duration?: number;
   isWeatherDependent?: boolean;
+  acceptVotes?: number;
 }
 
 interface CalendarEvent {
@@ -63,6 +64,8 @@ const GroupPage: React.FC = () => {
   const [votedCount, setVotedCount] = useState<number>(0);
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
 
   //Auth check
   //useEffect(() => {
@@ -135,9 +138,9 @@ const GroupPage: React.FC = () => {
   ]);
 
   setPendingActivities([
-    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" },
-    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" },
-    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" },
+    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" , acceptVotes: 1},
+    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" , acceptVotes: 0},
+    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" , acceptVotes: 2},
   ]);
 
   setTotalPending(3);
@@ -153,6 +156,29 @@ const GroupPage: React.FC = () => {
 
 }, [groupId]);
 //-------END MOCKDATA BLOCK-------//
+  useEffect(() => {
+    if (!groupId || !token) return;
+    const interval = setInterval(async () => {
+      try {
+        const planned = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=PLANNED`
+        );
+        setPlannedActivities((prev) => {
+          const newOnes = planned.filter(
+            (a) => !prev.find((p) => p.id === a.id)
+          );
+          if (newOnes.length > 0) {
+            setNewEventPopup(newOnes[0]); // ← triggert Modal
+          }
+          return planned;
+        });
+      } catch (error) {
+        console.error("Polling error:", error);
+      }
+    }, 10000); // alle 10 Sekunden
+
+    return () => clearInterval(interval);
+  }, [groupId, token]);
 
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
     setFeedbackType(voteType);
@@ -198,6 +224,50 @@ const GroupPage: React.FC = () => {
       flexDirection: "column",
     }}>
       {contextHolder}
+     
+    {/* MODAL NOTIFICATION FOR NEW EVENT */}
+    <Modal
+      open={!!newEventPopup}
+      onOk={() => setNewEventPopup(null)}
+      onCancel={() => setNewEventPopup(null)}
+      okText="Let's go!"
+      cancelText="Close"
+      styles={{
+        body: { backgroundColor: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)" },
+        header: { backgroundColor: "#1a1a1a" },
+        footer: { backgroundColor: "#1a1a1a" },
+        mask: { backdropFilter: "blur(4px)" },
+      }}
+      title={
+        <span style={{ color: "white", fontSize: "18px" }}>
+          🎉 New Event Confirmed!
+        </span>
+      }
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "10px 0" }}>
+        <p style={{ color: "white", fontSize: "16px", fontWeight: "bold", margin: 0 }}>
+          {newEventPopup?.name}
+        </p>
+        {newEventPopup?.scheduledTime && (
+          <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>
+            📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}
+          </p>
+        )}
+        {newEventPopup?.location && (
+          <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>
+            📍 {newEventPopup.location}
+          </p>
+        )}
+        {newEventPopup?.duration && (
+          <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>
+            ⏱ {newEventPopup.duration} hours
+          </p>
+        )}
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", margin: 0, marginTop: "6px" }}>
+          A time slot was found and the event has been added to the group calendar.
+        </p>
+      </div>
+    </Modal>
 
        {/* Feedback Flash Overlay */}
       {feedbackType && (
