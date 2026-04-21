@@ -9,6 +9,7 @@ import {
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
+  SettingOutlined
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -19,6 +20,12 @@ import NextImage from 'next/image';
 import logo from '../../friendlerLogo.png';
 
 const localizer = momentLocalizer(moment);
+
+interface Group { // needed to check if current user is admin
+  id: number;
+  name: string;
+  adminId: number;
+}
 
 interface User {
   id: number;
@@ -53,23 +60,35 @@ const GroupPage: React.FC = () => {
   const { clear: clearToken } = useLocalStorage<string>("token", "");
   const { clear: clearUserId } = useLocalStorage<string>("userId", "");
 
+  const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
-  //Auth check
-  useEffect(() => {
-    if (!token) {
-      router.push("/login");
-    }
-  }, [token, router]);
+
+  
+  // //Auth check
+  // useEffect(() => {
+  //   if (!token) {
+  //     router.push("/login");
+  //   }
+  // }, [token, router]);
 
   // Fetch all data
   useEffect(() => {
     if (!groupId || !token) return;
 
     const fetchData = async () => {
+
+      // Fetch group information 
+      try {
+        const groupData = await apiService.get<Group>(`/groups/${groupId}`);
+        setGroup(groupData);
+      } catch (error) {
+        console.error("Failed to fetch group details:", error);
+      }
+
       try {
         // Fetch group members
         const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
@@ -184,6 +203,19 @@ const GroupPage: React.FC = () => {
                 </div>
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+      
+          {group?.adminId.toString() === userId && ( 
+
+            <Button
+              type="primary"
+              icon={<SettingOutlined />}
+              onClick={() => router.push(`/groups/${groupId}/settings`)}
+            >
+              Admin Group Settings
+            </Button>
+
+          )}
+          
           <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
             Calendar
           </Button>

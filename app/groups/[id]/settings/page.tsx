@@ -86,13 +86,13 @@ const GroupSettings: React.FC = () => {
         setGroup(groupData);
 
         //VALIDATION COMMENTED OUT FOR TESTING:
-        /*
+        
         if (groupData.adminId.toString() !== currentUserId) {
           messageApi.error("Access denied. Only administrators can view this page.");
           router.push(`/groups/${groupId}`);
           return;
         }
-        */
+        
 
         // Using /users as defined in the REST specification
         const membersData = await apiService.get<Member[]>(`/groups/${groupId}/users`);
