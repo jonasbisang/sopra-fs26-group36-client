@@ -1,6 +1,6 @@
 :root {
-  --background: #201f1f;
-  --foreground: #171717;
+  --background: #000000;
+  --foreground: #ffffff;
 }
 
 html,
@@ -39,7 +39,7 @@ a {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: rgb(41, 44, 59);
+  background-color: #FF6D1F
 }
 
 .login-button {
@@ -51,5 +51,8 @@ a {
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background-color: rgb(41, 44, 59);
+  background-color: #FF6D1F;
+}
+h1, h2, h3, p {
+  color: var(--foreground);
 }

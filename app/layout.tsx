@@ -15,8 +15,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Student XX-XXX-XXX",
-  description: "sopra-fs26-template-client",
+  title: "Friendler",
+  description: "Friendler - SoPra 2026 - Group 36",
 };
 
 export default function RootLayout({
@@ -34,7 +34,7 @@ export default function RootLayout({
               // general theme options are set in token, meaning all primary elements (button, menu, ...) will have this color
               colorPrimary: "#22426b", // selected input field boarder will have this color as well
               borderRadius: 8,
-              colorText: "#fff",
+              colorText: "#000000",
               fontSize: 16,
 
               // Alias Token

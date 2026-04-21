@@ -13,11 +13,11 @@ import {
   RightOutlined,
   PlusOutlined
 } from "@ant-design/icons"; // Ant Design icons for the UI
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 
-interface JoinGroupValues { // creating case for joinging a group 
-    groupName: string;
+interface JoinGroupValues {
+    groupId: string;
     password: string;
 }
 
@@ -30,17 +30,32 @@ const Dashboard: React.FC = () => { //creating the dashboard component
     const router = useRouter(); // to navigate to other pages
     const apiService = useApi();
     const [messageApi, contextHolder] = message.useMessage(); //shows messages to the user
-
+    const { value: userId } = useLocalStorage<string>("userId", "");
     const { clear: clearToken } = useLocalStorage<string>("token", ""); // removing the token as this will be used for logging out 
     const { clear: clearUserId } = useLocalStorage<string>("userId", "");
+
+    const {value: token} = useLocalStorage<string>("token", "");
+    const [mounted, setMounted] = useState(false);
+
 
     const [joinForm] = Form.useForm(); //created controlers to join groups 
     const [createForm] = Form.useForm();
 
-    const [groups, setGroups] = useState([ // test code to be able to use for the design 
-        { id: 1, name: "Weekend Warriors", members: 2 },
-        { id: 2, name: "Book Club", members: 1 }
-        ]);
+    const [groups, setGroups] = useState<{id: number, name: string, members: number}[]>([]);
+
+    const fetchGroups = async () => {
+      try {
+          const data = await apiService.get<{id: number, name: string, members: number}[]>(`/users/${userId}/groups`);
+          setGroups(data);
+      } catch (error) {
+        console.error("Create group error:", error); // ADD THIS
+          console.error("Failed to fetch groups:", error);
+      }
+};
+
+useEffect(() => {
+    if (userId) fetchGroups();
+}, [userId]);
 
     const handleLogout = () => { // to logout the user
     clearToken(); // Remove token from local storage
@@ -49,24 +64,26 @@ const Dashboard: React.FC = () => { //creating the dashboard component
     router.push("/login"); // Redirect to login page
     };
 
-    const handleJoinGroup = async (values: JoinGroupValues) => { // for handling the join group form 
-    try {
-      //!!!!!!!!!!!!!!!!! LOOK AT AGAIN FOR WHEN THE BACKEND GROUP JOINING GETS CREATED
-      // Example: await apiService.post("/groups/join", values);
-      console.log("Joining group with values:", values);
-      messageApi.success(`Successfully requested to join: ${values.groupName}`);
-      joinForm.resetFields(); // Clear the form after success
-    } catch (error) {
-      messageApi.error("Failed to join the group.");
-    }
-  };
+    const handleJoinGroup = async (values: JoinGroupValues) => {
+  try {
+    await apiService.post(`/groups/${values.groupId}/members`, 
+      { joinPassword: values.password }
+    );
+    messageApi.success(`Successfully joined group!`);
+    joinForm.resetFields();
+    await fetchGroups();
+  } catch (error) {
+    messageApi.error("Failed to join the group.");
+  }
+};
 
     const handleCreateGroup = async (values: CreateGroupValues) => {
         try {
         // //!!!!!!!!!!!!!!!!!// LOOK AT AGAIN FOR WHEN THE BACKEND GROUP CREATE GETS CREATED
-        // Example: await apiService.post("/groups", values);
+        await apiService.post("/groups", { name: values.newGroupName, joinPassword: values.password });
         console.log("Creating group with values:", values);
         messageApi.success(`Successfully created group: ${values.newGroupName}`);
+        await fetchGroups();
         createForm.resetFields(); // Clear the form after success
         } catch (error) {
         messageApi.error("Failed to create the group.");
@@ -79,6 +96,17 @@ const Dashboard: React.FC = () => { //creating the dashboard component
         padding: '30px',
         width: '100%'
     };
+
+    useEffect(() => {
+    setMounted(true);
+    }, []);
+
+  
+    useEffect(() => {
+    if (mounted && (!token || token === "")) {
+      router.replace("/login");
+    }
+    }, [mounted, token, router]);
 
 
     return (
@@ -121,8 +149,8 @@ const Dashboard: React.FC = () => { //creating the dashboard component
         </div>
 
         <div style={{ display: 'flex', gap: '20px' }}>
-          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>Calendar</Button>
-          <Button type="text" icon={<SettingOutlined />} style={{ color: "white" }}>Settings</Button>
+          <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
+          <Button type="text" icon={<SettingOutlined />} onClick={() => router.push(`/users/${userId}/settings`)} style={{ color: "white" }}>Settings</Button>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: "white" }}>Logout</Button>
         </div>
     </div>
@@ -170,8 +198,8 @@ const Dashboard: React.FC = () => { //creating the dashboard component
                   <div style={{ display: 'flex', alignItems: 'center', gap: '15px' }}>
                     {/* Group info */}
                     <div>
-                      <div style={{ color: 'white', fontWeight: 'bold', fontSize: '18px' }}>{group.name}</div>
-                      <div style={{ color: '#aaa', fontSize: '14px' }}>{group.members} members</div>
+                      <div style={{ color: 'white', fontWeight: 'bold', fontSize: '20px' }}>{group.name}</div>
+                      <div style={{ color: '#f7f7f7', fontSize: '16px' }}>Group-ID: {group.id} - Member(s): {group.members}</div>
                     </div>
                   </div>
                   <RightOutlined style={{ color: '#555' }} /> {/* Right arrow icon to indicate it's clickable */}
@@ -193,13 +221,13 @@ const Dashboard: React.FC = () => { //creating the dashboard component
                 onFinish={handleJoinGroup} // when form is submitted successfully thene call handleJoinGroup and then the info is passed on correctly 
                 requiredMark={false}
               >
-                <Form.Item 
-                  name="groupName" 
-                  label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>GROUP NAME</span>} // span is used to be able to style the label of the form item
-                  rules={[{ required: true, message: "Please enter the group name" }]}
-                >
-                  <Input placeholder="e.g., Weekend Warriors" />
-                </Form.Item>
+              <Form.Item 
+              name="groupId" 
+              label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>GROUP ID</span>}
+              rules={[{ required: true, message: "Please enter the group ID" }]}
+              >
+              <Input placeholder="e.g., 3" />
+              </Form.Item>
 
                 <Form.Item 
                   name="password" 
