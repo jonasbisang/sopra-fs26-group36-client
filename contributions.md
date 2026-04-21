@@ -78,8 +78,8 @@ reason).
 |                    | 21.04.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/pull/165 | added fetching list of all groups that a specific user is currently a member of | necessary for your groups dashboard |
 | **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
 |                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser5]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+| **[@ananis299]** | [20.04.2026]   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/f4bf90877ff1b6071fd8131ee5ac02a8a5e5796c | Group Admin settings page | Enabled the Admin to edit the group (has the property to kick out peopel or promote them to Admins inside the group); Also the possibility of changign the group access password |
+|                    | [21.04.2026]   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/8147d2b9ad42d2c926f2f0b4f883f0e984067f3a | created the enw activity creation function inside the group id page (in frontend) | The creation of an activity is now possible; The user can now input information and add the events eh wants to propose to his group of friends |
 ---
 
 ## Contributions Week 4 - [Begin Date] to [End Date]
