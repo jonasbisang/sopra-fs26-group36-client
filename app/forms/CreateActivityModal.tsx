@@ -8,6 +8,21 @@ import moment from "moment"; //handle time
 const { TextArea } = Input;
 const { Option } = Select;
 
+interface ActivityFormValues {
+  title: string;
+  description: string;
+  minParticipants: number;
+  maxParticipants: number;
+  isRecursive: boolean;
+  isWeatherDependent: boolean;
+  startDate?: moment.Moment;
+  endDate?: moment.Moment;
+  timeRange?: [moment.Moment, moment.Moment];
+  minTemp?: number;
+  maxTemp?: number;
+  rainPreference?: string;
+}
+
 interface CreateActivityModalProps {
   visible: boolean;
   onClose: () => void; // as it returns nothing when closed 
@@ -21,7 +36,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
   const [messageApi, contextHolder] = message.useMessage();
 
   // when pop up is successfully completed, this gets sent 
-  const onFinish = async (values: any) => {
+  const onFinish = async (values: ActivityFormValues) => {
     try {
       // all the data that is then organizedly sent to backend      
       const payload = {
@@ -88,7 +103,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
         okButtonProps={{ style: { backgroundColor: "black", color: "white", fontWeight: "bold", borderRadius: "6px" } }}
         cancelButtonProps={{ style: { color: "black", borderColor: "#d9d9d9", borderRadius: "6px" } }}
         styles={{
-          content: { backgroundColor: "#ffffff", borderRadius: "12px" }, // Clean white background
+          body: { backgroundColor: "#ffffff", borderRadius: "12px" }, // Clean white background
           header: { backgroundColor: "#ffffff", borderBottom: "none", paddingBottom: "10px" }
         }}
       >
