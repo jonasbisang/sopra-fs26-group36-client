@@ -70,15 +70,26 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@elisabettade]** | 14.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/3549b83b84c26b8dbbbf5633a6137c1bcedbaaf6| Added tinder style voting for pending activities, frontend | users need to be able to vote on proposed activities |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | 21.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/pull/82/changes/b19c3d7db9ea8d9668538df54e08de59d515ca3f https://github.com/jonasbisang/sopra-fs26-group36-client/commit/1da498e4511a53a2eff544fc44d1301b73956a55 | Made the voting card show progress, give feedback and remove a card once the user has voted | it supports actually going through the stack of cards and voting, not just voting on one thing |
+|                    | 21.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/0109b48ea20745195afdc77e4089d9c0ea154242 | The user which triggers the time slot search is informed visually that the search began | users have to be notified when the date-search process begins |
+|                    | 21.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/755ef39f168ca87190955d0870eb0efa87dafe37 | Once a possible slot is found each participating user is informed visually with a new event popup | Every partaking user has to know when they have been scheduled for something (new event has been confirmed) |
 | **[@jonasbisang]** | [20.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/76/changes/c20db0ceb4f0f3ffd6f8269b907c9b645fc225a0] | [Added to option fot the user to add manual calendar entries or connect to google (frontend)] | [Needed for one of the core features of the website, finding a suiting time slot without the user having to interfer.] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser3]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser4]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
-| **[@githubUser5]** | [date]   | [Link to Commit 1] | [Brief description of the task] | [Why this contribution is relevant] |
-|                    | [date]   | [Link to Commit 2] | [Brief description of the task] | [Why this contribution is relevant] |
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/163/commits/fde757638cb87bb5d25b0e9ea002ddefe522cd91 https://github.com/jonasbisang/sopra-fs26-group36-client/commit/4532a5f8fe22954ccdc16c01411c8d13b26b177c] | [Added the option to create a group and that groups are which a user is part of are loaded on his/hers dashboard | [Creating a group is a crusial functionality needed for our USP] |
+| **@vonhollym-art** | 18.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/issues/114?issue=jonasbisang%7Csopra-fs26-group36-server%7C114 | added promoting to admin and kickinf functionality for groups | The admin can only leave the group if there is min 1 other admin. Thus there needs to be a way to promote members to admins. Kicking people from a group is practical if e.g. a member doesn't participate or posts inappropiate activities. |
+|                    | 19.04.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/issues/115?issue=jonasbisang%7Csopra-fs26-group36-server%7C115 | added group password change and delete logic | These are useful functionalities of any group based application and gives the admin special rights over other members. |
+|                    | 21.04.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/pull/165 | added fetching list of all groups that a specific user is currently a member of | necessary for your groups dashboard |
+<<<<<<< HEAD
+| **[@ananis299]** | [20.04.2026]   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/f4bf90877ff1b6071fd8131ee5ac02a8a5e5796c | Group Admin settings page | Enabled the Admin to edit the group (has the property to kick out people or promote them to Admins inside the group); Also the possibility of changing the group access password |
+|                    | [21.04.2026]   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/156278f3b5425ec0c425ba7d7d768a0be0ad1372 | Settings Button for group Admin | Added the Settings Button inside the group Admin Page (meaning only accessible for an admin user) |
+|                    | [21.04.2026]   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/8147d2b9ad42d2c926f2f0b4f883f0e984067f3a | created the New Activity creation function inside the group id page| The creation of an activity is now possible; The user can now input information and add the events they want to propose to their group of friends |
+=======
+| **[@CiaranHendriks]** | [17.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/155] | [data cleanup, when a User deletes their profile, all data associated with them (like groupmembership etc.) are also deleted] [needed for a clean database]|
+|                    | [20.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/159] | [Database for activities in the server repository / saving activity proposals] [needed to store activities]|
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/161] | [Implement activity creation endpoint (POST) with validation logic for inputs] | [Connection from client side to database] |
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/164] | [time-slot parser for activitys] | [needed for scheduling, to unify time blocks and custom time slots] |
+|                    | [21.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/166] | [unified calendar API that fetches data from the DB as well as from the google calendar
+] | [needed for scheduling, to take into account both manually added unavailabilities and the ones in google calendar] |
+
 ---
 
 ## Contributions Week 4 - [Begin Date] to [End Date]
