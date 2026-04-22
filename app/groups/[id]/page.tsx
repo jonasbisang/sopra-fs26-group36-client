@@ -3,18 +3,20 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag } from "antd";
+import { Button, message, List, Avatar, Tag , Modal} from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
+  PlusOutlined
 } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
 
+import CreateActivityModal from "@/forms/CreateActivityModal";
 import NextImage from 'next/image';
 import logo from '@/friendlerLogo.png';
 
@@ -31,6 +33,11 @@ interface Activity {
   status: string;
   scheduledTime?: string;
   location?: string;
+  minSize?: number;
+  maxSize?: number;
+  duration?: number;
+  isWeatherDependent?: boolean;
+  acceptVotes?: number;
 }
 
 interface CalendarEvent {
@@ -58,65 +65,177 @@ const GroupPage: React.FC = () => {
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
-  //Auth check
-  useEffect(() => {
-    if (!token) {
-      router.push("/login");
-    }
-  }, [token, router]);
+  const [totalPending, setTotalPending] = useState<number>(0);
+  const [votedCount, setVotedCount] = useState<number>(0);
+  const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
+  const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Fetch all data
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
+  const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
+
+  //Auth check
+  //useEffect(() => {
+   // if (!token) {
+   //   router.push("/login");
+    //}
+  //}, [token, router]);
+
+  // Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
+  //useEffect(() => {
+  //  if (!groupId || !token) return;
+
+  //  const fetchData = async () => {
+  //    try {
+  //      // Fetch group members
+  //      const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
+  //      setMembers(users);
+  //    } catch (error) {
+  //      console.error("Failed to fetch members:", error);
+  //    }
+
+  //    try {
+        // Fetch pending activities
+  //      const pending = await apiService.get<Activity[]>(
+  //        `/groups/${groupId}/activities?status=PENDING`
+  //      );
+  //      setPendingActivities(pending);
+  //    } catch (error) {
+  //      console.error("Failed to fetch pending activities:", error);
+  //    }
+
+  //    try {
+        // Fetch planned activities
+  //      const planned = await apiService.get<Activity[]>(
+  //        `/groups/${groupId}/activities?status=PLANNED`
+  //      );
+  //      setPlannedActivities(planned);
+  //    } catch (error) {
+  //      console.error("Failed to fetch planned activities:", error);
+  //    }
+
+  //    try {
+  //      // Fetch calendar events
+  //      const events = await apiService.get<CalendarEvent[]>(
+  //        `/groups/${groupId}/calendar`
+  //      );
+  //      // Convert date strings to Date objects for react-big-calendar
+  //      const formatted = events.map((e) => ({
+  //        ...e,
+  //        start: new Date(e.start),
+  //        end: new Date(e.end),
+  //      }));
+  //      setCalendarEvents(formatted);
+  //    } catch (error) {
+  //      console.error("Failed to fetch calendar:", error);
+  //    }
+  //  };
+
+  //  fetchData();
+  //}, [groupId, token, apiService]);
+
+  //-------START MOCKDATA BLOCK-------//
+  useEffect(() => {
+  if (!groupId) return; // token check entfernen für lokalen Test
+
+  setMembers([
+    { id: 1, username: "Tim" },
+    { id: 2, username: "Tom" },
+    { id: 3, username: "Tam" },
+  ]);
+
+  setPendingActivities([
+    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" , acceptVotes: 1},
+    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" , acceptVotes: 0},
+    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" , acceptVotes: 2},
+  ]);
+
+  setTotalPending(3);
+  
+
+  setPlannedActivities([
+    { id: 4, name: "Movie Night", scheduledTime: "2026-05-10T19:00:00", location: "Kino Houdini", status: "PLANNED" },
+  ]);
+
+  setCalendarEvents([
+    { id: 4, title: "Movie Night", start: new Date("2026-05-10T19:00:00"), end: new Date("2026-05-10T22:00:00"), location: "Kino Houdini" },
+  ]);
+
+}, [groupId]);
+//-------END MOCKDATA BLOCK-------//
   useEffect(() => {
     if (!groupId || !token) return;
-
-    const fetchData = async () => {
+    const interval = setInterval(async () => {
       try {
-        // Fetch group members
-        const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
-        setMembers(users);
-      } catch (error) {
-        console.error("Failed to fetch members:", error);
-      }
-
-      try {
-        // Fetch pending activities
-        const pending = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=PENDING`
-        );
-        setPendingActivities(pending);
-      } catch (error) {
-        console.error("Failed to fetch pending activities:", error);
-      }
-
-      try {
-        // Fetch planned activities
         const planned = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=PLANNED`
         );
-        setPlannedActivities(planned);
+        setPlannedActivities((prev) => {
+          const newOnes = planned.filter(
+            (a) => !prev.find((p) => p.id === a.id)
+          );
+          if (newOnes.length > 0) {
+            setNewEventPopup(newOnes[0]); // ← triggert Modal
+          }
+          return planned;
+        });
       } catch (error) {
-        console.error("Failed to fetch planned activities:", error);
+        console.error("Polling error:", error);
       }
+    }, 10000); // alle 10 Sekunden
 
-      try {
-        // Fetch calendar events
-        const events = await apiService.get<CalendarEvent[]>(
-          `/groups/${groupId}/calendar`
-        );
-        // Convert date strings to Date objects for react-big-calendar
-        const formatted = events.map((e) => ({
-          ...e,
-          start: new Date(e.start),
-          end: new Date(e.end),
-        }));
-        setCalendarEvents(formatted);
-      } catch (error) {
-        console.error("Failed to fetch calendar:", error);
+    return () => clearInterval(interval);
+  }, [groupId, token]);
+
+  //conect to backend and update the list of pending activities
+  const handleActivityCreated = async () => {
+    setIsCreateModalVisible(false);
+
+    if (!groupId) return;
+    try {
+      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+      setPendingActivities(pending);
+     
+    } catch (error) {
+      console.error("Failed to fetch pending activities after creation:", error);
+    }
+    
+  };
+
+  const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
+    setFeedbackType(voteType);
+    if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
+    feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600); 
+
+    try {
+      await apiService.post(`/activities/${activityId}/votes`, { voteType });
+      if (voteType === "DECLINE") {
+        setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+        setVotedCount((prev) => prev + 1);
+        messageApi.success("Passed.");
+      } else {
+        try {
+          const updated = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+          const updatedActivity = updated.find((a) => a.id === activityId);
+          if (!updatedActivity) {
+            setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+            setVotedCount((prev) => prev + 1);
+            messageApi.success("Minimum reached — looking for the best time slot!")
+          } else {
+            setPendingActivities((prev) => prev.map((a) => a.id === activityId ? updatedActivity : a));
+          setVotedCount((prev) => prev + 1);
+          messageApi.success("Liked! 👍");
+          }
+        } catch {
+          setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+          setVotedCount((prev) => prev + 1);
+          messageApi.success("Liked! 👍");
+        }
       }
-    };
-
-    fetchData();
-  }, [groupId, token, apiService]);
+    } catch (error) {
+      messageApi.error("Failed to submit vote.");
+      console.error(error);
+    }
+  };
 
   const handleLeaveGroup = async () => {
     try {
@@ -136,6 +255,8 @@ const GroupPage: React.FC = () => {
     router.push("/login");
   };
 
+  const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
+
   return (
     <div style={{
       backgroundColor: "#000000",
@@ -144,6 +265,68 @@ const GroupPage: React.FC = () => {
       flexDirection: "column",
     }}>
       {contextHolder}
+     
+    {/* MODAL NOTIFICATION FOR NEW EVENT */}
+    <Modal
+      open={!!newEventPopup}
+      onOk={() => setNewEventPopup(null)}
+      onCancel={() => setNewEventPopup(null)}
+      okText="Let's go!"
+      cancelText="Close"
+      styles={{
+        body: { backgroundColor: "#1a1a1a", border: "1px solid rgba(255,255,255,0.1)" },
+        header: { backgroundColor: "#1a1a1a" },
+        footer: { backgroundColor: "#1a1a1a" },
+        mask: { backdropFilter: "blur(4px)" },
+      }}
+      title={
+        <span style={{ color: "white", fontSize: "18px" }}>
+          🎉 New Event Confirmed!
+        </span>
+      }
+    >
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px", padding: "10px 0" }}>
+        <p style={{ color: "white", fontSize: "16px", fontWeight: "bold", margin: 0 }}>
+          {newEventPopup?.name}
+        </p>
+        {newEventPopup?.scheduledTime && (
+          <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>
+            📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}
+          </p>
+        )}
+        {newEventPopup?.location && (
+          <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>
+            📍 {newEventPopup.location}
+          </p>
+        )}
+        {newEventPopup?.duration && (
+          <p style={{ color: "rgba(255,255,255,0.7)", margin: 0 }}>
+            ⏱ {newEventPopup.duration} hours
+          </p>
+        )}
+        <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", margin: 0, marginTop: "6px" }}>
+          A time slot was found and the event has been added to the group calendar.
+        </p>
+      </div>
+    </Modal>
+
+       {/* Feedback Flash Overlay */}
+      {feedbackType && (
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          zIndex: 999,
+          pointerEvents: "none",
+          backgroundColor: feedbackType === "ACCEPT" ? "rgba(66,214,120,0.12)" : "rgba(255,66,56,0.12)",
+          animation: "flashFade 0.6s ease-out forwards",
+        }} />
+      )}
+      <style>{`
+        @keyframes flashFade {
+          0% { opacity: 1; }
+          100% { opacity: 0; }
+        }
+      `}</style>
 
       {/* Header */}
       <div style={{
@@ -184,9 +367,21 @@ const GroupPage: React.FC = () => {
                 </div>
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
+          
+          <Button 
+            type="primary" 
+            shape="round" 
+            icon={<PlusOutlined />} 
+            onClick={() => setIsCreateModalVisible(true)}
+            style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
+          >
+            New Activity
+          </Button>
+
+          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} >
             Calendar
           </Button>
+
           <Button
             type="text"
             icon={<UserOutlined />}
@@ -258,18 +453,135 @@ const GroupPage: React.FC = () => {
             padding: "24px",
           }}>
             <h3 style={{ color: "white", marginBottom: "16px" }}>💡 Upcoming Ideas</h3>
-            <List
-              dataSource={pendingActivities}
-              renderItem={(activity) => (
-                <List.Item style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "10px 0" }}>
-                  <List.Item.Meta
-                    title={<span style={{ color: "white" }}>{activity.name}</span>}
-                  />
-                  <Tag color="blue">Pending</Tag>
-                </List.Item>
-              )}
-              locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No pending activities</span> }}
-            />
+            
+            {totalPending > 0 && (
+             <div style={{ marginBottom: "16px" }}>
+               <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                 <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>Voting progress</span>
+                <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>{votedCount} / {totalPending}</span>
+              </div>
+              <div style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
+                <div style={{
+                  height: "100%",
+                  width: `${progressPercent}%`,                    
+                  backgroundColor: progressPercent === 100 ? "#42d678" : "#42a2d6",
+                  borderRadius: "2px",
+                  transition: "width 0.4s ease",
+                }} />
+              </div>
+            </div>
+          )}
+
+          {pendingActivities.length === 0 ? (
+            <div style={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", padding: "50px 20px", gap: "12px" }}>                
+            <span style={{ fontSize: "48px" }}></span>
+               <p style={{ color: "white", fontSize: "18px", fontWeight: 600, margin: 0, textAlign: "center" }}>
+                {votedCount > 0 ? "You're all caught up!" : "No proposals yet"}
+              </p>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", margin: 0, textAlign: "center" }}>
+                {votedCount > 0
+                  ? `You voted on all ${votedCount} activit${votedCount === 1 ? "y" : "ies"}. Check back later for new proposals.`                    
+                  : "No one has proposed an activity yet. Be the first!"}
+              </p>
+            </div>
+          ) : (
+            <>
+
+                {/* Card */}
+                <div 
+                  key={pendingActivities[0].id}
+                  style={{
+                  backgroundColor: "rgba(60,60,60,0.6)",
+                  borderRadius: "12px",
+                  padding: "20px",
+                }}>
+                  <h4 style={{ color: "white", margin: "0 0 12px", fontSize: "20px", fontWeight: 600 }}>
+                    {pendingActivities[0].name}
+                  </h4>
+
+                  <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+                    {pendingActivities[0].location && (
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
+                        📍 {pendingActivities[0].location}
+                      </span>
+                    )}
+                    {(pendingActivities[0].minSize || pendingActivities[0].maxSize) && (
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
+                        👥 Min {pendingActivities[0].minSize ?? "?"} · Max {pendingActivities[0].maxSize ?? "?"} participants
+                      </span>
+                    )}
+                    {pendingActivities[0].duration && (
+                      <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
+                        ⏱ {pendingActivities[0].duration} hours
+                      </span>
+                    )}
+                    <div style={{ marginTop: "8px", display: "flex", gap: "6px", flexWrap: "wrap" }}>
+                      <Tag color="blue">Pending votes</Tag>
+                      {pendingActivities[0].isWeatherDependent && (
+                        <Tag color="cyan">Weather-dependent</Tag>
+                      )}
+                    </div>
+                    {pendingActivities[0].minSize && (
+                      <div style={{ marginTop: "10px" }}>
+                        <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "4px" }}>
+                          <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>Interest</span>
+                          <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}>
+                            {pendingActivities[0].acceptVotes ?? 0} / {pendingActivities[0].minSize} needed
+                          </span>
+                        </div>
+                      <div style={{ height: "4px", backgroundColor: "rgba(255,255,255,0.1)", borderRadius: "2px", overflow: "hidden" }}>
+                      <div style={{
+                        height: "100%",
+                        width: `${Math.min(((pendingActivities[0].acceptVotes ?? 0) / pendingActivities[0].minSize) * 100, 100)}%`,
+                        backgroundColor: (pendingActivities[0].acceptVotes ?? 0) >= pendingActivities[0].minSize
+                          ? "#42d678" : "#ff9f43",
+                        borderRadius: "2px",
+                        transition: "width 0.4s ease",
+                      }} />
+                    </div>
+                  </div>
+                )}
+                  </div>
+                </div>
+
+                {/* Vote buttons */}
+                <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
+                  <Button
+                    block
+                    size="large"
+                    onClick={() => handleVote(pendingActivities[0].id, "DECLINE")}
+                    style={{
+                      background: "rgba(255,66,56,0.15)",
+                      color: "#ff4238",
+                      border: "1px solid rgba(255,66,56,0.4)",
+                      borderRadius: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ✕ Pass
+                  </Button>
+                  <Button
+                    block
+                    size="large"
+                    onClick={() => handleVote(pendingActivities[0].id, "ACCEPT")}
+                    style={{
+                      background: "rgba(66,214,120,0.15)",
+                      color: "#42d678",
+                      border: "1px solid rgba(66,214,120,0.4)",
+                      borderRadius: "10px",
+                      fontWeight: "bold",
+                    }}
+                  >
+                    ♥ Like
+                  </Button>
+                </div>
+
+                {/* Counter */}
+                <div style={{ color: "rgba(255,255,255,0.3)", fontSize: "12px", textAlign: "center", marginTop: "10px" }}>
+                  {pendingActivities.length} activit{pendingActivities.length === 1 ? "y" : "ies"} remaining
+                </div>
+              </>
+            )}
           </div>
         </div>
 
@@ -335,6 +647,12 @@ const GroupPage: React.FC = () => {
         </div>
 
       </div>
+      <CreateActivityModal 
+        visible={isCreateModalVisible}
+        onClose={() => setIsCreateModalVisible(false)} // triggers the whole pope up when set to true 
+        groupId={groupId as string}
+        onSuccess={handleActivityCreated}
+      />
     </div>
   );
 };
