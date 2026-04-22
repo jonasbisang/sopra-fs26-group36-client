@@ -73,95 +73,68 @@ const GroupPage: React.FC = () => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
 
-  //Auth check
-  //useEffect(() => {
-   // if (!token) {
-   //   router.push("/login");
-    //}
-  //}, [token, router]);
+  //Auth check - no ändere so wie bi andere pages
+ // useEffect(() => {
+ //   if (!token) {
+ //     router.push("/login");
+ //   }
+ // }, [token, router]);
 
-  // Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
-  //useEffect(() => {
-  //  if (!groupId || !token) return;
-
-  //  const fetchData = async () => {
-  //    try {
-  //      // Fetch group members
-  //      const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
-  //      setMembers(users);
-  //    } catch (error) {
-  //      console.error("Failed to fetch members:", error);
-  //    }
-
-  //    try {
-        // Fetch pending activities
-  //      const pending = await apiService.get<Activity[]>(
-  //        `/groups/${groupId}/activities?status=PENDING`
-  //      );
-  //      setPendingActivities(pending);
-  //    } catch (error) {
-  //      console.error("Failed to fetch pending activities:", error);
-  //    }
-
-  //    try {
-        // Fetch planned activities
-  //      const planned = await apiService.get<Activity[]>(
-  //        `/groups/${groupId}/activities?status=PLANNED`
-  //      );
-  //      setPlannedActivities(planned);
-  //    } catch (error) {
-  //      console.error("Failed to fetch planned activities:", error);
-  //    }
-
-  //    try {
-  //      // Fetch calendar events
-  //      const events = await apiService.get<CalendarEvent[]>(
-  //        `/groups/${groupId}/calendar`
-  //      );
-  //      // Convert date strings to Date objects for react-big-calendar
-  //      const formatted = events.map((e) => ({
-  //        ...e,
-  //        start: new Date(e.start),
-  //        end: new Date(e.end),
-  //      }));
-  //      setCalendarEvents(formatted);
-  //    } catch (error) {
-  //      console.error("Failed to fetch calendar:", error);
-  //    }
-  //  };
-
-  //  fetchData();
-  //}, [groupId, token, apiService]);
-
-  //-------START MOCKDATA BLOCK-------//
+  //Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
   useEffect(() => {
-  if (!groupId) return; // token check entfernen für lokalen Test
+    if (!groupId || !token) return;
 
-  setMembers([
-    { id: 1, username: "Tim" },
-    { id: 2, username: "Tom" },
-    { id: 3, username: "Tam" },
-  ]);
+    const fetchData = async () => {
+        try {
+    // Fetch group members
+    const users = await apiService.get<User[]>(`/groups/${groupId}/members`);
+    setMembers(users);
+  } catch (error) {
+    console.error("Failed to fetch members:", error);
+  }
 
-  setPendingActivities([
-    { id: 1, name: "Mountain Hiking", location: "Uetliberg", minSize: 2, maxSize: 8, duration: 4, isWeatherDependent: true, status: "PENDING" , acceptVotes: 1},
-    { id: 2, name: "City Art Tour", location: "Zürich Innenstadt", minSize: 2, maxSize: 10, duration: 2, isWeatherDependent: false, status: "PENDING" , acceptVotes: 0},
-    { id: 3, name: "Gourmet Dinner", location: "Le Petit Chef", minSize: 3, maxSize: 6, duration: 3, isWeatherDependent: false, status: "PENDING" , acceptVotes: 2},
-  ]);
+    try {
+    // Fetch pending activities
+    const pending = await apiService.get<Activity[]>(
+      `/groups/${groupId}/activities?status=PENDING`);
+      setPendingActivities(pending);
+      setTotalPending(pending.length);
+      } catch (error) {
+        console.error("Failed to fetch pending activities:", error);
+    }
+      try {
+        //Fetch planned activities
+        const planned = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=PLANNED`
+        );
+        setPlannedActivities(planned);
+      } catch (error) {
+        console.error("Failed to fetch planned activities:", error);
+      }
 
-  setTotalPending(3);
+      try {
+        //Fetch calendar events
+        const events = await apiService.get<CalendarEvent[]>(
+          `/groups/${groupId}/calendar`
+        );
+        // Convert date strings to Date objects for react-big-calendar
+        const formatted = events.map((e) => ({
+          ...e,
+          start: new Date(e.start),
+          end: new Date(e.end),
+        }));
+        setCalendarEvents(formatted);
+      } catch (error) {
+        console.error("Failed to fetch calendar:", error);
+      }
+   };
+
+    fetchData();
+  }, [groupId, token, apiService]);
+
   
 
-  setPlannedActivities([
-    { id: 4, name: "Movie Night", scheduledTime: "2026-05-10T19:00:00", location: "Kino Houdini", status: "PLANNED" },
-  ]);
 
-  setCalendarEvents([
-    { id: 4, title: "Movie Night", start: new Date("2026-05-10T19:00:00"), end: new Date("2026-05-10T22:00:00"), location: "Kino Houdini" },
-  ]);
-
-}, [groupId]);
-//-------END MOCKDATA BLOCK-------//
   useEffect(() => {
     if (!groupId || !token) return;
     const interval = setInterval(async () => {
@@ -647,12 +620,13 @@ const GroupPage: React.FC = () => {
         </div>
 
       </div>
-      <CreateActivityModal 
-        visible={isCreateModalVisible}
-        onClose={() => setIsCreateModalVisible(false)} // triggers the whole pope up when set to true 
-        groupId={groupId as string}
-        onSuccess={handleActivityCreated}
-      />
+    <CreateActivityModal 
+      visible={isCreateModalVisible}
+      onClose={() => setIsCreateModalVisible(false)}
+      groupId={groupId as string}
+      userId={userId}
+      onSuccess={handleActivityCreated}
+    />
     </div>
   );
 };

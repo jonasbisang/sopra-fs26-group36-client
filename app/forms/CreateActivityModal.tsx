@@ -25,12 +25,15 @@ interface ActivityFormValues {
 
 interface CreateActivityModalProps {
   visible: boolean;
-  onClose: () => void; // as it returns nothing when closed 
+  onClose: () => void;
   groupId: string;
-  onSuccess: () => void; // refreshes the data so that the new activity pops up right after 
+  userId: string;
+  onSuccess: () => void;
 }
 
-const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onClose, groupId, onSuccess }) => {
+
+
+const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onClose, groupId, userId, onSuccess }) => {
   const [form] = Form.useForm();
   const apiService = useApi();
   const [messageApi, contextHolder] = message.useMessage();
@@ -39,28 +42,24 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
   const onFinish = async (values: ActivityFormValues) => {
     try {
       // all the data that is then organizedly sent to backend      
-      const payload = {
-        name: values.title,
-        description: values.description, 
-        minSize: values.minParticipants,
-        maxSize: values.maxParticipants,
-        isRecursive: values.isRecursive || false,
-        isWeatherDependent: values.isWeatherDependent || false,
-        timePreference: {
-          startDate: values.startDate ? values.startDate.format("YYYY-MM-DD") : null,
-          endDate: values.endDate ? values.endDate.format("YYYY-MM-DD") : null,
-          startTime: values.timeRange ? values.timeRange[0].format("HH:mm") : null,
-          endTime: values.timeRange ? values.timeRange[1].format("HH:mm") : null,
-        },
-        // this is only sent if the activity depends on the event 
-        ...(values.isWeatherDependent && {
-          weatherRequirement: {
-            minTemp: values.minTemp,
-            maxTemp: values.maxTemp,
-            rainPreference: values.rainPreference,
-          }
-        })
-      };
+    const payload = {
+      name: values.title,
+      description: values.description,
+      minSize: values.minParticipants,
+      maxSize: values.maxParticipants,
+      isRecursive: values.isRecursive || false,
+      isWeatherDependent: values.isWeatherDependent || false,
+      startTime: values.timeRange ? values.timeRange[0].format("HH:mm:ss") : null,
+      endTime: values.timeRange ? values.timeRange[1].format("HH:mm:ss") : null,
+      createdBy: Number(userId),
+
+
+      ...(values.isWeatherDependent && {
+        minTemp: values.minTemp,
+        maxTemp: values.maxTemp,
+        rainPreference: values.rainPreference,
+      })
+  };
 
       //REST call based on the REST specifications
       await apiService.post(`/groups/${groupId}/activities`, payload);
