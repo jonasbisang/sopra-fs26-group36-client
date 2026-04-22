@@ -154,7 +154,7 @@ const CalendarPage: React.FC = () => {
         icon={<ArrowLeftOutlined />}
         type="text"
         style={{ color: "white", marginBottom: 24 }}
-        onClick={() => router.push(`/users/${userId}`)}
+        onClick={() => router.back()}
       >
         Back
       </Button>

@@ -44,7 +44,7 @@ const UserprofilePage: React.FC = () => {
   const profileId = params.id;
   const apiService = useApi(); //TLAKIGN TO BACKEND
   const [messageApi, contextHolder] = message.useMessage(); //for messages
-
+  const { value: userId } = useLocalStorage<string>("userId", "");
   const {value: token} = useLocalStorage<string>("token", "");
   const [mounted, setMounted] = useState(false);
 
@@ -174,7 +174,7 @@ const UserprofilePage: React.FC = () => {
             type="text"
             icon={<CalendarOutlined />}
             style={{ color: "white" }}
-            onClick={() => router.push(`/users/[id]/calendar`)}
+            onClick={() => router.push(`/users/${userId}/calendar`)}
           >
             Calendar
           </Button>
@@ -192,12 +192,12 @@ const UserprofilePage: React.FC = () => {
       {/*ACTAUL PAGE CONTENT*/}
       <div style={{ width: "100%", maxWidth: "860px", padding: "50px 20px" }}>
 
-        {/* Back button that leads to Dashboard */}
+        {/* Back button that leads to  /groups */}
         <Button
           type="text"
           icon={<ArrowLeftOutlined />}
           style={{ color: "#aaa", marginBottom: "30px", padding: 0 }}
-          onClick={() => router.push("/dashboard")}
+          onClick={() => router.push("/groups")}
         >
           Back to Groups
         </Button>

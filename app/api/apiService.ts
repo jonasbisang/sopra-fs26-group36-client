@@ -15,11 +15,12 @@ export class ApiService {
     };
 
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("token");
+      const raw = localStorage.getItem("token");
+      const token = raw ? JSON.parse(raw) : null;
       if (token) {
         headers["Authorization"] = token;
+        }
       }
-    }
 
     return headers;
   }
