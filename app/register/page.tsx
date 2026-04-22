@@ -5,8 +5,12 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Form, Input, message} from "antd";
+import React, { useState } from "react";
 // Optionally, you can import a CSS module or file for additional styling:
 // import styles from "@/styles/page.module.css";
+import NextImage from 'next/image';
+import logo from '../friendlerLogo.png';
+
 
 interface NeededFields { 
   name: string; 
@@ -23,7 +27,7 @@ const Register: React.FC = () => {
   //const [form] = Form.useForm();
 
   const [messageApi, contextHolder] = message.useMessage();
-  
+  const [loading, setLoading] = useState(false);
   // useLocalStorage hook example use
   // The hook returns an object with the value and two functions
   // Simply choose what you need from the hook:
@@ -41,6 +45,7 @@ const Register: React.FC = () => {
   } = useLocalStorage<string>("userId", "");
 
   const handleRegister = async (values: NeededFields) => {
+    setLoading(true);
     try {
 
       // Call the API service and let it handle JSON serialization and error handling
@@ -50,21 +55,31 @@ const Register: React.FC = () => {
       if (response.token) {
         setToken(response.token);
       }
-
       if (response.id) {
         setUserId(response.id.toString());
       }
-
-
-      // Navigate to the user overview
-      router.push("/users");
+      // Navigate to the groups dashboard overview
+      messageApi.success("Account successfully created!");
+      router.push("/groups");
+    
     } catch (error) { 
       if (error instanceof Error) {
-        alert(`Something went wrong during the registration:\n${error.message}`);
+        if (error.message.includes("409")) {
+        messageApi.error("Username already exists.");
+      } else if (error.message.includes("400")) {
+        messageApi.error("Invalid input. Please check your data.");
+      } else if (error.message.includes("Network")) {
+        messageApi.error("Network error. Please try again.");
       } else {
-        console.error("An unknown error occurred during register.");
+        messageApi.error(`Registration failed: ${error.message}`);//shows the original message to the user
       }
+    } else {
+      messageApi.error("An unknown error occurred.");
     }
+
+  } finally {
+    setLoading(false); // always stop loading
+  }
   };
 
   
@@ -90,25 +105,36 @@ const Register: React.FC = () => {
           borderRadius: '12px' 
         }}>
       
-        <h1 style={{ 
-            fontSize: '64px', 
-            textAlign: 'center', 
-            color: 'white', 
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: '2px',
-            whiteSpace: 'nowrap' 
-          }}>
-            F<span style={{ color: '#ff4238' }}>·</span>
-            R<span style={{ color: '#ffdc00' }}>·</span>
-            I<span style={{ color: '#42a2d6' }}>·</span>
-            E<span style={{ color: '#ff4238' }}>·</span>
-            N<span style={{ color: '#ffdc00' }}>·</span>
-            D<span style={{ color: '#42a2d6' }}>·</span>
-            L<span style={{ color: '#ff4238' }}>·</span>
-            E<span style={{ color: '#ffdc00' }}>·</span>
-            R
-        </h1>
+{/* <h1 style={{ 
+          fontSize: '64px', 
+          textAlign: 'center', 
+          color: 'white', 
+          margin: 0,
+    
+          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', // custom font for logo 
+          letterSpacing: '2px'
+        }}>
+          F<span style={{ color: '#ff4238' }}>·</span>
+          R<span style={{ color: '#ffdc00' }}>·</span>
+          I<span style={{ color: '#42a2d6' }}>·</span>
+          E<span style={{ color: '#ff4238' }}>·</span>
+          N<span style={{ color: '#ffdc00' }}>·</span>
+          D<span style={{ color: '#42a2d6' }}>·</span>
+          L<span style={{ color: '#ff4238' }}>·</span>
+          E<span style={{ color: '#ffdc00' }}>·</span>
+          R
+      </h1> */}
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <NextImage
+          src={logo}
+          alt="Friendler Logo"
+          height={160}
+          width={480}
+        />
+        </div>
+
+      {/* <img src={friendlerLogo.src} alt="Friendler Logo" style={{ width: '200px', marginBottom: '20px' }} /> */}
+
 
         <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
           CREATE YOUR ACCOUNT
@@ -177,7 +203,7 @@ const Register: React.FC = () => {
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0 }}>
-            <Button type="primary" htmlType="submit" block style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold' }}>
+            <Button type="primary" htmlType="submit" block   loading={loading} disabled={loading} style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold' }}>
               Register
             </Button>
           </Form.Item>

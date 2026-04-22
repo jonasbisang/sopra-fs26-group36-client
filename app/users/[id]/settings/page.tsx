@@ -4,6 +4,7 @@ import { Button, Typography, Space, Divider, Input, Form, Spin, message, Popconf
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { apiService } from "@/api/apiService"; 
+import useLocalStorage from "@/hooks/useLocalStorage";
 
 interface UserData {
   username: string;
@@ -16,6 +17,13 @@ const EditProfile: React.FC = () => {
   const router = useRouter();
   const { id: userId } = useParams() as { id: string };
   const [form] = Form.useForm();  
+
+
+  const {value: token} = useLocalStorage<string>("token", "");
+  const [mounted, setMounted] = useState(false);
+
+
+
   //states for daten
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<UserData>({ username: "", bio: "" });
@@ -113,6 +121,17 @@ const EditProfile: React.FC = () => {
     }
   };
 
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  
+  useEffect(() => {
+    if (mounted && (!token || token === "")) {
+      router.replace("/login");
+    }
+  }, [mounted, token, router]);
+
   if (loading) {
     return (
     <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000' }}>
@@ -123,6 +142,10 @@ const EditProfile: React.FC = () => {
 
   const inputStyle = { backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' };
   const labelStyle = { color: "rgba(255,255,255,0.7)", fontSize: '12px', textTransform: 'uppercase' as const };
+
+
+
+
 
 return (
     <div style={{
