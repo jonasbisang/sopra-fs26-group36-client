@@ -121,17 +121,7 @@ const EditProfile: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000' }}>
-      <Spin size="large" />
-      </div>
-    );
-  }
-
-  const inputStyle = { backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' };
-  const labelStyle = { color: "rgba(255,255,255,0.7)", fontSize: '12px', textTransform: 'uppercase' as const };
-
+  
   useEffect(() => {
     setMounted(true);
   }, []);
@@ -143,6 +133,18 @@ useEffect(() => {
     }
   }, [mounted, token, router]);
 
+
+
+  if (loading) {
+    return (
+    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#000' }}>
+      <Spin size="large" />
+      </div>
+    );
+  }
+
+  const inputStyle = { backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' };
+  const labelStyle = { color: "rgba(255,255,255,0.7)", fontSize: '12px', textTransform: 'uppercase' as const };
 
 
 return (
