@@ -80,13 +80,17 @@ const GroupPage: React.FC = () => {
 
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
+  const [mounted, setMounted] = useState(false);
 
-  //Auth check - no ändere so wie bi andere pages
   useEffect(() => {
-    if (!token) {
-      router.push("/login");
-    }
-  }, [token, router]);
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+  if (mounted && (!token || token === "")) {
+    router.replace("/login");
+  }
+}, [mounted, token, router]);
 
   //Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
   useEffect(() => {
