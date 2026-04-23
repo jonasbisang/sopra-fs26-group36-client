@@ -87,7 +87,7 @@ const GroupSettings: React.FC = () => {
 
         //VALIDATION COMMENTED OUT FOR TESTING:
         
-        if (groupData.adminId.toString() !== currentUserId) {
+        if (groupData?.adminId.toString() !== currentUserId) {
           messageApi.error("Access denied. Only administrators can view this page.");
           router.push(`/groups/${groupId}`);
           return;
@@ -95,7 +95,7 @@ const GroupSettings: React.FC = () => {
         
 
         // Using /users as defined in the REST specification
-        const membersData = await apiService.get<Member[]>(`/groups/${groupId}/users`);
+        const membersData = await apiService.get<Member[]>(`/groups/${groupId}/members`);
         setMembers(membersData);
 
        } catch (error) {

@@ -104,7 +104,7 @@ const GroupPage: React.FC = () => {
 
       try {
         // Fetch group members
-        const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
+        const users = await apiService.get<User[]>(`/groups/${groupId}/members`);
         setMembers(users);
       } catch (error) {
         console.error("Failed to fetch members:", error);
