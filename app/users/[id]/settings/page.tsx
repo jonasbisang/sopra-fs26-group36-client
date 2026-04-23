@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Button, Typography, Space, Divider, Input, Form, Spin, message, Popconfirm } from "antd";
+import { Button, Typography, Space, Divider, Input, Form, Spin, message, Modal } from "antd";
 import { useRouter, useParams } from "next/navigation";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { apiService } from "@/api/apiService"; 
@@ -28,6 +28,9 @@ const EditProfile: React.FC = () => {
   //states for daten
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<UserData>({ username: "", bio: "" });
+
+  const [deleteModalVisible, setDeleteModalVisible] = useState(false);
+  const [deletePassword, setDeletePassword] = useState("");
 
 
   //Daten vom server laden beim start
@@ -59,38 +62,40 @@ const EditProfile: React.FC = () => {
   const handleSave = async (values: Record<string, string>) => {
     try {
       setLoading(true);
-
-      const updateData: Partial<UserData & { password?: string }> = {};
       let passwordChanged = false;
+      let anythingChanged = false;
 
+    // Username ändern → PUT /users/{id}/username
       if (values.username !== userData.username) {
-        updateData.username = values.username;
-      }
-      if (values.bio !== userData.bio) {
-        updateData.bio = values.bio;
-      }
+        await apiService.put(`/users/${userId}/username`, {
+          newUsername: values.username,
+        });
+        anythingChanged = true;
+      } 
+
+    // Passwort ändern → PUT /users/{id}/password
       if (values.password && values.password.trim() !== "") {
-        updateData.password = values.password;
+        await apiService.put(`/users/${userId}/password`, {
+          newPassword: values.password,
+        });
         passwordChanged = true;
-      }
-      if (Object.keys(updateData).length === 0) {
-        message.info("No changes detected.");
-        return; 
+        anythingChanged = true;
       }
 
-      await apiService.updateUserById(userId, updateData);
+      if (!anythingChanged) {
+        message.info("No changes detected.");
+        return;
+      }
+
       if (passwordChanged) {
         message.success("Password changed! Please log in again.");
-        // Session beenden
         localStorage.removeItem("token");
         localStorage.removeItem("userId");
         setTimeout(() => router.push("/login"), 1500);
       } else {
         message.success("Profile updated successfully!");
-        setTimeout(() => {
-        router.push(`/users/${userId}`);
-      }, 1500);
-    }
+        setTimeout(() => router.push(`/users/${userId}`), 1500);
+      }
 
     } catch (error) {
       console.error("Could not save profile data.", error);
@@ -101,15 +106,16 @@ const EditProfile: React.FC = () => {
     }
   };
 
+
   const handleDeleteAccount = async () => {
     try {
       setLoading(true);
-      await apiService.delete(`/users/${userId}`);
+      await apiService.delete(`/users/${userId}`, { oldPassword: deletePassword });
       message.success("Account permanently deleted.");
-      localStorage.clear(); 
+      localStorage.clear();
       router.push("/login");
     } catch (error) {
-      message.error("Could not delete account.");
+      message.error("Could not delete account. Wrong password?");
     } finally {
       setLoading(false);
     }
@@ -126,7 +132,7 @@ const EditProfile: React.FC = () => {
     }
   }, [mounted, token, router]);
 
-    useEffect(() => {
+  useEffect(() => {
       if (!mounted) return;
       if (loggedInUserId === "") return;
       if (String(loggedInUserId) !== String(userId)) {
@@ -268,18 +274,34 @@ return (
                 SAVE ALL CHANGES
               </Button>
 
-                <Popconfirm
-                  title="Delete Account?"
-                  description={<span style={{ color: 'black'}}>This action is permanent. All your data will be lost.</span>}
-                  onConfirm={handleDeleteAccount}
-                  okText="Yes, delete"
-                  cancelText="Cancel"
-                  okButtonProps={{ danger: true }}
-                >
-                <Button danger type="text" block style={{ marginTop: '10px', opacity: 0.6 }}>
-                  Delete Account
-                </Button>
-              </Popconfirm>
+            {/* Delete Modal */}
+            <Modal
+              open={deleteModalVisible}
+              onOk={handleDeleteAccount}
+              onCancel={() => { setDeleteModalVisible(false); setDeletePassword(""); }}
+              okText="Yes, delete"
+              cancelText="Cancel"
+              okButtonProps={{ danger: true }}
+              title="Delete Account?"
+            >
+            <p style={{ color: "black" }}>This action is permanent. Please enter your password to confirm.</p>
+            <Input.Password
+              placeholder="Enter your password"
+              value={deletePassword}
+              onChange={(e) => setDeletePassword(e.target.value)}
+            />
+            </Modal>
+
+            {/* Delete Button */}
+            <Button
+              danger
+              type="text"
+              block
+              style={{ marginTop: '10px', opacity: 0.6 }}
+              onClick={() => setDeleteModalVisible(true)}
+            >
+              Delete Account
+            </Button>
             </Space>
           </Form>
         </Space>
