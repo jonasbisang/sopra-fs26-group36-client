@@ -105,7 +105,7 @@ const GroupPage: React.FC = () => {
       try {
         //Fetch planned activities
         const planned = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=PLANNED`
+          `/groups/${groupId}/activities?status=SCHEDULED`
         );
         setPlannedActivities(planned);
       } catch (error) {
@@ -140,7 +140,7 @@ const GroupPage: React.FC = () => {
     const interval = setInterval(async () => {
       try {
         const planned = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=PLANNED`
+          `/groups/${groupId}/activities?status=SCHEDULED`
         );
         setPlannedActivities((prev) => {
           const newOnes = planned.filter(
@@ -175,45 +175,33 @@ const GroupPage: React.FC = () => {
   };
 
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
-    setFeedbackType(voteType);
+      setFeedbackType(voteType);
     if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
-    feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600); 
+      feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600);
 
     try {
-      await apiService.post(`/activities/${activityId}/votes`, { voteType });
+      await apiService.post(`/groups/${groupId}/activities/${activityId}/votes`, {
+        wantsToJoin: voteType === "ACCEPT",
+        userId: Number(userId),
+      });
+      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setVotedCount((prev) => prev + 1);
       if (voteType === "DECLINE") {
-        setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
-        setVotedCount((prev) => prev + 1);
         messageApi.success("Passed.");
       } else {
-        try {
-          const updated = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
-          const updatedActivity = updated.find((a) => a.id === activityId);
-          if (!updatedActivity) {
-            setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
-            setVotedCount((prev) => prev + 1);
-            messageApi.success("Minimum reached — looking for the best time slot!")
-          } else {
-            setPendingActivities((prev) => prev.map((a) => a.id === activityId ? updatedActivity : a));
-          setVotedCount((prev) => prev + 1);
-          messageApi.success("Liked! 👍");
-          }
-        } catch {
-          setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
-          setVotedCount((prev) => prev + 1);
-          messageApi.success("Liked! 👍");
-        }
+        messageApi.success("Liked! 👍");
       }
-    } catch (error) {
+      } catch (error) {
       messageApi.error("Failed to submit vote.");
       console.error(error);
-    }
-  };
+      }
+    };
+
 
   const handleLeaveGroup = async () => {
     try {
       await apiService.delete(`/groups/${groupId}/members/${userId}`);
-      messageApi.success("Successfully left the group!");
+      messageApi.success("Left the group!");
       router.push("/groups");
     } catch (error) {
       if (error instanceof Error) {
