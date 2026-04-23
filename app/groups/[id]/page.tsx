@@ -132,6 +132,7 @@ const GroupPage: React.FC = () => {
       } catch (error) {
         console.error("Failed to fetch planned activities:", error);
       }
+      
 
       try {
         //Fetch calendar events
@@ -179,6 +180,22 @@ const GroupPage: React.FC = () => {
 
     return () => clearInterval(interval);
   }, [groupId, token]);
+
+
+  useEffect(() => {
+    if (!groupId || !token) return;
+    const interval = setInterval(async () => {
+    try {
+      const pending = await apiService.get<Activity[]>(
+        `/groups/${groupId}/activities?status=PENDING`
+      );
+      setPendingActivities(pending);
+    } catch (error) {
+      console.error("Polling error:", error);
+    }
+  }, 10000);
+  return () => clearInterval(interval);
+    }, [groupId, token]);
 
   //conect to backend and update the list of pending activities
   const handleActivityCreated = async () => {
