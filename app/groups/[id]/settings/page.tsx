@@ -32,6 +32,10 @@ interface Group {
   adminId: number;
 }
 
+interface PasswordFormValues {
+  newPassword: string;
+}
+
 const GroupSettings: React.FC = () => {
   const router = useRouter();
   const params = useParams();
@@ -155,7 +159,7 @@ const GroupSettings: React.FC = () => {
   };
 
   //Change password 
-  const handleChangePassword = async (values: any) => {
+  const handleChangePassword = async (values: PasswordFormValues) => {
     try {
       await apiService.put(`/groups/${groupId}/password`, {
         newPassword: values.newPassword,
