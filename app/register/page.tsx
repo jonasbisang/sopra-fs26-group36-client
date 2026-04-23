@@ -99,8 +99,7 @@ const Register: React.FC = () => {
             display: "flex",// by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
             flexDirection: 'column',
             alignItems: "center",
-            justifyContent: "center",
-
+            justifyContent: "center"
             }}>
 
           {contextHolder}
@@ -119,7 +118,7 @@ const Register: React.FC = () => {
           color: 'white', 
           margin: 0,
     
-          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', // custom font for logo 
+          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', custom font for logo 
           letterSpacing: '2px'
         }}>
           F<span style={{ color: '#ff4238' }}>·</span>
@@ -149,10 +148,9 @@ const Register: React.FC = () => {
         </p>
 
       <Form
-        //form={form} //not really needed 
         size="large"
         variant="outlined"
-        onFinish={handleRegister} // this is the key that calls the function when it want to send the data to the back end 
+        onFinish={handleRegister} 
         layout="vertical"
         requiredMark={false}
         style={{ 
