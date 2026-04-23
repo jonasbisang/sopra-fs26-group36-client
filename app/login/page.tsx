@@ -35,6 +35,13 @@ const Login: React.FC = () => {
   
   const {set: setUserId} = useLocalStorage<string>("userId", ""); // we need this method to set the value of the userId to the one we receive from the POST request to the backend server API
  
+  const inputStyle = {
+  backgroundColor: '#2a2a2a', // Grey backgroufnd for input fields
+  color: 'white',             // White text
+  borderColor: '#434343',     // border to define the input fields
+  };
+
+
   const handleLogin = async (values: LoginValues) => {
     setLoading(true); // Set loading state to true when the login process starts
     try {
@@ -146,7 +153,7 @@ const Login: React.FC = () => {
             label={<span style={{ color: "white" }}>Username</span>}
             rules={[{ required: true, message: "Please input your username!" }]}
           >
-            <Input placeholder="Enter username" />
+            <Input placeholder="Enter username" style={inputStyle} />
           </Form.Item>
 
           <Form.Item
@@ -154,7 +161,7 @@ const Login: React.FC = () => {
             label={<span style={{ color: "white" }}>Password</span>}
             rules={[{ required: true, message: "Please input your password!" }]}
           >
-            <Input.Password placeholder="Enter password" />
+            <Input.Password placeholder="Enter password" style={inputStyle} />
           </Form.Item>
           
           <Form.Item>

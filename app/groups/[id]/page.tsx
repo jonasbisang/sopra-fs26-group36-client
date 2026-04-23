@@ -388,7 +388,7 @@ const GroupPage: React.FC = () => {
         </Button>
         )}
 
-        <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
+        <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
          Calendar
         </Button>
 

@@ -44,6 +44,14 @@ const Register: React.FC = () => {
   
   } = useLocalStorage<string>("userId", "");
 
+  const inputStyle = {
+    backgroundColor: '#2a2a2a', // Grey backgroufnd for input fields
+    color: 'white',             // White text
+    borderColor: '#434343',     // border to define the input fields
+  };
+
+
+
   const handleRegister = async (values: NeededFields) => {
     setLoading(true);
     try {
@@ -163,7 +171,7 @@ const Register: React.FC = () => {
             label={<span style={{ color: "white" }}>Email</span>}
             rules={[{ required: true, type: 'email', message: "Valid email required" }]}
         > 
-            <Input placeholder="Email"/> 
+            <Input placeholder="Email" style={inputStyle} /> 
           </Form.Item>
 
         <Form.Item
@@ -171,7 +179,7 @@ const Register: React.FC = () => {
           label={<span style={{ color: "white" }}>Full name</span>}
           rules={[{ required: true, message: "Please input your full name!" }]}
         >
-          <Input placeholder="Enter your name" />
+          <Input placeholder="Enter your name" style={inputStyle} />
 
         </Form.Item>
 
@@ -181,7 +189,7 @@ const Register: React.FC = () => {
           label={<span style={{ color: "white" }}>Username</span>}
           rules={[{ required: true, message: "Please input your username!" }]}
       >
-          <Input placeholder="Enter username" />
+          <Input placeholder="Enter username" style={inputStyle} />
 
         </Form.Item>
         
@@ -190,7 +198,7 @@ const Register: React.FC = () => {
           label={<span style={{ color: "white" }}>Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
-          <Input.Password placeholder="Enter password" />
+          <Input.Password placeholder="Enter password" style={inputStyle} />
         </Form.Item>
 
         <Form.Item
@@ -199,7 +207,7 @@ const Register: React.FC = () => {
           rules={[{ message: "Please input your bio!" }]}
         >
 
-          <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." />
+          <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." style={inputStyle} />
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0 }}>

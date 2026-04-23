@@ -25,6 +25,8 @@ import {
   InfoCircleOutlined,
 } from "@ant-design/icons"; // icons that ive been using lately 
 
+import NextImage from 'next/image';
+import logo from '@/friendlerLogo.png';
 interface UserProfile {//what teh user profiel should looke like 
   name: string;
   id: number;
@@ -152,7 +154,7 @@ const UserprofilePage: React.FC = () => {
         alignItems: "center",
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
-        <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
+        {/* <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
           <h1 style={{
             fontSize: "32px", color: "white", margin: 0,
             fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
@@ -167,6 +169,15 @@ const UserprofilePage: React.FC = () => {
             L<span style={{ color: "#ff4238" }}>·</span>
             E<span style={{ color: "#ffdc00" }}>·</span>R
           </h1>
+        </div> */}
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <NextImage
+          src={logo}
+          alt="Friendler Logo"
+          height={160}
+          width={480}
+        />
         </div>
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
