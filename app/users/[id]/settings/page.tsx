@@ -76,6 +76,7 @@ const EditProfile: React.FC = () => {
     // Passwort ändern → PUT /users/{id}/password
       if (values.password && values.password.trim() !== "") {
         await apiService.put(`/users/${userId}/password`, {
+          oldPassword: values.oldPassword, 
           newPassword: values.password,
         });
         passwordChanged = true;
@@ -227,7 +228,18 @@ return (
 
             <Divider style={{ borderColor: 'rgba(255,255,255,0.1)', margin: '24px 0' }} />
 
-            {/* Password Field */}
+            {/* Current Password Field */}
+            <Form.Item
+              label={<span style={labelStyle}>Current Password</span>}
+              name="oldPassword"
+            >
+            <Input.Password
+              placeholder="Enter current password"
+              style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+            />
+            </Form.Item>
+
+            {/* new Password Field */}
             <Form.Item 
               label={<span style={labelStyle}>Change Password</span>} 
               name="password"
