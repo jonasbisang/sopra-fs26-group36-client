@@ -20,6 +20,7 @@ const EditProfile: React.FC = () => {
 
 
   const {value: token} = useLocalStorage<string>("token", "");
+  const { value: loggedInUserId } = useLocalStorage<string>("userId", "");
   const [mounted, setMounted] = useState(false);
 
 
@@ -28,19 +29,12 @@ const EditProfile: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [userData, setUserData] = useState<UserData>({ username: "", bio: "" });
 
+
   //Daten vom server laden beim start
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         setLoading(true);
-
-        //AUTH CHECKKKK
-        const loggedInUser = localStorage.getItem("userId"); 
-        if (!loggedInUser || loggedInUser != userId) {
-          message.error("You are not authorized to edit this profile.");
-          router.push(`/users/${userId}`);
-          return;
-        }
 
         const data = await apiService.getUserById<UserData>(userId);
         setUserData({
@@ -131,6 +125,15 @@ const EditProfile: React.FC = () => {
       router.replace("/login");
     }
   }, [mounted, token, router]);
+
+    useEffect(() => {
+      if (!mounted) return;
+      if (loggedInUserId === "") return;
+      if (String(loggedInUserId) !== String(userId)) {
+        message.error("You are not authorized to edit this profile.");
+        router.push(`/users/${userId}`);
+      }
+    }, [mounted, loggedInUserId, userId, router]);
 
   if (loading) {
     return (
