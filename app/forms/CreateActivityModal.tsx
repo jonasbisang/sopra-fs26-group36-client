@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Modal, Form, Input, DatePicker, TimePicker, InputNumber, Checkbox, Select, message } from "antd"; //Modal = popup window; selct  dropdown menu
+import { Modal, Form, Input, TimePicker, InputNumber, Checkbox, Select, message } from "antd"; //Modal = popup window; selct  dropdown menu
 import { useApi } from "@/hooks/useApi";
 import moment from "moment"; //handle time
 
@@ -15,8 +15,7 @@ interface ActivityFormValues {
   maxParticipants: number;
   isRecursive: boolean;
   isWeatherDependent: boolean;
-  startDate?: moment.Moment;
-  endDate?: moment.Moment;
+  duration: number;
   timeRange?: [moment.Moment, moment.Moment];
   minTemp?: number;
   maxTemp?: number;
@@ -47,6 +46,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       description: values.description,
       minSize: values.minParticipants,
       maxSize: values.maxParticipants,
+      duration: values.duration, 
       isRecursive: values.isRecursive || false,
       isWeatherDependent: values.isWeatherDependent || false,
       startTime: values.timeRange ? values.timeRange[0].format("HH:mm:ss") : null,
@@ -130,12 +130,12 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
 
           <div style={{ display: "flex", gap: "16px" }}>
             <Form.Item
-              name="startDate"
-              label={<span style={labelStyle}>START DATE</span>}
+              name="duration"
+              label={<span style={labelStyle}>DURATION (hours)</span>}
               rules={[{ required: true, message: "Required" }]}
               style={{ flex: 1 }}
             >
-              <DatePicker style={{ width: "100%", ...inputStyle }} />
+               <InputNumber min={1} max={24} style={{ width: "100%", ...inputStyle }} />
             </Form.Item>
             <Form.Item
               name="timeRange"
