@@ -9,8 +9,9 @@ import {
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
-  PlusOutlined
-} from "@ant-design/icons";
+  PlusOutlined,
+  SettingOutlined
+}from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -21,6 +22,12 @@ import NextImage from 'next/image';
 import logo from '@/friendlerLogo.png';
 
 const localizer = momentLocalizer(moment);
+
+interface Group { // needed to check if current user is admin
+  id: number;
+  name: string;
+  adminId: number;
+}
 
 interface User {
   id: number;
@@ -60,6 +67,7 @@ const GroupPage: React.FC = () => {
   const { clear: clearToken } = useLocalStorage<string>("token", "");
   const { clear: clearUserId } = useLocalStorage<string>("userId", "");
 
+  const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<User[]>([]);
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
@@ -85,13 +93,22 @@ const GroupPage: React.FC = () => {
     if (!groupId || !token) return;
 
     const fetchData = async () => {
-        try {
-    // Fetch group members
-    const users = await apiService.get<User[]>(`/groups/${groupId}/members`);
-    setMembers(users);
-  } catch (error) {
-    console.error("Failed to fetch members:", error);
-  }
+
+      // Fetch group information 
+      try {
+        const groupData = await apiService.get<Group>(`/groups/${groupId}`);
+        setGroup(groupData);
+      } catch (error) {
+        console.error("Failed to fetch group details:", error);
+      }
+
+      try {
+        // Fetch group members
+        const users = await apiService.get<User[]>(`/groups/${groupId}/users`);
+        setMembers(users);
+      } catch (error) {
+        console.error("Failed to fetch members:", error);
+      }
 
     try {
     // Fetch pending activities
@@ -338,10 +355,21 @@ const GroupPage: React.FC = () => {
           >
             New Activity
           </Button>
+          
+          
+          {group?.adminId.toString() === userId && ( 
+          <Button
+          type="primary"
+          icon={<SettingOutlined />}
+          onClick={() => router.push(`/groups/${groupId}/settings`)}
+            >
+          Admin Group Settings
+        </Button>
+        )}
 
-          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} >
-            Calendar
-          </Button>
+        <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
+         Calendar
+        </Button>
 
           <Button
             type="text"
