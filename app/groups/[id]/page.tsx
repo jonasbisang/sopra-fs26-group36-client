@@ -82,11 +82,11 @@ const GroupPage: React.FC = () => {
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
 
   //Auth check - no ändere so wie bi andere pages
- // useEffect(() => {
- //   if (!token) {
- //     router.push("/login");
- //   }
- // }, [token, router]);
+  useEffect(() => {
+    if (!token) {
+      router.push("/login");
+    }
+  }, [token, router]);
 
   //Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
   useEffect(() => {
