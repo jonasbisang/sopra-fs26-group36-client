@@ -44,6 +44,14 @@ const Register: React.FC = () => {
   
   } = useLocalStorage<string>("userId", "");
 
+  const inputStyle = {
+    backgroundColor: '#2a2a2a', // Grey backgroufnd for input fields
+    color: 'white',             // White text
+    borderColor: '#434343',     // border to define the input fields
+  };
+
+
+
   const handleRegister = async (values: NeededFields) => {
     setLoading(true);
     try {
@@ -91,8 +99,7 @@ const Register: React.FC = () => {
             display: "flex",// by using login contianer you get the wanted structure, yet im not sur eif it will lead to problems 
             flexDirection: 'column',
             alignItems: "center",
-            justifyContent: "center",
-
+            justifyContent: "center"
             }}>
 
           {contextHolder}
@@ -111,7 +118,7 @@ const Register: React.FC = () => {
           color: 'white', 
           margin: 0,
     
-          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', // custom font for logo 
+          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', custom font for logo 
           letterSpacing: '2px'
         }}>
           F<span style={{ color: '#ff4238' }}>·</span>
@@ -141,10 +148,9 @@ const Register: React.FC = () => {
         </p>
 
       <Form
-        //form={form} //not really needed 
         size="large"
         variant="outlined"
-        onFinish={handleRegister} // this is the key that calls the function when it want to send the data to the back end 
+        onFinish={handleRegister} 
         layout="vertical"
         requiredMark={false}
         style={{ 
@@ -163,7 +169,7 @@ const Register: React.FC = () => {
             label={<span style={{ color: "white" }}>Email</span>}
             rules={[{ required: true, type: 'email', message: "Valid email required" }]}
         > 
-            <Input placeholder="Email"/> 
+            <Input placeholder="Email" style={inputStyle} /> 
           </Form.Item>
 
         <Form.Item
@@ -171,7 +177,7 @@ const Register: React.FC = () => {
           label={<span style={{ color: "white" }}>Full name</span>}
           rules={[{ required: true, message: "Please input your full name!" }]}
         >
-          <Input placeholder="Enter your name" />
+          <Input placeholder="Enter your name" style={inputStyle} />
 
         </Form.Item>
 
@@ -181,7 +187,7 @@ const Register: React.FC = () => {
           label={<span style={{ color: "white" }}>Username</span>}
           rules={[{ required: true, message: "Please input your username!" }]}
       >
-          <Input placeholder="Enter username" />
+          <Input placeholder="Enter username" style={inputStyle} />
 
         </Form.Item>
         
@@ -190,7 +196,7 @@ const Register: React.FC = () => {
           label={<span style={{ color: "white" }}>Password</span>}
           rules={[{ required: true, message: "Please input your password!" }]}
         >
-          <Input.Password placeholder="Enter password" />
+          <Input.Password placeholder="Enter password" style={inputStyle} />
         </Form.Item>
 
         <Form.Item
@@ -199,7 +205,7 @@ const Register: React.FC = () => {
           rules={[{ message: "Please input your bio!" }]}
         >
 
-          <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." />
+          <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." style={inputStyle} />
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0 }}>

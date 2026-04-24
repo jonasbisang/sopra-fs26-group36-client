@@ -16,6 +16,9 @@ import {
 } from "@ant-design/icons"; // Ant Design icons for the UI
 import { useState, useEffect } from "react";
 
+import NextImage from 'next/image';
+import logo from '../friendlerLogo.png';
+
 
 interface JoinGroupValues {
     groupId: string;
@@ -44,6 +47,12 @@ const Dashboard: React.FC = () => { //creating the dashboard component
 
     const [groups, setGroups] = useState<{id: number, name: string, members: number}[]>([]);
 
+      const inputStyle = {
+      backgroundColor: '#2a2a2a', // Grey backgroufnd for input fields
+      color: 'white',             // White text
+      borderColor: '#434343',     // border to define the input fields
+      };
+
     const fetchGroups = async () => {
       try {
           const data = await apiService.get<{id: number, name: string, members: number}[]>(`/users/${userId}/groups`);
@@ -52,6 +61,8 @@ const Dashboard: React.FC = () => { //creating the dashboard component
         console.error("Create group error:", error); // ADD THIS
           console.error("Failed to fetch groups:", error);
       }
+      
+
 };
 
 useEffect(() => {
@@ -129,7 +140,7 @@ useEffect(() => {
         borderBottom: '1px solid rgba(255,255,255,0.1)' // Subtle separator line
     }}>
 
-    <div style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}> 
+    {/* <div style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}> 
           <h1 style={{ // the logo should take you to the dashboard when clicked
             fontSize: '32px', // Smaller than login page, suitable for header
             color: 'white', 
@@ -147,6 +158,15 @@ useEffect(() => {
             E<span style={{ color: '#ffdc00' }}>·</span>
             R
           </h1>
+        </div> */}
+
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <NextImage
+          src={logo}
+          alt="Friendler Logo"
+          height={160}
+          width={480}
+        />
         </div>
 
         <div style={{ display: 'flex', gap: '20px' }}>
@@ -227,14 +247,14 @@ useEffect(() => {
               label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>GROUP ID</span>}
               rules={[{ required: true, message: "Please enter the group ID" }]}
               >
-              <Input placeholder="e.g., 3" />
+              <Input placeholder="e.g., 3" style={inputStyle} />
               </Form.Item>
 
                 <Form.Item 
                   name="password" 
                   label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>PASSWORD (IF ANY)</span>}
                 >
-                  <Input.Password placeholder="Enter password"/>
+                  <Input.Password placeholder="Enter password" style={inputStyle} />
                 </Form.Item>
 
                 <Form.Item style={{ marginBottom: 0 }}>
@@ -261,14 +281,14 @@ useEffect(() => {
                   label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>NEW GROUP NAME</span>}
                   rules={[{ required: true, message: "Please enter a new group name" }]}
                 >
-                  <Input placeholder="My New Group"/>
+                  <Input placeholder="My New Group" style={inputStyle} />
                 </Form.Item>
 
                 <Form.Item 
                   name="password" 
                   label={<span style={{ color: "#aaa", fontSize: "12px", fontWeight: "bold" }}>PASSWORD (OPTIONAL)</span>}
                 >
-                  <Input.Password placeholder="Set a password" />
+                  <Input.Password placeholder="Set a password" style={inputStyle} />
                 </Form.Item>
 
                 <Form.Item style={{ marginBottom: 0 }}>
