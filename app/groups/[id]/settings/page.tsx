@@ -108,10 +108,11 @@ const GroupSettings: React.FC = () => {
       } finally {
         setLoading(false);
       }
+    };
     if (groupId && currentUserId) {
       fetchGroupData(); // makes sure we have the groupId from the URL and the currentUserId from local storage before trying to fetch data from the backend server API
-    }
-    }
+      }
+
   }, [groupId, currentUserId, apiService, router, messageApi]); // if any of these values change, the useEffect will run again to fetch the latest data
  
 
