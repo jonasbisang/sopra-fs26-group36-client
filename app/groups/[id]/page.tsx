@@ -277,7 +277,6 @@ const GroupPage: React.FC = () => {
 
   const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
 
-
   return (
     <div style={{
       backgroundColor: "#000000",
@@ -690,6 +689,12 @@ const GroupPage: React.FC = () => {
               .rbc-toolbar button.rbc-active { background: rgba(255,255,255,0.2); }
               .rbc-date-cell { color: white; }
               .rbc-event { background-color: #42a2d6; }
+
+              .ant-modal-body p,
+              .ant-modal-body b,
+              .ant-modal-body div {
+              color: #111111 !important;
+              }
             `}</style>
             <Calendar
               localizer={localizer}
