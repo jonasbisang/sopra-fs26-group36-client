@@ -73,6 +73,10 @@ const GroupPage: React.FC = () => {
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
+  const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
+  const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
+  const votedActivityIdsRef = useRef<Set<number>>(new Set());
+
   const [totalPending, setTotalPending] = useState<number>(0);
   const [votedCount, setVotedCount] = useState<number>(0);
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
@@ -118,7 +122,7 @@ const GroupPage: React.FC = () => {
     // Fetch pending activities
     const pending = await apiService.get<Activity[]>(
       `/groups/${groupId}/activities?status=PENDING`);
-      setPendingActivities(pending);
+      setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
       setTotalPending(pending.length);
       } catch (error) {
         console.error("Failed to fetch pending activities:", error);
@@ -189,7 +193,7 @@ const GroupPage: React.FC = () => {
       const pending = await apiService.get<Activity[]>(
         `/groups/${groupId}/activities?status=PENDING`
       );
-      setPendingActivities(pending);
+      setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
     } catch (error) {
       console.error("Polling error:", error);
     }
@@ -204,7 +208,7 @@ const GroupPage: React.FC = () => {
     if (!groupId) return;
     try {
       const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
-      setPendingActivities(pending);
+      setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
      
     } catch (error) {
       console.error("Failed to fetch pending activities after creation:", error);
@@ -217,12 +221,29 @@ const GroupPage: React.FC = () => {
     if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
       feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600);
 
+    setVotedActivityIds((prev) => {
+      const next = new Set([...prev, activityId]);
+      votedActivityIdsRef.current = next;
+      return next;
+      });
+
     try {
       await apiService.post(`/groups/${groupId}/activities/${activityId}/votes`, {
         wantsToJoin: voteType === "ACCEPT",
         userId: Number(userId),
       });
-      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      
+      setPendingActivities((prev) => {
+        const voted = prev.find((a) => a.id === activityId);
+        if (voted && voteType === "ACCEPT") {
+          const updated = { ...voted, acceptVotes: (voted.acceptVotes ?? 0) + 1 };
+          setLikedActivities((liked) =>
+            liked.find((a) => a.id === activityId) ? liked : [...liked, updated]  // ← updated, not voted; with duplicate guard
+          );
+        }
+        return prev.filter((a) => a.id !== activityId);
+      });
+
       setVotedCount((prev) => prev + 1);
       if (voteType === "DECLINE") {
         messageApi.success("Passed.");
@@ -273,14 +294,34 @@ const GroupPage: React.FC = () => {
       onCancel={() => setNewEventPopup(null)}
       okText="Let's go! 🎉"
       cancelText="Close"
-      okButtonProps={{ style: { backgroundColor: "black", border: "none" } }}
-      title="New Event Confirmed!"
->
-      <p><b>{newEventPopup?.name}</b></p>
-      {newEventPopup?.scheduledTime && <p>📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}</p>}
-      {newEventPopup?.location && <p>📍 {newEventPopup.location}</p>}
-      {newEventPopup?.duration && <p>⏱ {newEventPopup.duration} hours</p>}
-      <p style={{ color: "#999", fontSize: "12px" }}>The event has been added to the group calendar.</p>
+      okButtonProps={{ style: { backgroundColor: "green", color:"white", border: "none" } }}
+      title={<span style={{ color: "white" }}>New Event Confirmed!</span>}
+        styles={{
+          //content: { backgroundColor: "#1a1a1a" },
+          header: { backgroundColor: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.1)" },
+          footer: { backgroundColor: "#1a1a1a", borderTop: "1px solid rgba(255,255,255,0.1)" },
+          mask: { backdropFilter: "blur(4px)" },
+        }}
+    >
+                <p style={{ color: "black" }}><b>{newEventPopup?.name}</b></p>
+          {newEventPopup?.scheduledTime && (
+            <p style={{ color: "black" }}>
+              📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}
+            </p>
+          )}
+
+          {newEventPopup?.location && (
+            <p style={{ color: "black" }}>
+              📍 {newEventPopup.location}
+            </p>
+          )}
+
+          {newEventPopup?.duration && (
+            <p style={{ color: "black" }}>
+              ⏱ {newEventPopup.duration} hours
+            </p>
+          )}
+
     </Modal>
 
        {/* Feedback Flash Overlay */}
@@ -597,6 +638,48 @@ const GroupPage: React.FC = () => {
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
           />
         </div>
+
+        {/* Awaiting Members */}
+          {likedActivities.length > 0 && (
+            <div style={{
+              backgroundColor: "rgba(126,126,126,0.2)",
+              borderRadius: "12px",
+              padding: "24px",
+            }}>
+              <h3 style={{ color: "white", marginBottom: "16px" }}>⏳ Awaiting Members</h3>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", marginBottom: "16px" }}>
+                Activities you liked — waiting for enough people to join.
+              </p>
+              <List
+                dataSource={likedActivities.filter(
+                  (a) => (a.acceptVotes ?? 0) < (a.minSize ?? Infinity)
+                )}
+                renderItem={(activity) => (
+                  <List.Item style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "12px 0" }}>
+                    <List.Item.Meta
+                      title={<span style={{ color: "white" }}>{activity.name}</span>}
+                      description={
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          {activity.location && (
+                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                              📍 {activity.location}
+                            </span>
+                          )}
+                          {activity.minSize && (
+                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                              👥 {activity.acceptVotes ?? 0} / {activity.minSize} people needed
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                    <Tag color="orange">Waiting</Tag>
+                  </List.Item>
+                )}
+                locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>None waiting</span> }}
+              />
+            </div>
+          )}
 
         {/* Calendar */}
         <div style={{
