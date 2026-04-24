@@ -159,10 +159,11 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
               >
                 {/* Notice ConfigProvider is gone from here! It's wrapping the form now. */}
                 <Select placeholder="Select a time window..." style={{ width: "100%", ...inputStyle }}>
-                  <Option value="MORNING">Morning (06:00 - 12:00)</Option>
-                  <Option value="AFTERNOON">Afternoon (12:00 - 18:00)</Option>
-                  <Option value="EVENING">Evening (18:00 - 22:00)</Option>
-                  <Option value="NIGHT">Night (22:00 - 06:00)</Option>
+                  {/* <Option value="MORNING">Morning (06:00 - 12:00)</Option>
+                      <Option value="AFTERNOON">Afternoon (12:00 - 18:00)</Option>
+                      <Option value="EVENING">Evening (18:00 - 22:00)</Option>
+                      <Option value="NIGHT">Night (22:00 - 06:00)</Option>
+                        */}
                   <Option value="CUSTOM">Custom Time</Option>
                 </Select>
               </Form.Item>
