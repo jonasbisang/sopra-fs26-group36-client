@@ -45,6 +45,10 @@ interface Activity {
   duration?: number;
   isWeatherDependent?: boolean;
   acceptVotes?: number;
+  participantUsernames?: string[];
+   minTemp?: number;       
+  maxTemp?: number;        
+  rainPreference?: string; 
 }
 
 interface CalendarEvent {
@@ -180,7 +184,7 @@ const GroupPage: React.FC = () => {
       } catch (error) {
         console.error("Polling error:", error);
       }
-    }, 10000); // alle 10 Sekunden
+    }, 2000); // alle 10 Sekunden
 
     return () => clearInterval(interval);
   }, [groupId, token]);
@@ -197,7 +201,7 @@ const GroupPage: React.FC = () => {
     } catch (error) {
       console.error("Polling error:", error);
     }
-  }, 10000);
+  }, 2000);
   return () => clearInterval(interval);
     }, [groupId, token]);
 
@@ -386,7 +390,7 @@ const GroupPage: React.FC = () => {
           icon={<SettingOutlined />}
           onClick={() => router.push(`/groups/${groupId}/settings`)}
             >
-          Admin Group Settings
+          Group Settings
         </Button>
         )}
 
@@ -610,20 +614,55 @@ const GroupPage: React.FC = () => {
               <List.Item style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "10px 0" }}>
                 <List.Item.Meta
                   title={<span style={{ color: "white" }}>{activity.name}</span>}
-                  description={
-                    <span style={{ color: "rgba(255,255,255,0.5)" }}>
-                      {activity.scheduledTime
+                    description={
+                      <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      <span style={{ color: "rgba(255,255,255,0.8)" }}>
+                        {activity.scheduledTime
                         ? moment(activity.scheduledTime).format("DD.MM.YYYY HH:mm")
                         : "Time TBD"}
-                      {activity.location ? ` · ${activity.location}` : ""}
+                        {activity.location ? ` · ${activity.location}` : ""}
+                      </span>
+                        {activity.participantUsernames && activity.participantUsernames.length > 0 && (
+                    <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                      {activity.participantUsernames.join(", ")}
                     </span>
+                      )}  
+                     {activity.isWeatherDependent && (
+                     <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                        Weather dependent
+                        {activity.minTemp != null ? ` · min ${activity.minTemp}°C` : ""}
+                        {activity.maxTemp != null ? ` · max ${activity.maxTemp}°C` : ""}
+                        {activity.rainPreference ? ` · ${activity.rainPreference}` : ""}
+                    </span>
+                    )}
+                    </div>
                   }
                 />
+                  {activity.maxSize &&
+                  (activity.acceptVotes ?? 0) < activity.maxSize &&
+                  !activity.participantUsernames?.includes(
+                    members.find((m) => m.id.toString() === userId)?.username ?? ""
+                  ) && (
+                    <Button
+                      size="small"
+                      onClick={() => handleVote(activity.id, "ACCEPT")}
+                      style={{
+                        background: "rgba(66,214,120,0.15)",
+                        color: "#42d678",
+                        border: "1px solid rgba(66,214,120,0.4)",
+                        borderRadius: "8px",
+                        marginLeft: "12px",
+                      }}
+                    >
+                      + Join
+                    </Button>
+                  )}
                 <Tag color="green">Planned</Tag>
               </List.Item>
             )}
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
           />
+          
         </div>
 
         {/* Awaiting Members */}
