@@ -297,6 +297,7 @@ const GroupPage: React.FC = () => {
       okButtonProps={{ style: { backgroundColor: "black", border: "none" } }}
       title="🎉 New Event Confirmed!"
     >
+      <div style={{ color: "#111" }}>
       <p><b>{newEventPopup?.name}</b></p>
       {newEventPopup?.scheduledTime && (
         <p>📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}</p>
@@ -308,6 +309,7 @@ const GroupPage: React.FC = () => {
       <p>⏱ {newEventPopup.duration} hours</p>
       )}
       <p style={{ color: "#999", fontSize: "12px" }}>The event has been added to the group calendar.</p>
+      </div>
       </Modal>
 
        {/* Feedback Flash Overlay */}
