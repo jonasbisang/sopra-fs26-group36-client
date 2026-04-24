@@ -294,35 +294,21 @@ const GroupPage: React.FC = () => {
       onCancel={() => setNewEventPopup(null)}
       okText="Let's go! 🎉"
       cancelText="Close"
-      okButtonProps={{ style: { backgroundColor: "green", color:"white", border: "none" } }}
-      title={<span style={{ color: "white" }}>New Event Confirmed!</span>}
-        styles={{
-          //content: { backgroundColor: "#1a1a1a" },
-          header: { backgroundColor: "#1a1a1a", borderBottom: "1px solid rgba(255,255,255,0.1)" },
-          footer: { backgroundColor: "#1a1a1a", borderTop: "1px solid rgba(255,255,255,0.1)" },
-          mask: { backdropFilter: "blur(4px)" },
-        }}
+      okButtonProps={{ style: { backgroundColor: "black", border: "none" } }}
+      title="🎉 New Event Confirmed!"
     >
-                <p style={{ color: "black" }}><b>{newEventPopup?.name}</b></p>
-          {newEventPopup?.scheduledTime && (
-            <p style={{ color: "black" }}>
-              📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}
-            </p>
-          )}
-
-          {newEventPopup?.location && (
-            <p style={{ color: "black" }}>
-              📍 {newEventPopup.location}
-            </p>
-          )}
-
-          {newEventPopup?.duration && (
-            <p style={{ color: "black" }}>
-              ⏱ {newEventPopup.duration} hours
-            </p>
-          )}
-
-    </Modal>
+      <p><b>{newEventPopup?.name}</b></p>
+      {newEventPopup?.scheduledTime && (
+        <p>📅 {moment(newEventPopup.scheduledTime).format("DD.MM.YYYY HH:mm")}</p>
+      )}
+      {newEventPopup?.location && (
+      <p>📍 {newEventPopup.location}</p>
+      )}
+      {newEventPopup?.duration && (
+      <p>⏱ {newEventPopup.duration} hours</p>
+      )}
+      <p style={{ color: "#999", fontSize: "12px" }}>The event has been added to the group calendar.</p>
+      </Modal>
 
        {/* Feedback Flash Overlay */}
       {feedbackType && (
