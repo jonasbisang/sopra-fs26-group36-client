@@ -53,6 +53,10 @@ const GroupSettings: React.FC = () => {
   const [group, setGroup] = useState<Group | null>(null);
   const [members, setMembers] = useState<Member[]>([]);
 
+  const {value: token} = useLocalStorage<string>("token", "");
+  const [mounted, setMounted] = useState(false);
+  
+
   // Fetch data fake verisino
 //   useEffect(() => {
 //     const fetchGroupData = async () => {
@@ -193,6 +197,16 @@ const GroupSettings: React.FC = () => {
     });
             
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+  if (mounted && (!token || token === "")) {
+    router.replace("/login");
+  }
+  }, [mounted, token, router]);
 
 
   return (

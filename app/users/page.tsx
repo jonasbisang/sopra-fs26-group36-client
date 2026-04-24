@@ -50,6 +50,11 @@ const Dashboard: React.FC = () => {
     router.push("/login");
   };
 
+
+  const {value: token} = useLocalStorage<string>("token", "");
+  const [mounted, setMounted] = useState(false);
+
+
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -73,6 +78,18 @@ const Dashboard: React.FC = () => {
   // if the dependency array is left away, the useEffect will run on every state change. Since we do a state change to users in the useEffect, this results in an infinite loop.
   // read more here: https://react.dev/reference/react/useEffect#specifying-reactive-dependencies
 
+  useEffect(() => {
+      setMounted(true);
+    }, []);
+  
+    
+    useEffect(() => {
+      if (mounted && (!token || token === "")) {
+        router.replace("/login");
+      }
+    }, [mounted, token, router]);
+
+    
   return (
     <div className="card-container">
       <Card
