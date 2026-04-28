@@ -229,6 +229,15 @@ const GroupPage: React.FC = () => {
       messageApi.success("Successfully joined! 🎉");
     } catch (error) {
       messageApi.error("Activity is already full.");
+        } finally {
+      try {
+        const planned = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=SCHEDULED`
+        );
+        setPlannedActivities(planned);
+      } catch {
+        console.error("Failed to reload.");
+      }
     }
   };
 
