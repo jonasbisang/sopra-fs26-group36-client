@@ -66,7 +66,7 @@ reason).
 
 ---
 
-## Contributions Week 3 - [Begin Date] to [End Date]
+## Contributions Week 3 - [16.04.2026] to [22.04.2026]
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@elisabettade]** | 14.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/3549b83b84c26b8dbbbf5633a6137c1bcedbaaf6| Added tinder style voting for pending activities, frontend | users need to be able to vote on proposed activities |
@@ -92,9 +92,12 @@ reason).
 
 ---
 
-## Contributions Week 4 - [Begin Date] to [End Date]
+## Contributions Week 4 - [23.04.2026] to [29.04.2026]
+| **[@jonasbisang]**    | [23.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/111b25d1a0c4bb8669b28ca0963c98efbef2f0d9] | [Create voting record endpoint to keep track of voting for each activity, ensure a user can only vote once per activity]| [Keeping track of who voted (and who has not yet) and how they voted is essential in order to provide the functionality of scheduling the right people.] |
+|                        [23.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/07a63281f23c35839c072aefb56366315831c9a4] | [Compares the different calendars of the users to find a fitting slot based on the time conditions entered. (only manual calendar yet)] | [Core functionality] |
+|                        [24.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/7d521515a432ab0c05aeb6bfa8ef2dce163b28db] | [Add unit tests for voting functionality] | [Voting functionality is a key function and has to work correctly.Therefore, tests to make sure everything works. ] |
 
-_Continue with the same table format as above._
+
 
 ---
 
