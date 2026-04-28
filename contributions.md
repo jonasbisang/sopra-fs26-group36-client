@@ -98,6 +98,8 @@ reason).
 |                        [24.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/7d521515a432ab0c05aeb6bfa8ef2dce163b28db] | [Add unit tests for voting functionality] | [Voting functionality is a key function and has to work correctly.Therefore, tests to make sure everything works. ] |
 | **[@elisabettade]**   | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/9f021e6bedd77d023adfb1b1aa7f31cd87cf9320 | added message that shows if join activity was successful or not | needed for usability/user experience, user needs to know whether joining was successful |
 |                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/ecce8ca40d3e746896c2fa2697b5111076a7c121 | ensures the user always sees the current state of the activity and doesn't get stuck with stale data, which is especially important when multiple users try to join simultaneously |
+| **[@ananis21]**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c576a878c977d5b574188f980e5e4688e639b12a | [Added creating activity concept] | now the user can create an activity that can be pusshed inside the system, to then later vote |
+|                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/82d18f1e844c5f2463273298ce860e839f1ffe66 | [Time calculation] | managed the connection between the backend and frontened regarding recording the time information of the activity creation |
 
 
 
