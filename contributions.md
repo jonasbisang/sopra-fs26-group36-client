@@ -100,7 +100,9 @@ reason).
 |                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/ecce8ca40d3e746896c2fa2697b5111076a7c121 | ensures the user always sees the current state of the activity and doesn't get stuck with stale data, which is especially important when multiple users try to join simultaneously |
 | **[@ananis21]**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c576a878c977d5b574188f980e5e4688e639b12a | [Added creating activity concept] | now the user can create an activity that can be pusshed inside the system, to then later vote |
 |                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/82d18f1e844c5f2463273298ce860e839f1ffe66 | [Time calculation] | managed the connection between the backend and frontened regarding recording the time information of the activity creation |
-| **@vonhollym-art**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/94288f2659f77930cf9c83eba3b2158b6c0b84b5 | Implemented Weather API and weather check in event scheduling | necessary if the user wants to make an activity weather dependent | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/70c5695be3d049076852e4591b63b9acf26f9393 | Get endpoint for fetching group events | This is necessary to see the group calendar |
+| **@vonhollym-art**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/94288f2659f77930cf9c83eba3b2158b6c0b84b5 | Implemented Weather API and weather check in event scheduling | necessary if the user wants to make an activity weather dependent | 
+|                       | 23.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/70c5695be3d049076852e4591b63b9acf26f9393 | Get endpoint for fetching group events | This is necessary to see the group calendar |
+
 
 
 
