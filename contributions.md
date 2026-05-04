@@ -96,8 +96,8 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@jonasbisang]**    | [23.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/111b25d1a0c4bb8669b28ca0963c98efbef2f0d9] | [Create voting record endpoint to keep track of voting for each activity, ensure a user can only vote once per activity]| [Keeping track of who voted (and who has not yet) and how they voted is essential in order to provide the functionality of scheduling the right people.] |
-|                        [23.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/07a63281f23c35839c072aefb56366315831c9a4] | [Compares the different calendars of the users to find a fitting slot based on the time conditions entered. (only manual calendar yet)] | [Core functionality] |
-|                        [24.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/7d521515a432ab0c05aeb6bfa8ef2dce163b28db] | [Add unit tests for voting functionality] | [Voting functionality is a key function and has to work correctly.Therefore, tests to make sure everything works. ] |
+|                        | [23.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/07a63281f23c35839c072aefb56366315831c9a4] | [Compares the different calendars of the users to find a fitting slot based on the time conditions entered. (only manual calendar yet)] | [Core functionality] |
+|                        | [24.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/7d521515a432ab0c05aeb6bfa8ef2dce163b28db] | [Add unit tests for voting functionality] | [Voting functionality is a key function and has to work correctly.Therefore, tests to make sure everything works. ] |
 | **[@elisabettade]**   | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/9f021e6bedd77d023adfb1b1aa7f31cd87cf9320 | added message that shows if join activity was successful or not | needed for usability/user experience, user needs to know whether joining was successful |
 |                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/ecce8ca40d3e746896c2fa2697b5111076a7c121 | ensures the user always sees the current state of the activity and doesn't get stuck with stale data, which is especially important when multiple users try to join simultaneously |
 | **[@ananis21]**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c576a878c977d5b574188f980e5e4688e639b12a | [Added creating activity concept] | now the user can create an activity that can be pusshed inside the system, to then later vote |
@@ -110,9 +110,22 @@ reason).
 
 ---
 
-## Contributions Week 5 - [Begin Date] to [End Date]
+## Contributions Week 5 - [30.04.2026] to [06.05.2026]
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **elisabettade**    | 04.05.2026 | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/7714831eaa02a4fbd2a244240883b15a6e529b4f | created activity detail page and made it accessible by clicking on to scheduled activities in group calendar, also color coded activites in groupcalendar | important for following tasks where users might want to edit activities or make them recursive, colors in groupcalender make usability better |
+|                     | 04.05.2026 | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/fd23da4ea7681b88205c3d28bec27ccbcf8f65c3 | created page, button and routepush for groupchat | important to make it possible for users to communicate in their groups |
+| **[user2]**         | [date]   | [link1] | [what] | [why] |
+|                     | [date]   | [link2] | [what] | [why] |
+| **[user3]**         | [date]   | [link1] | [what] | [why] |
+|                     | [date]   | [link2] | [what] | [why] |
+| **[user4]**         | [date]   | [link1] | [what] | [why] |
+|                     | [date]   | [link2] | [what] | [why] |
+| **[user5]**         | [date]   | [link1] | [what] | [why] |
+|                     | [date]   | [link2] | [what] | [why] |
+| **[user6]**         | [date]   | [link1] | [what] | [why] |
+|                     | [date]   | [link2] | [what] | [why] |
 
-_Continue with the same table format as above._
 
 ---
 
