@@ -66,7 +66,7 @@ reason).
 
 ---
 
-## Contributions Week 3 - [Begin Date] to [End Date]
+## Contributions Week 3 - [16.04.2026] to [22.04.2026]
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[@elisabettade]** | 14.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/3549b83b84c26b8dbbbf5633a6137c1bcedbaaf6| Added tinder style voting for pending activities, frontend | users need to be able to vote on proposed activities |
@@ -92,9 +92,21 @@ reason).
 
 ---
 
-## Contributions Week 4 - [Begin Date] to [End Date]
+## Contributions Week 4 - [23.04.2026] to [29.04.2026]
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| **[@jonasbisang]**    | [23.04.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/111b25d1a0c4bb8669b28ca0963c98efbef2f0d9] | [Create voting record endpoint to keep track of voting for each activity, ensure a user can only vote once per activity]| [Keeping track of who voted (and who has not yet) and how they voted is essential in order to provide the functionality of scheduling the right people.] |
+|                        [23.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/07a63281f23c35839c072aefb56366315831c9a4] | [Compares the different calendars of the users to find a fitting slot based on the time conditions entered. (only manual calendar yet)] | [Core functionality] |
+|                        [24.04.2025]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/7d521515a432ab0c05aeb6bfa8ef2dce163b28db] | [Add unit tests for voting functionality] | [Voting functionality is a key function and has to work correctly.Therefore, tests to make sure everything works. ] |
+| **[@elisabettade]**   | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/9f021e6bedd77d023adfb1b1aa7f31cd87cf9320 | added message that shows if join activity was successful or not | needed for usability/user experience, user needs to know whether joining was successful |
+|                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/ecce8ca40d3e746896c2fa2697b5111076a7c121 | ensures the user always sees the current state of the activity and doesn't get stuck with stale data, which is especially important when multiple users try to join simultaneously |
+| **[@ananis21]**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c576a878c977d5b574188f980e5e4688e639b12a | [Added creating activity concept] | now the user can create an activity that can be pusshed inside the system, to then later vote |
+|                       | 28.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/82d18f1e844c5f2463273298ce860e839f1ffe66 | [Time calculation] | managed the connection between the backend and frontened regarding recording the time information of the activity creation |
+| **@vonhollym-art**   | 24.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/94288f2659f77930cf9c83eba3b2158b6c0b84b5 | Implemented Weather API and weather check in event scheduling | necessary if the user wants to make an activity weather dependent | 
+|                       | 23.04.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/70c5695be3d049076852e4591b63b9acf26f9393 | Get endpoint for fetching group events | This is necessary to see the group calendar |
 
-_Continue with the same table format as above._
+
+
 
 ---
 
