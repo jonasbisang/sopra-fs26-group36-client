@@ -220,6 +220,27 @@ const GroupPage: React.FC = () => {
     
   };
 
+  const handleJoin = async (activityId: number) => {
+    try {
+      await apiService.post(`/groups/${groupId}/activities/${activityId}/votes`, {
+        wantsToJoin: true,
+        userId: Number(userId),
+      });
+      messageApi.success("Successfully joined! 🎉");
+    } catch (error) {
+      messageApi.error("Activity is already full.");
+        } finally {
+      try {
+        const planned = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=SCHEDULED`
+        );
+        setPlannedActivities(planned);
+      } catch {
+        console.error("Failed to reload.");
+      }
+    }
+  };
+
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
       setFeedbackType(voteType);
     if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
@@ -645,7 +666,7 @@ const GroupPage: React.FC = () => {
                   ) && (
                     <Button
                       size="small"
-                      onClick={() => handleVote(activity.id, "ACCEPT")}
+                      onClick={() => handleJoin(activity.id)}
                       style={{
                         background: "rgba(66,214,120,0.15)",
                         color: "#42d678",
