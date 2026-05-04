@@ -78,6 +78,7 @@ const GroupPage: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
+  const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
   const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
   const votedActivityIdsRef = useRef<Set<number>>(new Set());
 
@@ -141,6 +142,16 @@ const GroupPage: React.FC = () => {
         console.error("Failed to fetch planned activities:", error);
       }
       
+
+      try {
+        // Fetch rejected activities
+        const rejected = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=REJECTED`
+        );
+        setRejectedActivities(rejected);
+      } catch (error) {
+        console.error("Failed to fetch rejected activities:", error);
+      }
 
       try {
         //Fetch calendar events
@@ -260,6 +271,41 @@ const GroupPage: React.FC = () => {
       }
     };
 
+  const handleRevive = async (activityId: number) => {
+    try {
+      //calling backend to revive the activity
+      await apiService.post(`/activities/${activityId}/revive`, {});
+      
+      messageApi.success("Activity revived! 🎉 It's back in the voting feed.");
+
+      // 2. Limpiar el ID de los registros de votos locales
+      // Esto es CRUCIAL para que el filtro deje de ocultar la actividad
+      setVotedActivityIds((prev) => {
+        const next = new Set(prev);
+        next.delete(activityId); // delete the id activityId from the set, do that it can appear again in the pending list
+        votedActivityIdsRef.current = next; // also update the ref to keep them in sync
+        return next;
+      });
+
+      //reduce votes count by 1, but not less than 0
+      setVotedCount((prev) => Math.max(0, prev - 1));
+
+      //moving the activity from rejected to pending list
+      setRejectedActivities((prev) => prev.filter((a) => a.id !== activityId));
+
+      if (groupId) {
+        const pending = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=PENDING`
+        );
+        // apply to pending activities 
+        setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
+        setTotalPending(pending.length);
+      }
+    } catch (error) {
+      messageApi.error("Failed to revive activity.");
+      console.error(error);
+    }
+  };
 
   const handleLeaveGroup = async () => {
     try {
@@ -703,6 +749,69 @@ const GroupPage: React.FC = () => {
                   </List.Item>
                 )}
                 locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>None waiting</span> }}
+              />
+            </div>
+          )}
+
+        {/* Rejected Activities */}
+          {rejectedActivities.length > 0 && (
+            <div style={{
+              backgroundColor: "rgba(126,126,126,0.2)",
+              borderRadius: "12px",
+              padding: "24px",
+            }}>
+              <h3 style={{ color: "white", marginBottom: "8px" }}>❌ Rejected Activities</h3>
+              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", marginBottom: "16px" }}>
+                You rejected this activity. Revive to start a new voting round.
+              </p>
+              <List
+                dataSource={rejectedActivities}
+                renderItem={(activity) => (
+                  <List.Item
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "12px 0" }}
+                    actions={[
+                      <Button
+                        key="revive"
+                        size="small"
+                        onClick={() => handleRevive(activity.id)}
+                        style={{
+                          background: "rgba(255,159,67,0.15)",
+                          color: "#ff9f43",
+                          border: "1px solid rgba(255,159,67,0.4)",
+                          borderRadius: "8px",
+                          fontWeight: "bold",
+                        }}
+                      >
+                        🔄 Revive
+                      </Button>,
+                    ]}
+                  >
+                    <List.Item.Meta
+                      title={<span style={{ color: "white" }}>{activity.name}</span>}
+                      description={
+                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                          {activity.location && (
+                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                              📍 {activity.location}
+                            </span>
+                          )}
+                          {activity.minSize && (
+                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                              👥 Min {activity.minSize} · Max {activity.maxSize ?? "?"} participants
+                            </span>
+                          )}
+                          {activity.duration && (
+                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                              ⏱ {activity.duration} hours
+                            </span>
+                          )}
+                        </div>
+                      }
+                    />
+                    <Tag color="red" style={{ marginRight: "8px" }}>Rejected</Tag>
+                  </List.Item>
+                )}
+                locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No rejected activities</span> }}
               />
             </div>
           )}
