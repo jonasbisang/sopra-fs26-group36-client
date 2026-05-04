@@ -10,7 +10,8 @@ import {
   LogoutOutlined,
   TeamOutlined,
   PlusOutlined,
-  SettingOutlined
+  SettingOutlined,
+  MessageOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -403,7 +404,15 @@ const GroupPage: React.FC = () => {
           >
             New Activity
           </Button>
-          
+
+          <Button
+            type="text"
+            icon={<MessageOutlined />}
+            style={{ color: "white" }}
+            onClick={() => router.push(`/groups/${groupId}/chat`)}
+          >
+            Group Chat
+          </Button>
           
           {group?.adminId.toString() === userId && ( 
           <Button
