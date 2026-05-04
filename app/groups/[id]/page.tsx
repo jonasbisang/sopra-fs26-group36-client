@@ -46,7 +46,7 @@ interface Activity {
   isWeatherDependent?: boolean;
   acceptVotes?: number;
   participantUsernames?: string[];
-   minTemp?: number;       
+  minTemp?: number;       
   maxTemp?: number;        
   rainPreference?: string; 
 }
@@ -57,6 +57,7 @@ interface CalendarEvent {
   start: Date;
   end: Date;
   location?: string;
+  isFull?: boolean;
 }
 
 const GroupPage: React.FC = () => {
@@ -144,14 +145,19 @@ const GroupPage: React.FC = () => {
 
       try {
         //Fetch calendar events
-        const events = await apiService.get<CalendarEvent[]>(
+        const events = await apiService.get<Activity[]>(
           `/groups/${groupId}/calendar`
         );
         // Convert date strings to Date objects for react-big-calendar
         const formatted = events.map((e) => ({
-          ...e,
-          start: new Date(e.start),
-          end: new Date(e.end),
+          id: e.id,
+          title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(
+            new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000
+          ),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
         }));
         setCalendarEvents(formatted);
       } catch (error) {
@@ -364,23 +370,6 @@ const GroupPage: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          {/* <h1 style={{
-            fontSize: "32px",
-            color: "white",
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: "2px",
-          }}>
-            F<span style={{ color: "#ff4238" }}>·</span>
-            R<span style={{ color: "#ffdc00" }}>·</span>
-            I<span style={{ color: "#42a2d6" }}>·</span>
-            E<span style={{ color: "#ff4238" }}>·</span>
-            N<span style={{ color: "#ffdc00" }}>·</span>
-            D<span style={{ color: "#42a2d6" }}>·</span>
-            L<span style={{ color: "#ff4238" }}>·</span>
-            E<span style={{ color: "#ffdc00" }}>·</span>
-            R
-          </h1> */}
         </div>
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
@@ -678,7 +667,11 @@ const GroupPage: React.FC = () => {
                       + Join
                     </Button>
                   )}
-                <Tag color="green">Planned</Tag>
+                {activity.maxSize && (activity.acceptVotes ?? 0) >= activity.maxSize ? (
+                  <Tag color="red">Full</Tag>
+                ) : (
+                  <Tag color="green">{activity.acceptVotes ?? 0}/{activity.maxSize} joined</Tag>
+                )}
               </List.Item>
             )}
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
@@ -762,6 +755,14 @@ const GroupPage: React.FC = () => {
               startAccessor="start"
               endAccessor="end"
               style={{ height: "100%" }}
+              onSelectEvent={(event) => router.push(`/groups/${groupId}/activities/${event.id}`)}
+              eventPropGetter={(event) => ({
+                style: {
+                backgroundColor: event.isFull ? "#ff4d4f" : "#42d678",
+                border: "none",
+                borderRadius: "4px",
+              }
+            })}
             />
           </div>
         </div>
