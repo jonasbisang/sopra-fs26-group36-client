@@ -51,7 +51,8 @@ interface Activity {
   participantUsernames?: string[];
    minTemp?: number;       
   maxTemp?: number;        
-  rainPreference?: string; 
+  rainPreference?: string;
+  isRecursive?: boolean; 
 }
 
 interface CalendarEvent {
@@ -332,6 +333,11 @@ const GroupPage: React.FC = () => {
       <p>⏱ {newEventPopup.duration} hours</p>
       )}
       <p style={{ color: "#999", fontSize: "12px" }}>The event has been added to the group calendar.</p>
+      {newEventPopup?.isRecursive && (
+        <p style={{ color: "#7c3aed", fontSize: "12px", marginTop: "6px" }}>
+          🔁 This is a recurring activity — it has automatically re-entered the voting pool so the group can do it again!
+        </p>
+      )}
       </div>
       </Modal>
 
@@ -556,6 +562,9 @@ const GroupPage: React.FC = () => {
                       {pendingActivities[0].isWeatherDependent && (
                         <Tag color="cyan">Weather-dependent</Tag>
                       )}
+                      {pendingActivities[0].isRecursive && (
+                        <Tag color="purple">🔁 Recurring</Tag>
+                      )}
                     </div>
                     {pendingActivities[0].minSize && (
                       <div style={{ marginTop: "10px" }}>
@@ -694,6 +703,9 @@ const GroupPage: React.FC = () => {
                     </Button>
                   )}
                 <Tag color="green">Planned</Tag>
+                  {activity.isRecursive && (
+                    <Tag color="purple">🔁 Recurring</Tag>
+                  )}
               </List.Item>
             )}
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
@@ -736,6 +748,9 @@ const GroupPage: React.FC = () => {
                       }
                     />
                     <Tag color="orange">Waiting</Tag>
+                      {activity.isRecursive && (
+                      <Tag color="purple">🔁 Recurring</Tag>
+                    )}
                   </List.Item>
                 )}
                 locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>None waiting</span> }}
