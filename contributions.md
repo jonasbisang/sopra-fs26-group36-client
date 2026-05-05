@@ -114,12 +114,11 @@ reason).
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **elisabettade**    | 04.05.2026 | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/7714831eaa02a4fbd2a244240883b15a6e529b4f | created activity detail page and made it accessible by clicking on to scheduled activities in group calendar, also color coded activites in groupcalendar | important for following tasks where users might want to edit activities or make them recursive, colors in groupcalender make usability better |
 |                     | 04.05.2026 | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/fd23da4ea7681b88205c3d28bec27ccbcf8f65c3 | created page, button and routepush for groupchat | important to make it possible for users to communicate in their groups |
-<<<<<<< HEAD
 | **[jonasbisang]**         | [05.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/109/commits/b197bab8863a20a20c9f2a1f0e03650709415f2d] | [User overview page which can be filtered to only show user of common groups] | [To enable the user to get an overview of the users of our website, especially of user which share a group with them] |
 |                     | [5.5.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/180/commits/2e3dc68293e5c0205b03e2f335477c79d258b97b] | [Tests for functionallity of returning users] | [Test functionality of backend --> Our stuff is only protected on the frontend (only loggedin users) is it enough] |
-=======
 | **[@CiaranHendriks]**         | [02.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/178/changes/9d2394b286c102656b8a062ec5509b668775c43e] | [Random delay before processing request] | [Prevent two users from joining a activity at the same time] |
 |                     | [02.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/178/changes/ae93a42ecf584e7c51eb64f96a62d992f9aba4cb] | [Check for free slots, when trying to join a activity] | [Prevent "overbooking"/too many people joining a activity] |
+|                     | [05.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/ca407be65d10595c71a628857a2bc4336a1081dc] | [Recreate activity when isRecursive = True] | [Functionality on the backend if a activity is wanted as a recursive activity] |
 | **[user3]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
 | **[user4]**         | [date]   | [link1] | [what] | [why] |
