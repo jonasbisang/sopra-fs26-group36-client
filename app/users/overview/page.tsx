@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import type { TableProps } from "antd";
-import { useRouter, useParams } from "next/navigation"; // use NextJS router for navigation
+import { useRouter} from "next/navigation"; // use NextJS router for navigation
 import { useApi } from "@/hooks/useApi";
 import { User } from "@/types/user";
 import { Button, Table} from "antd";
@@ -13,7 +13,6 @@ import logo from '@/friendlerLogo.png';
 
 
 const Overview: React.FC = () => {
-const params = useParams();
 const router = useRouter();
 const { value: userId } = useLocalStorage<string>("userId", "");
 const { clear: clearToken } = useLocalStorage<string>("token", "");
@@ -135,7 +134,7 @@ return(
           loading={!users}
           rowKey="id"
           onRow={(row) => ({
-            onClick: () => router.push(`/users/${row.id}`),
+            onClick: () => router.push(`/users/overview/${row.id}`),
             style: { cursor: "pointer" },
           })}
         />
