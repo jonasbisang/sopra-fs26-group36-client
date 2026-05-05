@@ -172,6 +172,7 @@ useEffect(() => {
         <div style={{ display: 'flex', gap: '20px' }}>
           <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
           <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
+           <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: "white" }}>Logout</Button>
         </div>
     </div>

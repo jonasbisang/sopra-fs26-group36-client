@@ -8,9 +8,8 @@ import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { User } from "@/types/user";
 import { Button, Card, Table } from "antd";
-import type { TableProps } from "antd"; // antd component library allows imports of types
-// Optionally, you can import a CSS module or file for additional styling:
-// import "@/styles/views/Dashboard.scss";
+import type { TableProps } from "antd"; 
+import { LogoutOutlined, UserOutlined, CalendarOutlined, ArrowLeftOutlined } from "@ant-design/icons";
 
 // Columns for the antd table of User objects
 const columns: TableProps<User>["columns"] = [
@@ -109,6 +108,7 @@ const Dashboard: React.FC = () => {
                 style: { cursor: "pointer" },
               })}
             />
+
             <Button onClick={handleLogout} type="primary">
               Logout
             </Button>
