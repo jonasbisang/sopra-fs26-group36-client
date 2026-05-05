@@ -3,14 +3,15 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal} from "antd";
+import { Button, message, List, Avatar, Tag , Modal, Popconfirm} from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
   PlusOutlined,
-  SettingOutlined
+  SettingOutlined,
+  DeleteOutlined
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -38,6 +39,8 @@ interface Activity {
   id: number;
   name: string;
   status: string;
+  authorId?: number;
+  //isRecursive?: boolean; missing the is recursive booelan (but which has already been added by another branch)
   scheduledTime?: string;
   location?: string;
   minSize?: number;
@@ -259,6 +262,23 @@ const GroupPage: React.FC = () => {
       console.error(error);
       }
     };
+
+  const handleDeleteActivity = async (activityId: number) => {
+    try {
+      await apiService.delete(`/groups/${groupId}/activities/${activityId}`);
+      messageApi.success("Activity deleted.");
+      
+      // Optimistically update lists
+      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setPlannedActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setLikedActivities((prev) => prev.filter((a) => a.id !== activityId));
+    } catch (error) {
+      messageApi.error("Failed to delete activity.");
+      console.error(error);
+    }
+  };
+
+  //here the function for removing the recursive function should be added (will complete it once the recursive features are finished)
 
 
   const handleLeaveGroup = async () => {
@@ -557,9 +577,25 @@ const GroupPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-                  </div>
                 </div>
-
+                {pendingActivities[0].authorId?.toString() === userId && (
+                    <div style={{ display: "flex", gap: "8px", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                      <Popconfirm title="Delete this activity?" onConfirm={() => handleDeleteActivity(pendingActivities[0].id)}>
+                        <Button size="small" danger icon={<DeleteOutlined />} style={{ background: "transparent" }}>
+                          Delete
+                        </Button>
+                      </Popconfirm>
+                      {/*{pendingActivities[0].isRecursive && (
+                        <Popconfirm title="Stop recurring?" onConfirm={() => handleStopRecursion(pendingActivities[0].id)}>
+                          <Button size="small" icon={<StopOutlined />} style={{ color: "#d9d9d9", background: "transparent", borderColor: "#555" }}>
+                            Stop Recursion
+                          </Button>
+                        </Popconfirm>
+                      )}*/}
+                    </div>
+                    )}
+                </div>
+              
                 {/* Vote buttons */}
                 <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
                   <Button
