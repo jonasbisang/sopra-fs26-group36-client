@@ -134,7 +134,7 @@ return(
           loading={!users}
           rowKey="id"
           onRow={(row) => ({
-            onClick: () => router.push(`/users/overview/${row.id}`),
+            onClick: () => router.push(`/users/${row.id}`),
             style: { cursor: "pointer" },
           })}
         />
