@@ -134,9 +134,14 @@ return(
           loading={!users}
           rowKey="id"
           onRow={(row) => ({
-            onClick: () => router.push(`/users/${row.id}`),
-            style: { cursor: "pointer" },
-          })}
+            onClick: () => {
+            if (groupUserIds.has(String(row.id))) {
+            router.push(`/users/overview/${row.id}`);
+             }},
+            style: { 
+            cursor: groupUserIds.has(String(row.id)) ? "pointer" : "not-allowed",
+            opacity: groupUserIds.has(String(row.id)) ? 1 : 0.5,
+          },})}
         />
 
 
