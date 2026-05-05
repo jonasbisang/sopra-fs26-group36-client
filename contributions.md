@@ -119,8 +119,8 @@ reason).
 | **[@CiaranHendriks]**         | [02.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/178/changes/9d2394b286c102656b8a062ec5509b668775c43e] | [Random delay before processing request] | [Prevent two users from joining a activity at the same time] |
 |                     | [02.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/178/changes/ae93a42ecf584e7c51eb64f96a62d992f9aba4cb] | [Check for free slots, when trying to join a activity] | [Prevent "overbooking"/too many people joining a activity] |
 |                     | [05.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/commit/ca407be65d10595c71a628857a2bc4336a1081dc] | [Recreate activity when isRecursive = True] | [Functionality on the backend if a activity is wanted as a recursive activity] |
-| **[user3]**         | [date]   | [link1] | [what] | [why] |
-|                     | [date]   | [link2] | [what] | [why] |
+| **@vonhollym-art**         | 05.05.2026| https://github.com/jonasbisang/sopra-fs26-group36-server/commit/25fd0798aa776e5aec088c24dbd34c28228b9c7a https://github.com/jonasbisang/sopra-fs26-group36-server/commit/0c3e5b2cedeae63a57b05d076f94d42127489212 | Automatically add the activity to every participants google calendar when scheduled | Acts as confirmation and useful for users to not have to add event manually to their calendar but to already have it sinked |
+|                     | 05.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/4ea672e7e61ac6e1b8db358f70fb658557f71de8 | Dev task 70 and 71: reviving activity | easier to revive passed activity if user wants to do it again than creating it from scratch|
 | **[user4]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
 | **[user5]**         | [date]   | [link1] | [what] | [why] |
