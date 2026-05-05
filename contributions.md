@@ -123,8 +123,8 @@ reason).
 |                     | 05.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/4ea672e7e61ac6e1b8db358f70fb658557f71de8 | Dev task 70 and 71: reviving activity | easier to revive passed activity if user wants to do it again than creating it from scratch|
 | **[user4]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
-| **[user5]**         | [date]   | [link1] | [what] | [why] |
-|                     | [date]   | [link2] | [what] | [why] |
+|**[@ananis21]**      | [03.05.2026]   | [(https://github.com/jonasbisang/sopra-fs26-group36-client/commit/467265408009e764f130d91f37e6ab979009d1e1)] | [Refresh Activies] | [Created the user visualization for when an activity should be reinstalled inside the voting process] |
+|                     | [05.05.2026]   | [(https://github.com/jonasbisang/sopra-fs26-group36-client/commit/e1e6b45bc58a0d32c17d35f05c304f1fba052318] | [Controll Over Activities] | [Giving thw different users the option to delte or stop the repetiton of the different activities that they've created] |
 
 
 ---
