@@ -115,8 +115,8 @@ reason).
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **elisabettade**    | 04.05.2026 | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/7714831eaa02a4fbd2a244240883b15a6e529b4f | created activity detail page and made it accessible by clicking on to scheduled activities in group calendar, also color coded activites in groupcalendar | important for following tasks where users might want to edit activities or make them recursive, colors in groupcalender make usability better |
 |                     | 04.05.2026 | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/fd23da4ea7681b88205c3d28bec27ccbcf8f65c3 | created page, button and routepush for groupchat | important to make it possible for users to communicate in their groups |
-| **[user2]**         | [date]   | [link1] | [what] | [why] |
-|                     | [date]   | [link2] | [what] | [why] |
+| **[jonasbisang]**         | [05.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-client/pull/109/commits/b197bab8863a20a20c9f2a1f0e03650709415f2d] | [User overview page which can be filtered to only show user of common groups] | [To enable the user to get an overview of the users of our website, especially of user which share a group with them] |
+|                     | [5.5.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/180/commits/2e3dc68293e5c0205b03e2f335477c79d258b97b] | [Tests for functionallity of returning users] | [Test functionality of backend --> Our stuff is only protected on the frontend (only loggedin users) is it enough] |
 | **[user3]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
 | **[user4]**         | [date]   | [link1] | [what] | [why] |
