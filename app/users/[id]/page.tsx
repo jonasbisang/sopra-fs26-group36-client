@@ -181,6 +181,7 @@ const UserprofilePage: React.FC = () => {
         </div>
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+          <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
           <Button
             type="text"
             icon={<CalendarOutlined />}
@@ -208,12 +209,12 @@ const UserprofilePage: React.FC = () => {
           type="text"
           icon={<ArrowLeftOutlined />}
           style={{ color: "#aaa", marginBottom: "30px", padding: 0 }}
-          onClick={() => router.push("/groups")}
+          onClick={() => router.back()}
         >
-          Back to Groups
+          Back
         </Button>
 
-        {/* PAGE TITLE + EDIT BUTTON ROW*/}
+      
         <div style={{
           display: "flex",
           justifyContent: "space-between",
@@ -227,10 +228,10 @@ const UserprofilePage: React.FC = () => {
               margin: "0 0 6px 0",
               fontWeight: "bold",
             }}>
-              My Profile
+              User Profile
             </h2>
             <p style={{ color: "#aaa", margin: 0 }}>
-              Your personal information and account details.
+            Information and account details.
             </p>
           </div>
 
