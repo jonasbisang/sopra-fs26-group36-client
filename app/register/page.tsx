@@ -175,7 +175,10 @@ const Register: React.FC = () => {
         <Form.Item
           name="name"
           label={<span style={{ color: "white" }}>Full name</span>}
-          rules={[{ required: true, message: "Please input your full name!" }]}
+          rules={[{ required: true, message: "Please input your full name!" },
+            {pattern: /^(?=.*[a-zA-Z])[a-zA-Z ]{1,40}$/,
+            message: "No special characters allowed"}
+          ]}
         >
           <Input placeholder="Enter your name" style={inputStyle} />
 
@@ -185,7 +188,10 @@ const Register: React.FC = () => {
 
           name="username"
           label={<span style={{ color: "white" }}>Username</span>}
-          rules={[{ required: true, message: "Please input your username!" }]}
+          rules={[{ required: true, message: "Please input your username!" },
+                   {pattern: /^[a-zA-Z0-9 ]{1,40}$/,
+            message: "Only letters and numbers allowed"}
+          ]}
       >
           <Input placeholder="Enter username" style={inputStyle} />
 
@@ -194,7 +200,11 @@ const Register: React.FC = () => {
         <Form.Item
           name="password"
           label={<span style={{ color: "white" }}>Password</span>}
-          rules={[{ required: true, message: "Please input your password!" }]}
+          rules={[{ required: true, message: "Please input your password!" },
+            {pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[*_#@%^&,.+/\-])[^\s]{4,25}$/,
+            message: "At least 4 characters. Special characters, lower and uppercase letters needed."
+          }
+          ]}
         >
           <Input.Password placeholder="Enter password" style={inputStyle} />
         </Form.Item>
@@ -205,7 +215,7 @@ const Register: React.FC = () => {
           rules={[{ message: "Please input your bio!" }]}
         >
 
-          <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." style={inputStyle} />
+          <Input.TextArea rows={3} placeholder="Tell us a little about yourself..." style={inputStyle} maxLength={160} />
         </Form.Item>
 
         <Form.Item style={{ marginBottom: 0 }}>

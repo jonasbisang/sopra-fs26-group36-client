@@ -136,7 +136,7 @@ return(
           onRow={(row) => ({
             onClick: () => {
             if (groupUserIds.has(String(row.id))) {
-            router.push(`/users/overview/${row.id}`);
+            router.push(`/users/${row.id}`);
              }},
             style: { 
             cursor: groupUserIds.has(String(row.id)) ? "pointer" : "not-allowed",

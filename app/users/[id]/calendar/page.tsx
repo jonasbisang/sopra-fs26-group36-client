@@ -263,7 +263,7 @@ const CalendarPage: React.FC = () => {
                           minuteStep={15}
                           value={day?.startTime ? dayjs(day.startTime, "HH:mm") : null}
                           onChange={(v) => handleTimeChange(date, "startTime", v)}
-                          style={{ width: "100%" }}
+                          style={{ width: "100%",color: "rgba(255, 255, 255, 0.75)" }}
                         />
                         <div style={{ fontSize: 10, color: "gray" }}>To</div>
                         <TimePicker
@@ -272,7 +272,7 @@ const CalendarPage: React.FC = () => {
                           minuteStep={15}
                           value={day?.endTime ? dayjs(day.endTime, "HH:mm") : null}
                           onChange={(v) => handleTimeChange(date, "endTime", v)}
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", color: "rgba(255, 255, 255, 0.75)" }}
                         />
                       </div>
                     )}
