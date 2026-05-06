@@ -6,6 +6,7 @@ import { Button, message, Spin, TimePicker } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { getApiDomain } from "@/utils/domain";
 
 interface UnavailabilityPostDTO {
   startDateTime: string;
@@ -127,9 +128,12 @@ const CalendarPage: React.FC = () => {
   };
 
   const handleGoogleConnect = async () => {
-    try { //deleting manual entries so it is clear what option the user wants to use 
+    try {
       await apiService.delete(`/users/${userId}/unavailability`);
-      const authUrl = await apiService.get<string>(`/auth/google?userId=${userId}`);
+      
+      const baseURL = getApiDomain();
+      const response = await fetch(`${baseURL}/auth/google?userId=${userId}`);
+      const authUrl = await response.text();
       window.location.href = authUrl;
     } catch (error) {
       message.error("Error, could not connect to Google.");
