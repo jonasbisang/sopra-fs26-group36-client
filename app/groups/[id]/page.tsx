@@ -83,6 +83,7 @@ const GroupPage: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
+  const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
   const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
   const votedActivityIdsRef = useRef<Set<number>>(new Set());
 
@@ -150,6 +151,16 @@ const GroupPage: React.FC = () => {
      
     try {
     // Fetch rejected activities
+        const rejected = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=REJECTED`
+        );
+        setRejectedActivities(rejected);
+      } catch (error) {
+        console.error("Failed to fetch rejected activities:", error);
+      }
+
+      try {
+        // Fetch rejected activities
         const rejected = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=REJECTED`
         );
