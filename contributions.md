@@ -130,7 +130,7 @@ reason).
 ## Contributions Week 6 - [Begin Date] to [End Date]
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
-| **[user1]**         | [date]   | [link1] | [what] | [why] |
+| **[jonasbisang]**         | [10.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/185/commits/faaf8ffe439e47b56b3d77a110eefd4694d666ce / https://github.com/jonasbisang/sopra-fs26-group36-client/pull/113/commits/defde9e8138e5bb9c875eb9ffeef2d7dcc81b0e9] | [Fixed scheduling to use google calendar / New acitivity status] | [User can now use either manual entries, google calendar or both. Acitivities now have two more status in order to differentiate.] |
 |                     | [date]   | [link2] | [what] | [why] |
 | **[user2]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
