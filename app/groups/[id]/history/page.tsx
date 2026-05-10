@@ -2,17 +2,17 @@
 
 import { useRouter, useParams } from "next/navigation";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button } from "antd";
 import {
   ArrowLeftOutlined,
   ClockCircleOutlined,
   CloseCircleOutlined,
+  RedoOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import NextImage from "next/image";
 import logo from "@/friendlerLogo.png";
 import { useApi } from "@/hooks/useApi";
-import { List, Tag } from "antd";
+import { Button, message, List, Tag, Popconfirm, Spin } from "antd";
 import moment from "moment";
 
 
@@ -39,6 +39,7 @@ const HistoryPage: React.FC = () => {
     const params = useParams();
     const groupId = params.id; //make sure the url knows the group id
     const apiService = useApi(); //gives access to the api service we defined in useApi.ts, this will allow us to make requests to the backend
+    const [messageApi, contextHolder] = message.useMessage(); //used for showing messages to the user, like errors or success messages
 
     const { value: token } = useLocalStorage<string>("token", "");
     const [mounted, setMounted] = useState(false);
@@ -50,6 +51,8 @@ const HistoryPage: React.FC = () => {
     const [failedActivities, setFailedActivities] = useState<Activity[]>([]);
     const [failedError, setFailedError] = useState(false);
     const [failedLoading, setFailedLoading] = useState(true);
+
+    const [revivingIds, setRevivingIds] = useState<Set<number>>(new Set());
 
     useEffect(() => {
     setMounted(true);
@@ -110,6 +113,29 @@ const HistoryPage: React.FC = () => {
     fetchFailed();
 }, [groupId, token, apiService]);
 
+    const handleRevive = async (activityId: number, source: "past" | "failed") => {
+        setRevivingIds((prev) => new Set([...prev, activityId]));
+        try {
+            await apiService.post(`/activities/${activityId}/revive`, {}); //backend call 
+            messageApi.success("Activity revived! It's back in the voting pool. 🔄");
+            //remove from the list it came from
+            if (source === "past") {
+                setPastActivities((prev) => prev.filter((a) => a.id !== activityId));
+            } else {
+                setFailedActivities((prev) => prev.filter((a) => a.id !== activityId));
+            }
+        } catch (error) {
+          messageApi.error("Failed to revive activity.");
+          console.error(error);
+        } finally {
+          setRevivingIds((prev) => {
+            const next = new Set(prev);
+            next.delete(activityId);
+            return next;
+          });
+        }
+    };
+
     //form used for fetching failed or past activities
     const renderActivityItem = (activity: Activity, source: "past" | "failed") => (
     <List.Item
@@ -162,6 +188,30 @@ const HistoryPage: React.FC = () => {
             </div>
         }
         />
+
+        <Popconfirm
+            title="Put this activity back in the voting pool?"
+            description="A fresh copy will be created so everyone can vote again."
+            onConfirm={() => handleRevive(activity.id, source)}
+            okText="Revive it!"
+            cancelText="Cancel"
+            >
+            <Button
+                size="small"
+                icon={<RedoOutlined />}
+                loading={revivingIds.has(activity.id)}
+                style={{
+                background: "rgba(66,162,214,0.15)",
+                color: "#42a2d6",
+                border: "1px solid rgba(66,162,214,0.4)",
+                borderRadius: "8px",
+                marginLeft: "16px",
+                flexShrink: 0,
+                }}
+            >
+                Revive
+            </Button>
+        </Popconfirm>
     </List.Item>
     );
 
@@ -175,6 +225,7 @@ return (
             flexDirection: "column",
         }}
     >
+    {contextHolder}
 
     {/* Header with back button and logo */}
 
