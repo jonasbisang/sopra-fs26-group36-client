@@ -84,6 +84,14 @@ const EditProfile: React.FC = () => {
         anythingChanged = true;
       }
 
+      // Bio ändern → PUT /users/{id}/bio
+      if (values.bio !== userData.bio) {
+        await apiService.put(`/users/${userId}/bio`, {
+          newBio: values.bio,
+        });
+        anythingChanged = true;
+      }
+
       if (!anythingChanged) {
         message.info("No changes detected.");
         return;
