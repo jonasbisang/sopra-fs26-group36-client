@@ -70,24 +70,25 @@ const Register: React.FC = () => {
       messageApi.success("Account successfully created!");
       router.push("/groups");
     
-    } catch (error) { 
-      if (error instanceof Error) {
-        if (error.message.includes("409")) {
-        messageApi.error("Username already exists.");
-      } else if (error.message.includes("400")) {
-        messageApi.error("Invalid input. Please check your data.");
-      } else if (error.message.includes("Network")) {
-        messageApi.error("Network error. Please try again.");
-      } else {
-        messageApi.error(`Registration failed: ${error.message}`);//shows the original message to the user
-      }
-    } else {
-      messageApi.error("An unknown error occurred.");
-    }
+    } catch (error) {
+      const appError = error as { status?: number; message?: string };
+      const msg = appError.message ?? "";
 
-  } finally {
-    setLoading(false); // always stop loading
-  }
+      if (msg.includes("username and the email")) {
+        messageApi.error("This username and email are already taken.");
+      } else if (msg.includes("username")) {
+        messageApi.error("This username is already taken.");
+      } else if (msg.includes("Email")) {
+        messageApi.error("This email is already taken.");
+      } else if (appError.status === 400) {
+        messageApi.error("Invalid input. Please check your details.");
+      } else {
+        messageApi.error("Registration failed. Please try again.");
+      }
+
+    } finally {
+      setLoading(false); // always stop loading
+    }
   };
 
   
