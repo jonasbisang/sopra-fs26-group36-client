@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal} from "antd";
+import { Button, message, List, Avatar, Tag , Modal, DatePicker } from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -77,6 +77,7 @@ const GroupPage: React.FC = () => {
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
   const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
@@ -821,7 +822,16 @@ const GroupPage: React.FC = () => {
           borderRadius: "12px",
           padding: "24px",
         }}>
+         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
           <h3 style={{ color: "white", marginBottom: "16px" }}>🗓 Group Calendar</h3>
+          <DatePicker
+            onChange={(date) => {
+              if (date) setCalendarDate(date.toDate());
+            }}
+            placeholder="Go to date"
+            style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "white" }}
+          />
+          </div>
           <div style={{ height: "500px" }}>
             {/* Dark theme override for react-big-calendar */}
             <style>{`
@@ -837,6 +847,20 @@ const GroupPage: React.FC = () => {
               .rbc-date-cell { color: white; }
               .rbc-event { background-color: #42a2d6; }
 
+              .ant-picker {
+                background-color: rgba(255,255,255,0.08) !important;
+                border-color: rgba(255,255,255,0.2) !important;
+              }
+              .ant-picker input {
+                color: white !important;
+              }
+              .ant-picker input::placeholder {
+                color: rgba(255,255,255,0.4) !important;
+              }
+              .ant-picker-suffix {
+                color: rgba(255,255,255,0.4) !important;
+              }
+
               .ant-modal-body p,
               .ant-modal-body b,
               .ant-modal-body div {
@@ -848,6 +872,8 @@ const GroupPage: React.FC = () => {
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
+              date={calendarDate}
+              onNavigate={(date) => setCalendarDate(date)}
               style={{ height: "100%" }}
             />
           </div>
