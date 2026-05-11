@@ -40,6 +40,17 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
 
   // when pop up is successfully completed, this gets sent 
   const onFinish = async (values: ActivityFormValues) => {
+    console.log("all values:", values);
+      // Prüfen ob Duration zur Zeitspanne passt
+      if (values.timeRange && values.timeRange[0] && values.timeRange[1]) {
+        const windowHours = (values.timeRange[1].valueOf() - values.timeRange[0].valueOf()) / (1000 * 60 * 60);
+        const rounded = Math.round(windowHours);
+        if (values.duration !== rounded) {
+          messageApi.error(`Duration must be ${rounded}h to match the time window`);
+          return;
+      }
+    }
+  
     try {
       const isCustomTime = values.timePreference === "CUSTOM";
       // all the data that is then organizedly sent to backend      
@@ -146,6 +157,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
                 name="duration"
                 label={<span style={labelStyle}>DURATION (hours)</span>}
                 rules={[{ required: true, message: "Required" }]}
+                      
                 style={{ flex: 1 }}
               >
                  <InputNumber min={1} max={24} style={{ width: "100%", ...inputStyle }} />
