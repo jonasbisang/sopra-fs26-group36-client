@@ -92,15 +92,15 @@ const GroupPage: React.FC = () => {
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  //useEffect(() => {
-  //  setMounted(true);
-  //}, []);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
-  //useEffect(() => {
-  //if (mounted && (!token || token === "")) {
-  //  router.replace("/login");
-  //}
-//}, [mounted, token, router]);
+  useEffect(() => {
+  if (mounted && (!token || token === "")) {
+    router.replace("/login");
+  }
+}, [mounted, token, router]);
 
   //Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
   useEffect(() => {

@@ -18,6 +18,7 @@ import { useState, useEffect } from "react";
 
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
+import { createDiffieHellmanGroup } from "crypto";
 
 
 interface JoinGroupValues {
@@ -91,20 +92,21 @@ useEffect(() => {
 
     const handleCreateGroup = async (values: CreateGroupValues) => {
         try {
-        // //!!!!!!!!!!!!!!!!!// LOOK AT AGAIN FOR WHEN THE BACKEND GROUP CREATE GETS CREATED
-        await apiService.post("/groups", { name: values.newGroupName, joinPassword: values.password });
-        console.log("Creating group with values:", values);
-        Modal.success({
-        title: "Group created!",
-        content: `Your group ID is ${values.newGroupName}; share this and the password with anyone who wants to join.`,
-        okText: "Got it!",
-        });
-        await fetchGroups();
-        createForm.resetFields(); // Clear the form after success
+          const createdGroup = await apiService.post<{id: number, name: string}>("/groups", { 
+            name: values.newGroupName, 
+            joinPassword: values.password 
+          });
+          Modal.success({
+            title: "Group created!",
+            content: `Your group ID is ${createdGroup.id}; share this and the password with anyone who wants to join.`,
+            okText: "Got it!",
+          });
+          await fetchGroups();
+          createForm.resetFields(); // Clear the form after success
         } catch (error) {
-        messageApi.error("Failed to create the group.");
+          messageApi.error("Failed to create the group.");
         }
-    };
+      };
 
     const glassBoxStyle: React.CSSProperties = { // value created of translucent boxes 
         backgroundColor: 'rgba(126, 126, 126, 0.2)',
