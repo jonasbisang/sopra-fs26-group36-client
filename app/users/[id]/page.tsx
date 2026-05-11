@@ -163,10 +163,10 @@ const UserprofilePage: React.FC = () => {
             <Button
               type="text"
               icon={<ArrowLeftOutlined />}
-              onClick={() => router.back()}
+              onClick={() => router.push("/groups")}
               style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
             >
-            Back
+            Back to Groups
             </Button>
             </div>  
 
