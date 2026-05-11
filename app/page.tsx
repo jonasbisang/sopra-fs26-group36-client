@@ -18,8 +18,8 @@ export default function Home() {
                 <NextImage
                   src={logo}
                   alt="Friendler Logo"
-                  height={100}
-                  width={380}
+                  height={60}
+                  width={250}
                   />
         </div>
         <div className={styles.navBtns}>
