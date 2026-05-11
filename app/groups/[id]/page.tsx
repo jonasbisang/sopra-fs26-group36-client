@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal} from "antd";
+import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, Badge } from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -12,6 +12,7 @@ import {
   PlusOutlined,
   SettingOutlined,
   MessageOutlined,
+  SendOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -60,6 +61,13 @@ interface CalendarEvent {
   location?: string;
 }
 
+interface Message {
+  id: number;
+  text: string;
+  senderName: string;
+  createdAt?: string;
+}
+
 const GroupPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
@@ -90,6 +98,13 @@ const GroupPage: React.FC = () => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
 
   useEffect(() => {
     setMounted(true);
@@ -218,8 +233,52 @@ const GroupPage: React.FC = () => {
     } catch (error) {
       console.error("Failed to fetch pending activities after creation:", error);
     }
-    
   };
+
+  const fetchMessages = async () => {
+  try {
+
+    //MOCKDATEN, ENTFERNEN NACH BACKEND IMPLEMENTIERUNG
+      const newMsgs=([
+      { id: 1, text: "mockdata", senderName: "Tim", createdAt: "2026-05-10T10:00:00" },
+      { id: 2, text: "mockdata", senderName: "Tom", createdAt: "2026-05-10T10:01:00" },
+      { id: 3, text: "mockdata", senderName: "Tam", createdAt: "2026-05-10T10:02:00" },
+    ]);
+
+    setChatMessages((prev) => {
+      const prevCount = prev.length;
+      const newCount = newMsgs.length;
+      if (!chatOpen && newCount > prevCount) {
+        setUnreadCount((u) => u + (newCount - prevCount));
+      }
+      return newMsgs;
+    });
+
+
+    // const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
+    // setChatMessages((prev) => {
+    //   if (!chatOpen && msgs.length > prev.length) {
+    //     setUnreadCount((u) => u + (msgs.length - prev.length));
+    //   }
+    //   return msgs;
+    // });
+  } catch (error) {
+    console.error("Failed to fetch messages:", error);
+  }
+};
+
+// Polling für neue Messages wenn Chat offen ist
+useEffect(() => {
+  if (!chatOpen || !groupId || !token) return;
+  fetchMessages(); // initial laden
+  const interval = setInterval(fetchMessages, 3000);
+  return () => clearInterval(interval);
+}, [chatOpen, groupId, token]);
+
+// Auto-scroll nach unten wenn neue Messages kommen
+useEffect(() => {
+  chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [chatMessages]);
 
   const handleJoin = async (activityId: number) => {
     try {
@@ -301,6 +360,21 @@ const GroupPage: React.FC = () => {
     router.push("/login");
   };
 
+  const handleSendMessage = async () => {
+  if (!newMessage.trim()) return;
+  try {
+    await apiService.post(`/groups/${groupId}/messages`, {
+      text: newMessage,
+    });
+    setNewMessage("");
+    fetchMessages(); // sofort neu laden
+  } catch (error) {
+    messageApi.error("Failed to send message.");
+    console.error(error);
+  }
+};
+
+
   const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
 
   return (
@@ -337,6 +411,87 @@ const GroupPage: React.FC = () => {
       </div>
       </Modal>
 
+      {/* Group Chat Drawer */}
+<Drawer
+  title={<span style={{ color: "white" }}>💬 Group Chat</span>}
+  placement="right"
+  onClose={() => setChatOpen(false)}
+  open={chatOpen}
+  width={380}
+  styles={{
+    body: { backgroundColor: "#111", padding: "16px", display: "flex", flexDirection: "column", height: "100%" },
+    header: { backgroundColor: "#111", borderBottom: "1px solid rgba(255,255,255,0.1)" },
+    mask: { backdropFilter: "blur(4px)" },
+  }}
+>
+  {/* Messages */}
+  <div style={{ flex: 1, overflowY: "auto", marginBottom: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+    {chatMessages.length === 0 ? (
+      <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", marginTop: "40px" }}>
+        No messages yet. Say hi! 👋
+      </div>
+    ) : (
+      chatMessages.map((msg) => {
+        const isOwn = msg.senderName === members.find((m) => m.id.toString() === userId)?.username;
+        return (
+          <div key={msg.id} style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: isOwn ? "flex-end" : "flex-start",
+          }}>
+            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "11px", marginBottom: "4px" }}>
+              {msg.senderName}
+            </span>
+            <div style={{
+              backgroundColor: isOwn ? "#42a2d6" : "rgba(255,255,255,0.1)",
+              color: "white",
+              borderRadius: isOwn ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+              padding: "10px 14px",
+              maxWidth: "80%",
+              fontSize: "14px",
+            }}>
+              {msg.text}
+            </div>
+            {msg.createdAt && (
+              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "10px", marginTop: "2px" }}>
+                {moment(msg.createdAt).format("HH:mm")}
+              </span>
+            )}
+          </div>
+        );
+      })
+    )}
+    <div ref={chatBottomRef} />
+  </div>
+
+  {/* Input */}
+  <div style={{ display: "flex", gap: "8px" }}>
+    <Input
+      value={newMessage}
+      onChange={(e) => setNewMessage(e.target.value)}
+      onPressEnter={handleSendMessage}
+      placeholder="Type a message..."
+      style={{
+        backgroundColor: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        color: "white",
+        borderRadius: "8px",
+      }}
+    />
+    <Button
+      icon={<SendOutlined />}
+      onClick={handleSendMessage}
+      style={{
+        backgroundColor: "#42a2d6",
+        border: "none",
+        color: "white",
+        borderRadius: "8px",
+      }}
+    />
+  </div>
+</Drawer>
+
+
        {/* Feedback Flash Overlay */}
       {feedbackType && (
         <div style={{
@@ -365,23 +520,7 @@ const GroupPage: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          {/* <h1 style={{
-            fontSize: "32px",
-            color: "white",
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: "2px",
-          }}>
-            F<span style={{ color: "#ff4238" }}>·</span>
-            R<span style={{ color: "#ffdc00" }}>·</span>
-            I<span style={{ color: "#42a2d6" }}>·</span>
-            E<span style={{ color: "#ff4238" }}>·</span>
-            N<span style={{ color: "#ffdc00" }}>·</span>
-            D<span style={{ color: "#42a2d6" }}>·</span>
-            L<span style={{ color: "#ff4238" }}>·</span>
-            E<span style={{ color: "#ffdc00" }}>·</span>
-            R
-          </h1> */}
+
         </div>
 
                 <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
@@ -403,15 +542,6 @@ const GroupPage: React.FC = () => {
             style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
           >
             New Activity
-          </Button>
-
-          <Button
-            type="text"
-            icon={<MessageOutlined />}
-            style={{ color: "white" }}
-            onClick={() => router.push(`/groups/${groupId}/chat`)}
-          >
-            Group Chat
           </Button>
           
           {group?.adminId.toString() === userId && ( 
@@ -774,7 +904,32 @@ const GroupPage: React.FC = () => {
             />
           </div>
         </div>
-
+      {/* Floating Chat Button */}
+<div
+  style={{
+    position: "fixed",
+    bottom: "32px",
+    right: "32px",
+    zIndex: 1000,
+  }}> 
+    <Badge count={unreadCount} offset={[-4, 4]}>
+  <Button
+    type="primary"
+    shape="circle"
+    size="large"
+    icon={<MessageOutlined />}
+    onClick={() => {setChatOpen(true); setUnreadCount(0); }}
+    style={{
+      width: "56px",
+      height: "56px",
+      backgroundColor: "#42a2d6",
+      border: "none",
+      boxShadow: "0 4px 16px rgba(66,162,214,0.4)",
+      fontSize: "20px",
+    }}
+  />
+  </Badge>
+</div>
       </div>
     <CreateActivityModal 
       visible={isCreateModalVisible}
