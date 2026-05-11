@@ -131,7 +131,7 @@ reason).
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[jonasbisang]**         | [10.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/185/commits/faaf8ffe439e47b56b3d77a110eefd4694d666ce / https://github.com/jonasbisang/sopra-fs26-group36-client/pull/113/commits/defde9e8138e5bb9c875eb9ffeef2d7dcc81b0e9] | [Fixed scheduling to use google calendar / New acitivity status] | [User can now use either manual entries, google calendar or both. Acitivities now have two more status in order to differentiate.] |
-|                     | [date]   | [link2] | [what] | [why] |
+|                     | [11.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/187/commits/90747af1c19c03ac95cb5584e6c4f801f121693f / https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c3cd62525c9e3156474f5017129e2e3f2e3b677f] | [Frontend can now fetch scheduled events for calendar.] | [To allow the user to visually see WHEN an event is scheduled.] |
 | **[user2]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
 >>>>>>> 886895d9bd0b162e321e757bbf11e65124b0a2ad
