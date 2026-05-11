@@ -4,7 +4,7 @@
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";  //use NextJS router for navigation
-import { Button, Card, Form, Input, Layout, Typography, Space, message } from "antd";
+import { Button, Card, Form, Input, Layout, Typography, Space, message, Modal } from "antd";
 import { 
   CalendarOutlined, 
   SettingOutlined, 
@@ -94,7 +94,11 @@ useEffect(() => {
         // //!!!!!!!!!!!!!!!!!// LOOK AT AGAIN FOR WHEN THE BACKEND GROUP CREATE GETS CREATED
         await apiService.post("/groups", { name: values.newGroupName, joinPassword: values.password });
         console.log("Creating group with values:", values);
-        messageApi.success(`Successfully created group: ${values.newGroupName}`);
+        Modal.success({
+        title: "Group created!",
+        content: `Your group ID is ${values.newGroupName}; share this and the password with anyone who wants to join.`,
+        okText: "Got it!",
+        });
         await fetchGroups();
         createForm.resetFields(); // Clear the form after success
         } catch (error) {
@@ -139,26 +143,6 @@ useEffect(() => {
         alignItems: 'center',
         borderBottom: '1px solid rgba(255,255,255,0.1)' // Subtle separator line
     }}>
-
-    {/* <div style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}> 
-          <h1 style={{ // the logo should take you to the dashboard when clicked
-            fontSize: '32px', // Smaller than login page, suitable for header
-            color: 'white', 
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: '2px'
-          }}>
-            F<span style={{ color: '#ff4238' }}>·</span>
-            R<span style={{ color: '#ffdc00' }}>·</span>
-            I<span style={{ color: '#42a2d6' }}>·</span>
-            E<span style={{ color: '#ff4238' }}>·</span>
-            N<span style={{ color: '#ffdc00' }}>·</span>
-            D<span style={{ color: '#42a2d6' }}>·</span>
-            L<span style={{ color: '#ff4238' }}>·</span>
-            E<span style={{ color: '#ffdc00' }}>·</span>
-            R
-          </h1>
-        </div> */}
 
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <NextImage
