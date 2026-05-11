@@ -187,10 +187,21 @@ const GroupPage: React.FC = () => {
           }
           return planned;
         });
+        const events = await apiService.get<Activity[]>(`/groups/${groupId}/calendar`);
+        const formatted = events.map((e) => ({
+          id: e.id, title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
+      }));
+
+      setCalendarEvents(formatted);
+      
       } catch (error) {
         console.error("Polling error:", error);
       }
-    }, 2000); // alle 10 Sekunden
+    }, 10000); // alle 10 Sekunden
 
     return () => clearInterval(interval);
   }, [groupId, token]);
@@ -210,6 +221,8 @@ const GroupPage: React.FC = () => {
   }, 2000);
   return () => clearInterval(interval);
     }, [groupId, token]);
+
+
 
   //conect to backend and update the list of pending activities
   const handleActivityCreated = async () => {
