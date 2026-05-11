@@ -10,7 +10,7 @@ import React, { useState } from "react";
 // import styles from "@/styles/page.module.css";
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
-
+import { ArrowRightOutlined } from "@ant-design/icons";
 
 interface NeededFields { 
   name: string; 
@@ -113,25 +113,6 @@ const Register: React.FC = () => {
           borderRadius: '12px' 
         }}>
       
-{/* <h1 style={{ 
-          fontSize: '64px', 
-          textAlign: 'center', 
-          color: 'white', 
-          margin: 0,
-    
-          fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif', custom font for logo 
-          letterSpacing: '2px'
-        }}>
-          F<span style={{ color: '#ff4238' }}>·</span>
-          R<span style={{ color: '#ffdc00' }}>·</span>
-          I<span style={{ color: '#42a2d6' }}>·</span>
-          E<span style={{ color: '#ff4238' }}>·</span>
-          N<span style={{ color: '#ffdc00' }}>·</span>
-          D<span style={{ color: '#42a2d6' }}>·</span>
-          L<span style={{ color: '#ff4238' }}>·</span>
-          E<span style={{ color: '#ffdc00' }}>·</span>
-          R
-      </h1> */}
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <NextImage
           src={logo}
@@ -140,9 +121,6 @@ const Register: React.FC = () => {
           width={480}
         />
         </div>
-
-      {/* <img src={friendlerLogo.src} alt="Friendler Logo" style={{ width: '200px', marginBottom: '20px' }} /> */}
-
 
         <p style={{ color: 'white', letterSpacing: '2px', marginBottom: '40px', textAlign: 'center', fontSize: '12px', fontWeight: 'bold' }}>
           CREATE YOUR ACCOUNT
@@ -202,7 +180,7 @@ const Register: React.FC = () => {
           name="password"
           label={<span style={{ color: "white" }}>Password</span>}
           rules={[{ required: true, message: "Please input your password!" },
-            {pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[*_#@%^&,.+/\-])[^\s]{4,25}$/,
+            {pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[*_#@%^&,.+/\-!?])[^\s]{4,25}$/,
             message: "At least 4 characters. Special characters, lower and uppercase letters needed."
           }
           ]}
@@ -229,23 +207,34 @@ const Register: React.FC = () => {
 
           <div style={{ textAlign: 'center' }}>
         
-          <Form.Item>
-            <Button size = "middle" block onClick={() => router.push('/login')} style={{ backgroundColor: "white", color: 'black', fontWeight: 'bold'}}>
-              Already have an account? 
-            </Button>
-          </Form.Item>
-          </div>
-        </Form>
+        <Form.Item>
+        <div
+          onClick={() => router.push('/login')}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "6px",
+            color: "rgba(255,255,255,0.5)",
+            fontSize: "14px",
+            cursor: "pointer",
+            marginTop: "4px",
+          }}
+          onMouseEnter={e => (e.currentTarget.style.color = "white")}
+          onMouseLeave={e => (e.currentTarget.style.color = "rgba(255,255,255,0.5)")}
+        >
+          Already have an account? Log in
+          <ArrowRightOutlined style={{ fontSize: "12px" }} />
+        </div>
+      </Form.Item>
 
 
     </div>
-
+    </Form>
+    </div>
     </div>
   
   );
 };
 
 export default Register;
-
-
-
