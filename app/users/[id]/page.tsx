@@ -154,31 +154,21 @@ const UserprofilePage: React.FC = () => {
         alignItems: "center",
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
-        {/* <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          <h1 style={{
-            fontSize: "32px", color: "white", margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: "2px",
-          }}>
-            F<span style={{ color: "#ff4238" }}>·</span>
-            R<span style={{ color: "#ffdc00" }}>·</span>
-            I<span style={{ color: "#42a2d6" }}>·</span>
-            E<span style={{ color: "#ff4238" }}>·</span>
-            N<span style={{ color: "#ffdc00" }}>·</span>
-            D<span style={{ color: "#42a2d6" }}>·</span>
-            L<span style={{ color: "#ff4238" }}>·</span>
-            E<span style={{ color: "#ffdc00" }}>·</span>R
-          </h1>
-        </div> */}
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-        <NextImage
-          src={logo}
-          alt="Friendler Logo"
-          height={160}
-          width={480}
-        />
-        </div>
+            {/* Left: Logo + Back Arrow */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+            <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
+            </div>
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => router.back()}
+              style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
+            >
+            Back
+            </Button>
+            </div>  
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
@@ -204,17 +194,6 @@ const UserprofilePage: React.FC = () => {
       {/*ACTAUL PAGE CONTENT*/}
       <div style={{ width: "100%", maxWidth: "860px", padding: "50px 20px" }}>
 
-        {/* Back button that leads to  /groups */}
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          style={{ color: "#aaa", marginBottom: "30px", padding: 0 }}
-          onClick={() => router.back()}
-        >
-          Back
-        </Button>
-
-      
         <div style={{
           display: "flex",
           justifyContent: "space-between",
@@ -362,32 +341,6 @@ const UserprofilePage: React.FC = () => {
           </div>
         </div>
 
-        {/* SIGN OUT CARD */}
-        {isOwnProfile && (
-          <div style={{
-            ...glassBoxStyle,
-            marginTop: "20px",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-            padding: "20px 30px",
-          }}>
-            <div>
-              <div style={{ color: "white", fontWeight: "bold" }}>Sign Out</div>
-              <div style={{ color: "#777", fontSize: "13px" }}>
-                Log out of your Friendler account.
-              </div>
-            </div>
-            <Button
-              icon={<LogoutOutlined />}
-              danger
-              style={{ fontWeight: "bold" }}
-              onClick={handleLogout}
-            >
-              Sign Out
-            </Button>
-          </div>
-        )}
       </div>
     </div>
   );

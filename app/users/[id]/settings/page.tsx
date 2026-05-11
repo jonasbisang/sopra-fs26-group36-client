@@ -32,6 +32,7 @@ const EditProfile: React.FC = () => {
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
 
 
   //Daten vom server laden beim start
@@ -213,7 +214,7 @@ return (
           >
             {/* Username Field */}
             <Form.Item
-              label={<span style={labelStyle}>Username</span>}
+              label={<span style={labelStyle}>Change Username</span>}
               name="username"
               rules={[{ required: true, message: 'Username is required' }]}
             >
@@ -226,7 +227,7 @@ return (
 
             {/* Bio Field */}
             <Form.Item 
-              label={<span style={labelStyle}>Bio</span>} 
+              label={<span style={labelStyle}>Change Bio</span>} 
               name="bio"
             >
               <Input.TextArea 
@@ -243,15 +244,23 @@ return (
               name="oldPassword"
             >
             <Input.Password
-              placeholder="Enter current password"
+              placeholder="To change password, enter current one"
               style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+              onChange={(e) => setShowPasswordFields(e.target.value.length > 0)}
             />
             </Form.Item>
 
             {/* new Password Field */}
-            <Form.Item 
-              label={<span style={labelStyle}>Change Password</span>} 
+            {showPasswordFields && (
+              <>
+              <Form.Item 
+              label={<span style={labelStyle}>New Password</span>} 
               name="password"
+              rules={[{ required: true, message: "Please input your password!" },
+              {pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[*_#@%^&,.+/\-!?])[^\s]{4,25}$/,
+              message: "At least 4 characters. Special characters, lower and uppercase letters needed."
+              }
+              ]}
             >
               <Input.Password 
                 placeholder="Type to set new password" 
@@ -280,6 +289,8 @@ return (
                   style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'white', border: '1px solid #42a2d6' }}
                 />
               </Form.Item>
+            )}
+            </>
             )}
 
             <Space direction="vertical" style={{ width: '100%', marginTop: '20px' }} size="middle">
@@ -326,7 +337,7 @@ return (
             </Space>
           </Form>
         </Space>
-      </div>
+       </div>
     </div>
   );
 };
