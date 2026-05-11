@@ -29,18 +29,18 @@ interface CreateActivityModalProps {
   groupId: string;
   userId: string;
   onSuccess: () => void;
+  memberCount: number;
 }
 
 
 
-const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onClose, groupId, userId, onSuccess }) => {
+const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onClose, groupId, userId, onSuccess, memberCount }) => {
   const [form] = Form.useForm();
   const apiService = useApi();
   const [messageApi, contextHolder] = message.useMessage();
 
   // when pop up is successfully completed, this gets sent 
   const onFinish = async (values: ActivityFormValues) => {
-    console.log("all values:", values);
       // Prüfen ob Duration zur Zeitspanne passt
       if (values.timeRange && values.timeRange[0] && values.timeRange[1]) {
         const windowHours = (values.timeRange[1].valueOf() - values.timeRange[0].valueOf()) / (1000 * 60 * 60);
@@ -114,6 +114,13 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
   return (
     <>
       {contextHolder}
+      <style>{`
+      .ant-form-item-explain-error,
+      div[class*="explain-error"] {
+      font-size: 11px !important;
+      color: #ff4d4f !important;
+      }
+     `}</style>
       <Modal // starting of the modal window 
         title={<span style={{ color: "black", fontSize: "22px", fontWeight: "bold" }}>New Activity</span>}
         open={visible} //controlls when it pops up
@@ -202,7 +209,16 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
               <Form.Item
                 name="minParticipants"
                 label={<span style={labelStyle}>MIN PARTICIPANTS</span>}
-                rules={[{ required: true, message: "Required" }]}
+                rules={[{ required: true, message: "Required" },
+                  ({ getFieldValue }) => ({
+                    validator(_, value) {
+                      if (!value || value <= memberCount) {
+                        return Promise.resolve();
+                      }
+                      return Promise.reject(new Error(`Cannot exceed group size (${memberCount} members)`));
+                    },
+                  }),
+                ]}
                 style={{ flex: 1 }}
               >
                 <InputNumber min={1} style={{ width: "100%", ...inputStyle }} />

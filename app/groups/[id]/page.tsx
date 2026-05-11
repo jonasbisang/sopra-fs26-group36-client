@@ -860,6 +860,7 @@ const GroupPage: React.FC = () => {
       groupId={groupId as string}
       userId={userId}
       onSuccess={handleActivityCreated}
+      memberCount={members.length}
     />
     </div>
   );
