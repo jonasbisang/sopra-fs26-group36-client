@@ -10,7 +10,8 @@ import {
   LogoutOutlined,
   TeamOutlined,
   PlusOutlined,
-  SettingOutlined
+  SettingOutlined,
+  ArrowLeftOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -91,15 +92,15 @@ const GroupPage: React.FC = () => {
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
   const [mounted, setMounted] = useState(false);
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
+  //useEffect(() => {
+  //  setMounted(true);
+  //}, []);
 
-  useEffect(() => {
-  if (mounted && (!token || token === "")) {
-    router.replace("/login");
-  }
-}, [mounted, token, router]);
+  //useEffect(() => {
+  //if (mounted && (!token || token === "")) {
+  //  router.replace("/login");
+  //}
+//}, [mounted, token, router]);
 
   //Fetch all data (OG BLOCK) REVIVE WHEN BACKEND READY
   useEffect(() => {
@@ -410,33 +411,21 @@ const GroupPage: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          {/* <h1 style={{
-            fontSize: "32px",
-            color: "white",
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: "2px",
-          }}>
-            F<span style={{ color: "#ff4238" }}>·</span>
-            R<span style={{ color: "#ffdc00" }}>·</span>
-            I<span style={{ color: "#42a2d6" }}>·</span>
-            E<span style={{ color: "#ff4238" }}>·</span>
-            N<span style={{ color: "#ffdc00" }}>·</span>
-            D<span style={{ color: "#42a2d6" }}>·</span>
-            L<span style={{ color: "#ff4238" }}>·</span>
-            E<span style={{ color: "#ffdc00" }}>·</span>
-            R
-          </h1> */}
         </div>
-
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <NextImage
-                  src={logo}
-                  alt="Friendler Logo"
-                  height={160}
-                  width={480}
-                />
-                </div>
+      {/* Left: Logo + Back Arrow */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+          <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
+        </div>
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.push("/groups")}
+          style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
+        >
+          Back to Groups
+        </Button>
+      </div>   
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           
@@ -450,16 +439,6 @@ const GroupPage: React.FC = () => {
             New Activity
           </Button>
           
-          
-          {group?.adminId.toString() === userId && ( 
-          <Button
-          type="primary"
-          icon={<SettingOutlined />}
-          onClick={() => router.push(`/groups/${groupId}/settings`)}
-            >
-          Group Settings
-        </Button>
-        )}
         <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
         <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
          Calendar
@@ -473,14 +452,18 @@ const GroupPage: React.FC = () => {
           >
             My Profile
           </Button>
+
+          {group?.adminId.toString() === userId ? (
           <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={() => router.push("/groups")}
-            style={{ color: "white" }}
+            type="primary"
+            shape="round"
+            icon={<SettingOutlined />}
+            onClick={() => router.push(`/groups/${groupId}/settings`)}
+            style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}
           >
-            Change Group
+            Group Settings
           </Button>
+        ) : (
           <Button
             danger
             icon={<LogoutOutlined />}
@@ -489,16 +472,11 @@ const GroupPage: React.FC = () => {
           >
             Leave Group
           </Button>
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-            style={{ color: "white" }}
-          >
-            Logout
-          </Button>
+        )}
         </div>
       </div>
+
+      
 
       {/* Main Content */}
       <div style={{ padding: "40px 50px", display: "flex", flexDirection: "column", gap: "40px" }}>
