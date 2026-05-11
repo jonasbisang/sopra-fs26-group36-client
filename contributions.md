@@ -127,13 +127,18 @@ reason).
 
 ---
 
-## Contributions Week 6 - [Begin Date] to [End Date]
+## Contributions Week 6 - 07.05.2026 to 13.05.2026
 | **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
 | ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
 | **[jonasbisang]**         | [10.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/185/commits/faaf8ffe439e47b56b3d77a110eefd4694d666ce / https://github.com/jonasbisang/sopra-fs26-group36-client/pull/113/commits/defde9e8138e5bb9c875eb9ffeef2d7dcc81b0e9] | [Fixed scheduling to use google calendar / New acitivity status] | [User can now use either manual entries, google calendar or both. Acitivities now have two more status in order to differentiate.] |
 |                     | [11.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/187/commits/90747af1c19c03ac95cb5584e6c4f801f121693f / https://github.com/jonasbisang/sopra-fs26-group36-client/commit/c3cd62525c9e3156474f5017129e2e3f2e3b677f] | [Frontend can now fetch scheduled events for calendar.] | [To allow the user to visually see WHEN an event is scheduled.] |
-| **[user2]**         | [date]   | [link1] | [what] | [why] |
-|                     | [date]   | [link2] | [what] | [why] |
+| **[elisabettade]**         | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/f86c4406c058078104223c7139ddcb563ea32472 | added PickDate to groupcalendar | usability, also part of TA feedback |
+|                     | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/d3436656c603b1c74dcc3d5feea52a9a9669d32c | min participants for new activity now cant be > than amount of members | Otherwise activites might never be reached |
+|                     | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/4ddeb3d7811a6faa5bf77bba3150ed9034dc01e9 | create activity form; duration must match time window now
+ | logic, also TA feedback |
+ |                     | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/2fe7ab31adab40c153f083ace2200acae752df21 | error messages for the registration process now all show the correct errors | important feedback for users, also TA feedback |
+|                     | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/cd98caba58a000dc6f983fb4e61f90b3a1578ef4 | Implemented chat feature with mockdata | communication between users |
+
 >>>>>>> 886895d9bd0b162e321e757bbf11e65124b0a2ad
 | **[user3]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
