@@ -46,7 +46,17 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
         const windowHours = (values.timeRange[1].valueOf() - values.timeRange[0].valueOf()) / (1000 * 60 * 60);
 
         if (values.duration > windowHours) {
-          messageApi.error(`Duration (${values.duration}h) cannot exceed the time window (${windowHours}h)`);
+          const totalMinutes = Math.round(windowHours * 60);
+          const hours = Math.floor(totalMinutes / 60);
+          const minutes = totalMinutes % 60;
+  
+          const display = hours === 0 
+          ? `${minutes}min`
+          : minutes === 0 
+          ? `${hours}h` 
+          : `${hours}h ${minutes}min`;
+
+          messageApi.error(`Duration (${values.duration}h) cannot exceed the time window (${display})`);
           return;
       }
     }
@@ -118,7 +128,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       {contextHolder}
       <style>{`
       .ant-form-item-explain-error,
-      div[class*="explain-error"] {"
+      div[class*="explain-error"] {
       font-size: 11px !important;
       color: #ff4d4f !important;
       }
