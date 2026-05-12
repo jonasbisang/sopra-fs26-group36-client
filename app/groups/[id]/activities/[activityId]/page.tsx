@@ -66,40 +66,35 @@ const ActivityDetailPage: React.FC = () => {
     }
   }, [mounted, token, router]);
  
-  useEffect(() => {
-    if (!activityId || !token) return;
-    const fetchActivity = async () => {
-      try {
-        const data = await apiService.get<Activity>(
-          `/groups/${groupId}/activities/${activityId}`
-        );
-        setActivity(data);
-      } catch (error) {
-        console.error("Failed to fetch activity:", error);
-        messageApi.error("Could not load activity.");
-      } finally {
-        setLoading(false);
-      }
-    };
-    fetchActivity();
-  }, [activityId, token]);
- 
-  const handleJoin = async () => {
+useEffect(() => {
+  if (!activityId || !token) return;
+  const fetchActivity = async () => {
     try {
-      await apiService.post(
-        `/groups/${groupId}/activities/${activityId}/votes`,
-        { wantsToJoin: true, userId: Number(userId) }
-      );
-      messageApi.success("Successfully joined! 🎉");
-      // Reload activity
-      const data = await apiService.get<Activity>(
-        `/groups/${groupId}/activities/${activityId}`
-      );
-      setActivity(data);
-    } catch {
-      messageApi.error("Activity is already full.");
+      // Alle Activities holen (SCHEDULED + PENDING)
+      const [scheduled, pending] = await Promise.all([
+        apiService.get<Activity[]>(`/groups/${groupId}/activities?status=SCHEDULED`),
+        apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`),
+      ]);
+      
+      const all = [...scheduled, ...pending];
+      const found = all.find((a) => a.id === Number(activityId));
+      
+      if (found) {
+        setActivity(found);
+      } else {
+        messageApi.error("Activity not found.");
+      }
+    } catch (error) {
+      console.error("Failed to fetch activity:", error);
+      messageApi.error("Could not load activity.");
+    } finally {
+      setLoading(false);
     }
   };
+  fetchActivity();
+}, [activityId, groupId, token]);
+ 
+
  
   const handleLogout = () => {
     clearToken();
@@ -131,43 +126,47 @@ const ActivityDetailPage: React.FC = () => {
     <div style={{ backgroundColor: "#000000", minHeight: "100vh", display: "flex", flexDirection: "column" }}>
       {contextHolder}
  
-      {/* Header */}
-      <div style={{
-        width: "100%", padding: "20px 50px", display: "flex",
-        justifyContent: "space-between", alignItems: "center",
-        borderBottom: "1px solid rgba(255,255,255,0.1)",
-      }}>
-        <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          <NextImage src={logo} alt="Friendler Logo" height={60} width={180} />
-        </div>
-        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}
-            onClick={() => router.push(`/users/${userId}/calendar`)}>
-            Calendar
-          </Button>
-          <Button type="text" icon={<UserOutlined />} style={{ color: "white" }}
-            onClick={() => router.push(`/users/${userId}`)}>
-            My Profile
-          </Button>
-          <Button type="text" icon={<LogoutOutlined />} style={{ color: "white" }}
-            onClick={handleLogout}>
-            Logout
-          </Button>
-        </div>
+  {/* Header */}
+  <div style={{
+    width: "100%", padding: "20px 50px", display: "flex",
+    justifyContent: "space-between", alignItems: "center",
+    borderBottom: "1px solid rgba(255,255,255,0.1)",
+  }}>
+    {/* Left: Logo + Back Arrow */}
+    <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+      <div style={{ display: "flex", justifyContent: "center", marginBottom: "0px" }}>
+        <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
       </div>
+      <Button
+        type="text"
+        icon={<ArrowLeftOutlined />}
+        onClick={() => router.back()}
+        style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
+      >
+        Back to Group
+      </Button>
+    </div>
+
+    {/* Right: Nav buttons */}
+    <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+      <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}
+        onClick={() => router.push(`/users/${userId}/calendar`)}>
+        Calendar
+      </Button>
+      <Button type="text" icon={<UserOutlined />} style={{ color: "white" }}
+        onClick={() => router.push(`/users/${userId}`)}>
+        My Profile
+      </Button>
+      <Button type="text" icon={<LogoutOutlined />} style={{ color: "white" }}
+        onClick={handleLogout}>
+        Logout
+      </Button>
+    </div>
+  </div>
  
       {/* Content */}
       <div style={{ padding: "40px 50px", maxWidth: "860px", width: "100%", margin: "0 auto" }}>
  
-        {/* Back button */}
-        <Button
-          type="text"
-          icon={<ArrowLeftOutlined />}
-          style={{ color: "rgba(255,255,255,0.5)", marginBottom: "24px", padding: 0 }}
-          onClick={() => router.back()}
-        >
-          Back to Group
-        </Button>
  
         {activity ? (
           <>
@@ -188,24 +187,8 @@ const ActivityDetailPage: React.FC = () => {
                   {activity.isRecursive && <Tag color="purple">Recurring</Tag>}
                 </div>
               </div>
- 
-              {/* Join Button */}
-              {!isFull && activity.status === "SCHEDULED" && (
-                <Button
-                  size="large"
-                  onClick={handleJoin}
-                  style={{
-                    background: "rgba(66,214,120,0.15)",
-                    color: "#42d678",
-                    border: "1px solid rgba(66,214,120,0.4)",
-                    borderRadius: "10px",
-                    fontWeight: "bold",
-                  }}
-                >
-                  + Join Activity
-                </Button>
-              )}
             </div>
+
  
             {/* Info Cards */}
             <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "20px", marginBottom: "24px" }}>
