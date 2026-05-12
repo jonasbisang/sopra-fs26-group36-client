@@ -47,7 +47,7 @@ interface Activity {
   isWeatherDependent?: boolean;
   acceptVotes?: number;
   participantUsernames?: string[];
-   minTemp?: number;       
+  minTemp?: number;       
   maxTemp?: number;        
   rainPreference?: string; 
 }
@@ -58,6 +58,7 @@ interface CalendarEvent {
   start: Date;
   end: Date;
   location?: string;
+  isFull?: boolean;
 }
 
 const GroupPage: React.FC = () => {
@@ -157,14 +158,19 @@ const GroupPage: React.FC = () => {
 
       try {
         //Fetch calendar events
-        const events = await apiService.get<CalendarEvent[]>(
+        const events = await apiService.get<Activity[]>(
           `/groups/${groupId}/calendar`
         );
         // Convert date strings to Date objects for react-big-calendar
         const formatted = events.map((e) => ({
-          ...e,
-          start: new Date(e.start),
-          end: new Date(e.end),
+          id: e.id,
+          title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(
+            new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000
+          ),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
         }));
         setCalendarEvents(formatted);
       } catch (error) {
@@ -194,10 +200,21 @@ const GroupPage: React.FC = () => {
           }
           return planned;
         });
+        const events = await apiService.get<Activity[]>(`/groups/${groupId}/calendar`);
+        const formatted = events.map((e) => ({
+          id: e.id, title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
+      }));
+
+      setCalendarEvents(formatted);
+      
       } catch (error) {
         console.error("Polling error:", error);
       }
-    }, 2000); // alle 10 Sekunden
+    }, 10000); // alle 10 Sekunden
 
     return () => clearInterval(interval);
   }, [groupId, token]);
@@ -217,6 +234,8 @@ const GroupPage: React.FC = () => {
   }, 2000);
   return () => clearInterval(interval);
     }, [groupId, token]);
+
+
 
   //conect to backend and update the list of pending activities
   const handleActivityCreated = async () => {
@@ -703,7 +722,11 @@ const GroupPage: React.FC = () => {
                       + Join
                     </Button>
                   )}
-                <Tag color="green">Planned</Tag>
+                {activity.maxSize && (activity.acceptVotes ?? 0) >= activity.maxSize ? (
+                  <Tag color="red">Full</Tag>
+                ) : (
+                  <Tag color="green">{activity.acceptVotes ?? 0}/{activity.maxSize} joined</Tag>
+                )}
               </List.Item>
             )}
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
@@ -875,6 +898,14 @@ const GroupPage: React.FC = () => {
               date={calendarDate}
               onNavigate={(date) => setCalendarDate(date)}
               style={{ height: "100%" }}
+              onSelectEvent={(event) => router.push(`/groups/${groupId}/activities/${event.id}`)}
+              eventPropGetter={(event) => ({
+                style: {
+                backgroundColor: event.isFull ? "#ff4d4f" : "#42d678",
+                border: "none",
+                borderRadius: "4px",
+              }
+            })}
             />
           </div>
         </div>
