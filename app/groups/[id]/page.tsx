@@ -84,7 +84,6 @@ const GroupPage: React.FC = () => {
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
-  const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
   const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
   const votedActivityIdsRef = useRef<Set<number>>(new Set());
 
