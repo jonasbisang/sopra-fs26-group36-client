@@ -138,6 +138,10 @@ reason).
  |                     | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/2fe7ab31adab40c153f083ace2200acae752df21 | error messages for the registration process now all show the correct errors | important feedback for users, also TA feedback |
 |                     | 11.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/cd98caba58a000dc6f983fb4e61f90b3a1578ef4 | Implemented chat feature with mockdata | communication between users |
 
+| **[@ananis21]**         | 9.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/593de4709d260f2562e6bc06000723b59586b753 | created rejected Activities | Created for activities that are rejected by the user when voting. Gives the user access also to change his mind and join the activity  |
+|         | 10.05.2026   | http://github.com/jonasbisang/sopra-fs26-group36-client/commit/8c04e756ba3ccf172907cb64b112a745faa7369c | Revive Concept | Finished the reviving activities concept insise the history page, where all the user activites get portrayed. This finshed the implementation of the history page|
+
+
 >>>>>>> 886895d9bd0b162e321e757bbf11e65124b0a2ad
 | **[user3]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
