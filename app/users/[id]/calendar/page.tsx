@@ -106,9 +106,6 @@ const CalendarPage: React.FC = () => {
     try {
       setSaving(true);
 
-      // delete all existing first to avoid duplicates
-      await apiService.delete(`/users/${userId}/unavailability`);
-
       const unavailableDays = Object.values(days).filter((d) => d.status !== "available");
       for (const day of unavailableDays) {
         const body: UnavailabilityPostDTO = {
@@ -129,8 +126,6 @@ const CalendarPage: React.FC = () => {
 
   const handleGoogleConnect = async () => {
     try {
-      await apiService.delete(`/users/${userId}/unavailability`);
-      
       const baseURL = getApiDomain();
       const response = await fetch(`${baseURL}/auth/google?userId=${userId}`);
       const authUrl = await response.text();
