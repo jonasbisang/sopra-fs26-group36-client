@@ -44,9 +44,9 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       // Prüfen ob Duration zur Zeitspanne passt
       if (values.timeRange && values.timeRange[0] && values.timeRange[1]) {
         const windowHours = (values.timeRange[1].valueOf() - values.timeRange[0].valueOf()) / (1000 * 60 * 60);
-        const rounded = Math.round(windowHours);
-        if (values.duration !== rounded) {
-          messageApi.error(`Duration must be ${rounded}h to match the time window`);
+
+        if (values.duration > windowHours) {
+          messageApi.error(`Duration (${values.duration}h) cannot exceed the time window (${windowHours}h)`);
           return;
       }
     }
@@ -118,7 +118,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       {contextHolder}
       <style>{`
       .ant-form-item-explain-error,
-      div[class*="explain-error"] {
+      div[class*="explain-error"] {"
       font-size: 11px !important;
       color: #ff4d4f !important;
       }
@@ -134,6 +134,12 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
        .ant-picker-suffix {
        color: #000000 !important;
       }
+      .ant-picker-input input::placeholder {
+  color: #999999 !important;
+}
+.ant-picker-input input {
+  color: #000000 !important;
+}
      `}</style>
       <Modal // starting of the modal window 
         title={<span style={{ color: "black", fontSize: "22px", fontWeight: "bold" }}>New Activity</span>}
