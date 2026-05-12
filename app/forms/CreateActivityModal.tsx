@@ -107,6 +107,8 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       Select: {
         colorBgContainer: '#f0f0f0',
         colorBorder: '#d9d9d9',
+        colorText: '#000000',
+        colorTextPlaceholder: '#999999',
       },
     },
   };
@@ -119,6 +121,18 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       div[class*="explain-error"] {
       font-size: 11px !important;
       color: #ff4d4f !important;
+      }
+
+        /* TimePicker Fix */
+        .ant-picker-input input {
+        color: #000000 !important;
+      }
+        .ant-picker {
+        background-color: #f0f0f0 !important;
+      }
+       .ant-picker-separator,
+       .ant-picker-suffix {
+       color: #000000 !important;
       }
      `}</style>
       <Modal // starting of the modal window 
