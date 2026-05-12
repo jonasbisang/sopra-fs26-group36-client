@@ -140,11 +140,9 @@ reason).
 
 | **[@ananis21]**         | 9.05.2026   | https://github.com/jonasbisang/sopra-fs26-group36-client/commit/593de4709d260f2562e6bc06000723b59586b753 | created rejected Activities | Created for activities that are rejected by the user when voting. Gives the user access also to change his mind and join the activity  |
 |         | 10.05.2026   | http://github.com/jonasbisang/sopra-fs26-group36-client/commit/8c04e756ba3ccf172907cb64b112a745faa7369c | Revive Concept | Finished the reviving activities concept insise the history page, where all the user activites get portrayed. This finshed the implementation of the history page|
-
-
->>>>>>> 886895d9bd0b162e321e757bbf11e65124b0a2ad
-| **[user3]**         | [date]   | [link1] | [what] | [why] |
-|                     | [date]   | [link2] | [what] | [why] |
+| **[@CiaranHendriks]**         | [11.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/190/changes/68f54093a127b44513d1ba1e194d46262c564bd9] | [Integrate email provider] | [To be able to send emails] |
+|                     | [11.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/190/changes/33445623ed709029f1e50ff58e51f12fd7524c34] | [Trigger mail when activity gets scheduled] | [So that when an activity gets scheduled, the email is sent out to the participants] |
+|                     | [11.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/190/changes/33445623ed709029f1e50ff58e51f12fd7524c34] | [Email Specifications] | [So that the email contains all relevant info for the event] |
 | **[user4]**         | [date]   | [link1] | [what] | [why] |
 |                     | [date]   | [link2] | [what] | [why] |
 | **[user5]**         | [date]   | [link1] | [what] | [why] |
