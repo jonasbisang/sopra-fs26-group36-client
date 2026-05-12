@@ -12,6 +12,7 @@ import {
   PlusOutlined,
   SettingOutlined,
   DeleteOutlined,
+  HistoryOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -442,15 +443,29 @@ const GroupPage: React.FC = () => {
           </Button>
           
           
-          {group?.adminId.toString() === userId && ( 
-          <Button
-          type="primary"
-          icon={<SettingOutlined />}
-          onClick={() => router.push(`/groups/${groupId}/settings`)}
+          {group?.adminId.toString() === userId && (
+          <>
+            <Button
+              type="primary"
+              icon={<SettingOutlined />}
+              onClick={() => router.push(`/groups/${groupId}/settings`)}
             >
-          Group Settings
-        </Button>
+              Group Settings
+            </Button>
+
+            {/* History button that navigates to the new History page */}
+            <Button
+              type="text"
+              icon={<HistoryOutlined />}
+              style={{ color: "white" }}
+              onClick={() => router.push(`/groups/${groupId}/history`)}
+            >
+              History
+            </Button>
+          </>      
         )}
+
+
 
         <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
          Calendar
