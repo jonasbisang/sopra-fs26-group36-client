@@ -18,8 +18,6 @@ import { useState, useEffect } from "react";
 
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
-import { createDiffieHellmanGroup } from "crypto";
-
 
 interface JoinGroupValues {
     groupId: string;
