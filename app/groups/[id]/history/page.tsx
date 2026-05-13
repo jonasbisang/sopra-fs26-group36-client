@@ -12,7 +12,7 @@ import { useEffect, useState } from "react";
 import NextImage from "next/image";
 import logo from "@/friendlerLogo.png";
 import { useApi } from "@/hooks/useApi";
-import { Button, message, List, Tag, Popconfirm, Spin } from "antd";
+import { Button, message, List, Tag, Popconfirm } from "antd";
 import moment from "moment";
 
 
@@ -261,7 +261,7 @@ return (
             Group History
         </h2>
         <p style={{ color: "rgba(255,255,255,0.4)", marginTop: "8px", fontSize: "14px" }}>
-            Browse activities that already happened or didn't make the cut.
+            Browse activities that already happened or didn&apos;t make the cut.
         </p>
     </div>
 
