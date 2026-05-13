@@ -12,7 +12,6 @@ import {
   PlusOutlined,
   SettingOutlined,
   DeleteOutlined,
-  HistoryOutlined,
   ArrowLeftOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
@@ -87,7 +86,7 @@ const GroupPage: React.FC = () => {
   const [calendarDate, setCalendarDate] = useState(new Date());
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
-  const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
+  const [, setVotedActivityIds] = useState<Set<number>>(new Set());
   const votedActivityIdsRef = useRef<Set<number>>(new Set());
 
   const [totalPending, setTotalPending] = useState<number>(0);
@@ -461,6 +460,15 @@ const GroupPage: React.FC = () => {
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           
+          <Button
+            type="text"
+            icon={<UserOutlined />}
+            onClick={() => router.push(`/groups/${groupId}/history`)}
+            style={{ color: "white" }}
+          >
+            My Profile
+          </Button>
+
           <Button 
             type="primary" 
             shape="round" 
@@ -828,7 +836,7 @@ const GroupPage: React.FC = () => {
             Activities the user passed on — hit <b style={{ color: "rgba(255,255,255,0.6)" }}>+ Join</b> to change your mind and participate.
           </p>
           <List
-            dataSource={rejectedActivities}
+            dataSource={rejectedActivities.filter(a => votedActivityIdsRef.current.has(a.id))}
             renderItem={(activity) => (
               <List.Item
                 style={{
@@ -874,7 +882,7 @@ const GroupPage: React.FC = () => {
                     ) && (
                      <Button
                         size="small"
-                        onClick={() => handleVote(activity.id, "ACCEPT")}
+                        onClick={() => handleJoin(activity.id)}
                         style={{
                             background: "rgba(66,214,120,0.15)",
                             color: "#42d678",

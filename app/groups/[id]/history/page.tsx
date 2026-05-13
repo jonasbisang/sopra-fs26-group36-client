@@ -73,7 +73,7 @@ const HistoryPage: React.FC = () => {
 
             try {
             const data = await apiService.get<Activity[]>(
-                `/groups/${groupId}/activities?status=COMPLETED`
+                `/groups/${groupId}/activities?status=PAST`
             );
             // Extra client-side guard: only show entries whose scheduledTime is in the past
             const now = new Date();
@@ -99,7 +99,7 @@ const HistoryPage: React.FC = () => {
 
             try {
             const data = await apiService.get<Activity[]>(
-                `/groups/${groupId}/activities?status=REJECTED`
+                `/groups/${groupId}/activities?status=FAILED`
             );
 
             setFailedActivities(data);
