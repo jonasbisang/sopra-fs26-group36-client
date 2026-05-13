@@ -6,6 +6,7 @@ import { Button, message, Spin, TimePicker } from "antd";
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import useLocalStorage from "@/hooks/useLocalStorage";
+import { getApiDomain } from "@/utils/domain";
 
 interface UnavailabilityPostDTO {
   startDateTime: string;
@@ -105,9 +106,6 @@ const CalendarPage: React.FC = () => {
     try {
       setSaving(true);
 
-      // delete all existing first to avoid duplicates
-      await apiService.delete(`/users/${userId}/unavailability`);
-
       const unavailableDays = Object.values(days).filter((d) => d.status !== "available");
       for (const day of unavailableDays) {
         const body: UnavailabilityPostDTO = {
@@ -127,9 +125,10 @@ const CalendarPage: React.FC = () => {
   };
 
   const handleGoogleConnect = async () => {
-    try { //deleting manual entries so it is clear what option the user wants to use 
-      await apiService.delete(`/users/${userId}/unavailability`);
-      const authUrl = await apiService.get<string>(`/auth/google?userId=${userId}`);
+    try {
+      const baseURL = getApiDomain();
+      const response = await fetch(`${baseURL}/auth/google?userId=${userId}`);
+      const authUrl = await response.text();
       window.location.href = authUrl;
     } catch (error) {
       message.error("Error, could not connect to Google.");
@@ -154,7 +153,7 @@ const CalendarPage: React.FC = () => {
         icon={<ArrowLeftOutlined />}
         type="text"
         style={{ color: "white", marginBottom: 24 }}
-        onClick={() => router.back()}
+        onClick={() => router.push("/groups")}
       >
         Back
       </Button>
@@ -259,7 +258,7 @@ const CalendarPage: React.FC = () => {
                           minuteStep={15}
                           value={day?.startTime ? dayjs(day.startTime, "HH:mm") : null}
                           onChange={(v) => handleTimeChange(date, "startTime", v)}
-                          style={{ width: "100%" }}
+                          style={{ width: "100%",color: "rgba(255, 255, 255, 0.75)" }}
                         />
                         <div style={{ fontSize: 10, color: "gray" }}>To</div>
                         <TimePicker
@@ -268,7 +267,7 @@ const CalendarPage: React.FC = () => {
                           minuteStep={15}
                           value={day?.endTime ? dayjs(day.endTime, "HH:mm") : null}
                           onChange={(v) => handleTimeChange(date, "endTime", v)}
-                          style={{ width: "100%" }}
+                          style={{ width: "100%", color: "rgba(255, 255, 255, 0.75)" }}
                         />
                       </div>
                     )}

@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal, Popconfirm} from "antd";
+import { Button, message, List, Avatar, Tag , Modal, DatePicker, Popconfirm} from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -13,6 +13,7 @@ import {
   SettingOutlined,
   DeleteOutlined,
   HistoryOutlined,
+  ArrowLeftOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
@@ -50,7 +51,7 @@ interface Activity {
   isWeatherDependent?: boolean;
   acceptVotes?: number;
   participantUsernames?: string[];
-   minTemp?: number;       
+  minTemp?: number;       
   maxTemp?: number;        
   rainPreference?: string;
   isRecursive?: boolean; 
@@ -62,6 +63,7 @@ interface CalendarEvent {
   start: Date;
   end: Date;
   location?: string;
+  isFull?: boolean;
 }
 
 const GroupPage: React.FC = () => {
@@ -82,6 +84,7 @@ const GroupPage: React.FC = () => {
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
   const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
   const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
@@ -171,14 +174,19 @@ const GroupPage: React.FC = () => {
 
       try {
         //Fetch calendar events
-        const events = await apiService.get<CalendarEvent[]>(
+        const events = await apiService.get<Activity[]>(
           `/groups/${groupId}/calendar`
         );
         // Convert date strings to Date objects for react-big-calendar
         const formatted = events.map((e) => ({
-          ...e,
-          start: new Date(e.start),
-          end: new Date(e.end),
+          id: e.id,
+          title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(
+            new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000
+          ),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
         }));
         setCalendarEvents(formatted);
       } catch (error) {
@@ -208,10 +216,21 @@ const GroupPage: React.FC = () => {
           }
           return planned;
         });
+        const events = await apiService.get<Activity[]>(`/groups/${groupId}/calendar`);
+        const formatted = events.map((e) => ({
+          id: e.id, title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
+      }));
+
+      setCalendarEvents(formatted);
+      
       } catch (error) {
         console.error("Polling error:", error);
       }
-    }, 2000); // alle 10 Sekunden
+    }, 10000); // alle 10 Sekunden
 
     return () => clearInterval(interval);
   }, [groupId, token]);
@@ -233,6 +252,8 @@ const GroupPage: React.FC = () => {
   return () => clearInterval(interval);
     }, [groupId, token]);
 
+
+
   //conect to backend and update the list of pending activities
   const handleActivityCreated = async () => {
     setIsCreateModalVisible(false);
@@ -246,6 +267,27 @@ const GroupPage: React.FC = () => {
       console.error("Failed to fetch pending activities after creation:", error);
     }
     
+  };
+
+  const handleJoin = async (activityId: number) => {
+    try {
+      await apiService.post(`/groups/${groupId}/activities/${activityId}/votes`, {
+        wantsToJoin: true,
+        userId: Number(userId),
+      });
+      messageApi.success("Successfully joined! 🎉");
+    } catch (error) {
+      messageApi.error("Activity is already full.");
+        } finally {
+      try {
+        const planned = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=SCHEDULED`
+        );
+        setPlannedActivities(planned);
+      } catch {
+        console.error("Failed to reload.");
+      }
+    }
   };
 
   const handleVote = async (activityId: number, voteType: "ACCEPT" | "DECLINE") => {
@@ -401,33 +443,21 @@ const GroupPage: React.FC = () => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-          {/* <h1 style={{
-            fontSize: "32px",
-            color: "white",
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: "2px",
-          }}>
-            F<span style={{ color: "#ff4238" }}>·</span>
-            R<span style={{ color: "#ffdc00" }}>·</span>
-            I<span style={{ color: "#42a2d6" }}>·</span>
-            E<span style={{ color: "#ff4238" }}>·</span>
-            N<span style={{ color: "#ffdc00" }}>·</span>
-            D<span style={{ color: "#42a2d6" }}>·</span>
-            L<span style={{ color: "#ff4238" }}>·</span>
-            E<span style={{ color: "#ffdc00" }}>·</span>
-            R
-          </h1> */}
         </div>
-
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <NextImage
-                  src={logo}
-                  alt="Friendler Logo"
-                  height={160}
-                  width={480}
-                />
-                </div>
+      {/* Left: Logo + Back Arrow */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+          <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
+        </div>
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.push("/groups")}
+          style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
+        >
+          Back to Groups
+        </Button>
+      </div>   
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           
@@ -441,31 +471,7 @@ const GroupPage: React.FC = () => {
             New Activity
           </Button>
           
-          
-          {group?.adminId.toString() === userId && (
-          <>
-            <Button
-              type="primary"
-              icon={<SettingOutlined />}
-              onClick={() => router.push(`/groups/${groupId}/settings`)}
-            >
-              Group Settings
-            </Button>
-
-            {/* History button that navigates to the new History page */}
-            <Button
-              type="text"
-              icon={<HistoryOutlined />}
-              style={{ color: "white" }}
-              onClick={() => router.push(`/groups/${groupId}/history`)}
-            >
-              History
-            </Button>
-          </>      
-        )}
-
-
-
+        <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
         <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
          Calendar
         </Button>
@@ -478,14 +484,18 @@ const GroupPage: React.FC = () => {
           >
             My Profile
           </Button>
+
+          {group?.adminId.toString() === userId ? (
           <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={() => router.push("/groups")}
-            style={{ color: "white" }}
+            type="primary"
+            shape="round"
+            icon={<SettingOutlined />}
+            onClick={() => router.push(`/groups/${groupId}/settings`)}
+            style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}
           >
-            Change Group
+            Group Settings
           </Button>
+        ) : (
           <Button
             danger
             icon={<LogoutOutlined />}
@@ -494,16 +504,11 @@ const GroupPage: React.FC = () => {
           >
             Leave Group
           </Button>
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-            style={{ color: "white" }}
-          >
-            Logout
-          </Button>
+        )}
         </div>
       </div>
+
+      
 
       {/* Main Content */}
       <div style={{ padding: "40px 50px", display: "flex", flexDirection: "column", gap: "40px" }}>
@@ -736,7 +741,7 @@ const GroupPage: React.FC = () => {
                   ) && (
                     <Button
                       size="small"
-                      onClick={() => handleVote(activity.id, "ACCEPT")}
+                      onClick={() => handleJoin(activity.id)}
                       style={{
                         background: "rgba(66,214,120,0.15)",
                         color: "#42d678",
@@ -748,10 +753,11 @@ const GroupPage: React.FC = () => {
                       + Join
                     </Button>
                   )}
-                <Tag color="green">Planned</Tag>
-                  {activity.isRecursive && (
-                    <Tag color="purple">🔁 Recurring</Tag>
-                  )}
+                {activity.maxSize && (activity.acceptVotes ?? 0) >= activity.maxSize ? (
+                  <Tag color="red">Full</Tag>
+                ) : (
+                  <Tag color="green">{activity.acceptVotes ?? 0}/{activity.maxSize} joined</Tag>
+                )}
               </List.Item>
             )}
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
@@ -902,7 +908,16 @@ const GroupPage: React.FC = () => {
           borderRadius: "12px",
           padding: "24px",
         }}>
+         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
           <h3 style={{ color: "white", marginBottom: "16px" }}>🗓 Group Calendar</h3>
+          <DatePicker
+            onChange={(date) => {
+              if (date) setCalendarDate(date.toDate());
+            }}
+            placeholder="Go to date"
+            style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "white" }}
+          />
+          </div>
           <div style={{ height: "500px" }}>
             {/* Dark theme override for react-big-calendar */}
             <style>{`
@@ -918,6 +933,20 @@ const GroupPage: React.FC = () => {
               .rbc-date-cell { color: white; }
               .rbc-event { background-color: #42a2d6; }
 
+              .ant-picker {
+                background-color: rgba(255,255,255,0.08) !important;
+                border-color: rgba(255,255,255,0.2) !important;
+              }
+              .ant-picker input {
+                color: white !important;
+              }
+              .ant-picker input::placeholder {
+                color: rgba(255,255,255,0.4) !important;
+              }
+              .ant-picker-suffix {
+                color: rgba(255,255,255,0.4) !important;
+              }
+
               .ant-modal-body p,
               .ant-modal-body b,
               .ant-modal-body div {
@@ -929,7 +958,17 @@ const GroupPage: React.FC = () => {
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
+              date={calendarDate}
+              onNavigate={(date) => setCalendarDate(date)}
               style={{ height: "100%" }}
+              onSelectEvent={(event) => router.push(`/groups/${groupId}/activities/${event.id}`)}
+              eventPropGetter={(event) => ({
+                style: {
+                backgroundColor: event.isFull ? "#ff4d4f" : "#42d678",
+                border: "none",
+                borderRadius: "4px",
+              }
+            })}
             />
           </div>
         </div>
@@ -941,6 +980,7 @@ const GroupPage: React.FC = () => {
       groupId={groupId as string}
       userId={userId}
       onSuccess={handleActivityCreated}
+      memberCount={members.length}
     />
     </div>
   );
