@@ -10,6 +10,7 @@ import {
   LogoutOutlined,
   TeamOutlined,
   PlusOutlined,
+  ClockCircleOutlined,
   SettingOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
@@ -81,7 +82,7 @@ const GroupPage: React.FC = () => {
   const [members, setMembers] = useState<User[]>([]);
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
-  const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
+  const [declinedActivities, setDeclinedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [calendarDate, setCalendarDate] = useState(new Date());
 
@@ -152,27 +153,7 @@ const GroupPage: React.FC = () => {
         console.error("Failed to fetch planned activities:", error);
       }
       
-     
-    try {
-    // Fetch rejected activities
-        const rejected = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=REJECTED`
-        );
-        setRejectedActivities(rejected);
-      } catch (error) {
-        console.error("Failed to fetch rejected activities:", error);
-      }
-
-      try {
-        // Fetch rejected activities
-        const rejected = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=REJECTED`
-        );
-        setRejectedActivities(rejected);
-      } catch (error) {
-        console.error("Failed to fetch rejected activities:", error);
-      }
-
+    
       try {
         //Fetch calendar events
         const events = await apiService.get<Activity[]>(
@@ -208,15 +189,20 @@ const GroupPage: React.FC = () => {
         const planned = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=SCHEDULED`
         );
+
+
         setPlannedActivities((prev) => {
           const newOnes = planned.filter(
             (a) => !prev.find((p) => p.id === a.id)
           );
           if (newOnes.length > 0) {
-            setNewEventPopup(newOnes[0]); // ← triggert Modal
+            setNewEventPopup(newOnes[0]);
+            setLikedActivities((liked) => liked.filter((a) => !newOnes.find((n) => n.id === a.id))); 
           }
           return planned;
         });
+
+
         const events = await apiService.get<Activity[]>(`/groups/${groupId}/calendar`);
         const formatted = events.map((e) => ({
           id: e.id, title: e.name,
@@ -277,6 +263,7 @@ const GroupPage: React.FC = () => {
         userId: Number(userId),
       });
       messageApi.success("Successfully joined! 🎉");
+      setDeclinedActivities((prev) => prev.filter((a) => a.id !== activityId)); // achtung TEST --> maybe wieder entferne
     } catch (error) {
       messageApi.error("Activity is already full.");
         } finally {
@@ -296,17 +283,17 @@ const GroupPage: React.FC = () => {
     if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
       feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600);
 
-    setVotedActivityIds((prev) => {
-      const next = new Set([...prev, activityId]);
-      votedActivityIdsRef.current = next;
-      localStorage.setItem(VOTED_KEY, JSON.stringify([...next]));  // ← diese Zeile hinzufügen
-      return next;
-      });
-
     try {
       await apiService.post(`/groups/${groupId}/activities/${activityId}/votes`, {
         wantsToJoin: voteType === "ACCEPT",
         userId: Number(userId),
+      });
+
+      setVotedActivityIds((prev) => {
+      const next = new Set([...prev, activityId]);
+      votedActivityIdsRef.current = next;
+      localStorage.setItem(VOTED_KEY, JSON.stringify([...next]));  // ← diese Zeile hinzufügen
+      return next;
       });
       
       setPendingActivities((prev) => {
@@ -317,10 +304,14 @@ const GroupPage: React.FC = () => {
             liked.find((a) => a.id === activityId) ? liked : [...liked, updated]  // ← updated, not voted; with duplicate guard
           );
         }
+        if (voted && voteType === "DECLINE") {
+          setDeclinedActivities((d) =>
+          d.find((a) => a.id === activityId) ? d : [...d, voted]
+        );
+      }
         return prev.filter((a) => a.id !== activityId);
-      });
+        });
 
-      setRejectedActivities((prev) => prev.filter((a) => a.id !== activityId)); //remove from rejected if it was joined in 
 
       setVotedCount((prev) => prev + 1);
       if (voteType === "DECLINE") {
@@ -476,7 +467,7 @@ const GroupPage: React.FC = () => {
 
           <Button
             type="text"
-            icon={<UserOutlined />}
+            icon={<ClockCircleOutlined />}
             onClick={() => router.push(`/groups/${groupId}/history`)}
             style={{ color: "white" }}
           >
@@ -841,7 +832,7 @@ const GroupPage: React.FC = () => {
             Activities the user passed on — hit <b style={{ color: "rgba(255,255,255,0.6)" }}>+ Join</b> to change your mind and participate.
           </p>
           <List
-            dataSource={rejectedActivities.filter(a => votedActivityIdsRef.current.has(a.id))}
+            dataSource={declinedActivities}
             renderItem={(activity) => (
               <List.Item
                 style={{
