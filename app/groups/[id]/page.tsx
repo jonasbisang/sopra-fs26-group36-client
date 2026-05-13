@@ -87,10 +87,12 @@ const GroupPage: React.FC = () => {
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
   const [, setVotedActivityIds] = useState<Set<number>>(new Set());
-  const votedActivityIdsRef = useRef<Set<number>>(new Set());
+  const VOTED_KEY = `voted_${groupId}_${userId}`;
+  const votedActivityIdsRef = useRef<Set<number>>(new Set(JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]")));
 
   const [totalPending, setTotalPending] = useState<number>(0);
-  const [votedCount, setVotedCount] = useState<number>(0);
+  const [votedCount, setVotedCount] = useState<number>(
+  JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]").length);
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -297,6 +299,7 @@ const GroupPage: React.FC = () => {
     setVotedActivityIds((prev) => {
       const next = new Set([...prev, activityId]);
       votedActivityIdsRef.current = next;
+      localStorage.setItem(VOTED_KEY, JSON.stringify([...next]));  // ← diese Zeile hinzufügen
       return next;
       });
 
@@ -460,15 +463,7 @@ const GroupPage: React.FC = () => {
 
         <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
           
-          <Button
-            type="text"
-            icon={<UserOutlined />}
-            onClick={() => router.push(`/groups/${groupId}/history`)}
-            style={{ color: "white" }}
-          >
-            My Profile
-          </Button>
-
+     
           <Button 
             type="primary" 
             shape="round" 
@@ -478,6 +473,16 @@ const GroupPage: React.FC = () => {
           >
             New Activity
           </Button>
+
+          <Button
+            type="text"
+            icon={<UserOutlined />}
+            onClick={() => router.push(`/groups/${groupId}/history`)}
+            style={{ color: "white" }}
+          >
+            History
+          </Button>
+
           
         <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
         <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
