@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal, DatePicker } from "antd";
+import { Button, message, List, Avatar, Tag , Modal, DatePicker, Popconfirm} from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -11,6 +11,8 @@ import {
   TeamOutlined,
   PlusOutlined,
   SettingOutlined,
+  DeleteOutlined,
+  HistoryOutlined,
   ArrowLeftOutlined,
 }from "@ant-design/icons";
 import { useEffect, useState , useRef } from "react";
@@ -39,6 +41,8 @@ interface Activity {
   id: number;
   name: string;
   status: string;
+  authorId?: number;
+  //isRecursive?: boolean; missing the is recursive booelan (but which has already been added by another branch)
   scheduledTime?: string;
   location?: string;
   minSize?: number;
@@ -49,7 +53,8 @@ interface Activity {
   participantUsernames?: string[];
   minTemp?: number;       
   maxTemp?: number;        
-  rainPreference?: string; 
+  rainPreference?: string;
+  isRecursive?: boolean; 
 }
 
 interface CalendarEvent {
@@ -77,11 +82,11 @@ const GroupPage: React.FC = () => {
   const [members, setMembers] = useState<User[]>([]);
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
+  const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
   const [calendarDate, setCalendarDate] = useState(new Date());
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
-  const [rejectedActivities, setRejectedActivities] = useState<Activity[]>([]);
   const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
   const votedActivityIdsRef = useRef<Set<number>>(new Set());
 
@@ -135,8 +140,9 @@ const GroupPage: React.FC = () => {
       } catch (error) {
         console.error("Failed to fetch pending activities:", error);
     }
-      try {
-        //Fetch planned activities
+    
+    try {
+    //Fetch planned activities
         const planned = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=SCHEDULED`
         );
@@ -145,6 +151,16 @@ const GroupPage: React.FC = () => {
         console.error("Failed to fetch planned activities:", error);
       }
       
+     
+    try {
+    // Fetch rejected activities
+        const rejected = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=REJECTED`
+        );
+        setRejectedActivities(rejected);
+      } catch (error) {
+        console.error("Failed to fetch rejected activities:", error);
+      }
 
       try {
         // Fetch rejected activities
@@ -223,7 +239,8 @@ const GroupPage: React.FC = () => {
   useEffect(() => {
     if (!groupId || !token) return;
     const interval = setInterval(async () => {
-    try {
+    
+      try {
       const pending = await apiService.get<Activity[]>(
         `/groups/${groupId}/activities?status=PENDING`
       );
@@ -301,6 +318,8 @@ const GroupPage: React.FC = () => {
         return prev.filter((a) => a.id !== activityId);
       });
 
+      setRejectedActivities((prev) => prev.filter((a) => a.id !== activityId)); //remove from rejected if it was joined in 
+
       setVotedCount((prev) => prev + 1);
       if (voteType === "DECLINE") {
         messageApi.success("Passed.");
@@ -313,41 +332,23 @@ const GroupPage: React.FC = () => {
       }
     };
 
-  const handleRevive = async (activityId: number) => {
+  const handleDeleteActivity = async (activityId: number) => {
     try {
-      //calling backend to revive the activity
-      await apiService.post(`/activities/${activityId}/revive`, {});
+      await apiService.delete(`/groups/${groupId}/activities/${activityId}`);
+      messageApi.success("Activity deleted.");
       
-      messageApi.success("Activity revived! 🎉 It's back in the voting feed.");
-
-      // 2. Limpiar el ID de los registros de votos locales
-      // Esto es CRUCIAL para que el filtro deje de ocultar la actividad
-      setVotedActivityIds((prev) => {
-        const next = new Set(prev);
-        next.delete(activityId); // delete the id activityId from the set, do that it can appear again in the pending list
-        votedActivityIdsRef.current = next; // also update the ref to keep them in sync
-        return next;
-      });
-
-      //reduce votes count by 1, but not less than 0
-      setVotedCount((prev) => Math.max(0, prev - 1));
-
-      //moving the activity from rejected to pending list
-      setRejectedActivities((prev) => prev.filter((a) => a.id !== activityId));
-
-      if (groupId) {
-        const pending = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=PENDING`
-        );
-        // apply to pending activities 
-        setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
-        setTotalPending(pending.length);
-      }
+      // Optimistically update lists
+      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setPlannedActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setLikedActivities((prev) => prev.filter((a) => a.id !== activityId));
     } catch (error) {
-      messageApi.error("Failed to revive activity.");
+      messageApi.error("Failed to delete activity.");
       console.error(error);
     }
   };
+
+  //here the function for removing the recursive function should be added (will complete it once the recursive features are finished)
+
 
   const handleLeaveGroup = async () => {
     try {
@@ -368,6 +369,12 @@ const GroupPage: React.FC = () => {
   };
 
   const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
+
+  const sectionCard: React.CSSProperties = {
+  backgroundColor: "rgba(126,126,126,0.2)",
+  borderRadius: "12px",
+  padding: "24px",
+};
 
   return (
     <div style={{
@@ -400,6 +407,11 @@ const GroupPage: React.FC = () => {
       <p>⏱ {newEventPopup.duration} hours</p>
       )}
       <p style={{ color: "#999", fontSize: "12px" }}>The event has been added to the group calendar.</p>
+      {newEventPopup?.isRecursive && (
+        <p style={{ color: "#7c3aed", fontSize: "12px", marginTop: "6px" }}>
+          🔁 This is a recurring activity — it has automatically re-entered the voting pool so the group can do it again!
+        </p>
+      )}
       </div>
       </Modal>
 
@@ -505,13 +517,17 @@ const GroupPage: React.FC = () => {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px" }}>
 
           {/* Group Members */}
-          <div style={{
-            backgroundColor: "rgba(126,126,126,0.2)",
-            borderRadius: "12px",
-            padding: "24px",
-          }}>
-            <h3 style={{ color: "white", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-              <TeamOutlined /> Group Members
+          <div style={sectionCard}>
+            <h3
+              style={{
+                color: "white",
+                marginBottom: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <TeamOutlined /> {group?.name ? `${group.name} Members` : "Group Members"}
             </h3>
             <List
               dataSource={members}
@@ -528,11 +544,7 @@ const GroupPage: React.FC = () => {
           </div>
 
           {/* Pending Activities */}
-          <div style={{
-            backgroundColor: "rgba(126,126,126,0.2)",
-            borderRadius: "12px",
-            padding: "24px",
-          }}>
+          <div style={sectionCard}>
             <h3 style={{ color: "white", marginBottom: "16px" }}>💡 Upcoming Ideas</h3>
             
             {totalPending > 0 && (
@@ -588,7 +600,7 @@ const GroupPage: React.FC = () => {
                     )}
                     {(pendingActivities[0].minSize || pendingActivities[0].maxSize) && (
                       <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
-                        👥 Min {pendingActivities[0].minSize ?? "?"} · Max {pendingActivities[0].maxSize ?? "?"} participants
+                        👥 Min {pendingActivities[0].minSize ?? "?"} · Max {""} {pendingActivities[0].maxSize ?? "?"} participants
                       </span>
                     )}
                     {pendingActivities[0].duration && (
@@ -600,6 +612,9 @@ const GroupPage: React.FC = () => {
                       <Tag color="blue">Pending votes</Tag>
                       {pendingActivities[0].isWeatherDependent && (
                         <Tag color="cyan">Weather-dependent</Tag>
+                      )}
+                      {pendingActivities[0].isRecursive && (
+                        <Tag color="purple">🔁 Recurring</Tag>
                       )}
                     </div>
                     {pendingActivities[0].minSize && (
@@ -622,9 +637,25 @@ const GroupPage: React.FC = () => {
                     </div>
                   </div>
                 )}
-                  </div>
                 </div>
-
+                {pendingActivities[0].authorId?.toString() === userId && (
+                    <div style={{ display: "flex", gap: "8px", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                      <Popconfirm title="Delete this activity?" onConfirm={() => handleDeleteActivity(pendingActivities[0].id)}>
+                        <Button size="small" danger icon={<DeleteOutlined />} style={{ background: "transparent" }}>
+                          Delete
+                        </Button>
+                      </Popconfirm>
+                      {/*{pendingActivities[0].isRecursive && (
+                        <Popconfirm title="Stop recurring?" onConfirm={() => handleStopRecursion(pendingActivities[0].id)}>
+                          <Button size="small" icon={<StopOutlined />} style={{ color: "#d9d9d9", background: "transparent", borderColor: "#555" }}>
+                            Stop Recursion
+                          </Button>
+                        </Popconfirm>
+                      )}*/}
+                    </div>
+                    )}
+                </div>
+              
                 {/* Vote buttons */}
                 <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
                   <Button
@@ -769,6 +800,9 @@ const GroupPage: React.FC = () => {
                       }
                     />
                     <Tag color="orange">Waiting</Tag>
+                      {activity.isRecursive && (
+                      <Tag color="purple">🔁 Recurring</Tag>
+                    )}
                   </List.Item>
                 )}
                 locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>None waiting</span> }}
@@ -777,67 +811,96 @@ const GroupPage: React.FC = () => {
           )}
 
         {/* Rejected Activities */}
-          {rejectedActivities.length > 0 && (
-            <div style={{
-              backgroundColor: "rgba(126,126,126,0.2)",
-              borderRadius: "12px",
-              padding: "24px",
-            }}>
-              <h3 style={{ color: "white", marginBottom: "8px" }}>❌ Rejected Activities</h3>
-              <p style={{ color: "rgba(255,255,255,0.4)", fontSize: "13px", marginBottom: "16px" }}>
-                You rejected this activity. Revive to start a new voting round.
-              </p>
-              <List
-                dataSource={rejectedActivities}
-                renderItem={(activity) => (
-                  <List.Item
-                    style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "12px 0" }}
-                    actions={[
-                      <Button
-                        key="revive"
+        {/*
+          Shows activities whose status is REJECTED.
+          Uses the same list style as Scheduled Activities..
+
+        */}
+        <div style={sectionCard}>
+          <h3 style={{ color: "white", marginBottom: "4px" }}>❌ Rejected Activities</h3>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontSize: "13px",
+              marginBottom: "16px",
+            }}
+          >
+            Activities the user passed on — hit <b style={{ color: "rgba(255,255,255,0.6)" }}>+ Join</b> to change your mind and participate.
+          </p>
+          <List
+            dataSource={rejectedActivities}
+            renderItem={(activity) => (
+              <List.Item
+                style={{
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                  padding: "10px 0",
+                }}
+              >
+                <List.Item.Meta
+                  title={<span style={{ color: "white" }}>{activity.name}</span>}
+                  description={
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      {activity.location && (
+                        <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                          📍 {activity.location}
+                        </span>
+                      )}
+                      {activity.participantUsernames &&
+                        activity.participantUsernames.length > 0 && (
+                          <span
+                            style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}
+                          >
+                            {activity.participantUsernames.join(", ")}
+                          </span>
+                        )}
+                      {activity.isWeatherDependent && (
+                        <span
+                          style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}
+                        >
+                          Weather dependent
+                          {activity.minTemp != null ? ` · min ${activity.minTemp}°C` : ""}
+                          {activity.maxTemp != null ? ` · max ${activity.maxTemp}°C` : ""}
+                          {activity.rainPreference
+                            ? ` · ${activity.rainPreference}`
+                            : ""}
+                        </span>
+                      )}
+                    </div>
+                  }
+                />
+                {(!activity.maxSize || (activity.acceptVotes ?? 0) < activity.maxSize) &&
+                  !activity.participantUsernames?.includes(
+                     members.find((m) => m.id.toString() === userId)?.username ?? ""
+                    ) && (
+                     <Button
                         size="small"
-                        onClick={() => handleRevive(activity.id)}
+                        onClick={() => handleVote(activity.id, "ACCEPT")}
                         style={{
-                          background: "rgba(255,159,67,0.15)",
-                          color: "#ff9f43",
-                          border: "1px solid rgba(255,159,67,0.4)",
-                          borderRadius: "8px",
-                          fontWeight: "bold",
-                        }}
-                      >
-                        🔄 Revive
-                      </Button>,
-                    ]}
-                  >
-                    <List.Item.Meta
-                      title={<span style={{ color: "white" }}>{activity.name}</span>}
-                      description={
-                        <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
-                          {activity.location && (
-                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
-                              📍 {activity.location}
-                            </span>
-                          )}
-                          {activity.minSize && (
-                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
-                              👥 Min {activity.minSize} · Max {activity.maxSize ?? "?"} participants
-                            </span>
-                          )}
-                          {activity.duration && (
-                            <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
-                              ⏱ {activity.duration} hours
-                            </span>
-                          )}
-                        </div>
-                      }
-                    />
-                    <Tag color="red" style={{ marginRight: "8px" }}>Rejected</Tag>
-                  </List.Item>
-                )}
-                locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No rejected activities</span> }}
-              />
-            </div>
-          )}
+                            background: "rgba(66,214,120,0.15)",
+                            color: "#42d678",
+                            border: "1px solid rgba(66,214,120,0.4)",
+                            borderRadius: "8px",
+                            marginLeft: "12px",
+                         }}
+                         >
+                           + Join
+                         </Button>
+                       )}
+                <Tag color="red" style={{ marginLeft: "8px" }}>
+                  Rejected
+                </Tag>
+                {activity.isRecursive && <Tag color="purple">🔁 Recurring</Tag>}
+              </List.Item>
+            )}
+            locale={{
+              emptyText: (
+                <span style={{ color: "rgba(255,255,255,0.3)" }}>
+                  No rejected activities
+                </span>
+              ),
+            }}
+          />
+        </div>
 
         {/* Calendar */}
         <div style={{
