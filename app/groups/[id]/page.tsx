@@ -237,31 +237,13 @@ const GroupPage: React.FC = () => {
 
   const fetchMessages = async () => {
   try {
-
-    //MOCKDATEN, ENTFERNEN NACH BACKEND IMPLEMENTIERUNG
-      const newMsgs=([
-      { id: 1, text: "mockdata", senderName: "Tim", createdAt: "2026-05-10T10:00:00" },
-      { id: 2, text: "mockdata", senderName: "Tom", createdAt: "2026-05-10T10:01:00" },
-      { id: 3, text: "mockdata", senderName: "Tam", createdAt: "2026-05-10T10:02:00" },
-    ]);
-
-    setChatMessages((prev) => {
-      const prevCount = prev.length;
-      const newCount = newMsgs.length;
-      if (!chatOpen && newCount > prevCount) {
-        setUnreadCount((u) => u + (newCount - prevCount));
-      }
-      return newMsgs;
-    });
-
-
-    // const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
-    // setChatMessages((prev) => {
-    //   if (!chatOpen && msgs.length > prev.length) {
-    //     setUnreadCount((u) => u + (msgs.length - prev.length));
-    //   }
-    //   return msgs;
-    // });
+     const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
+     setChatMessages((prev) => {
+       if (!chatOpen && msgs.length > prev.length) {
+         setUnreadCount((u) => u + (msgs.length - prev.length));
+       }
+       return msgs;
+     });
   } catch (error) {
     console.error("Failed to fetch messages:", error);
   }
