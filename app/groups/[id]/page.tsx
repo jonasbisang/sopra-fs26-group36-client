@@ -174,6 +174,15 @@ const GroupPage: React.FC = () => {
       } catch (error) {
         console.error("Failed to fetch calendar:", error);
       }
+      try {
+        // Fetch rejected activities for the current user
+        const rejected = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=REJECTED`
+        );
+        setDeclinedActivities(rejected);
+      } catch (error) {
+        console.error("Failed to fetch rejected activities:", error);
+      }
    };
 
     fetchData();
@@ -228,13 +237,29 @@ const GroupPage: React.FC = () => {
     const interval = setInterval(async () => {
     
       try {
-      const pending = await apiService.get<Activity[]>(
-        `/groups/${groupId}/activities?status=PENDING`
-      );
-      setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
-    } catch (error) {
-      console.error("Polling error:", error);
-    }
+        // 1. Fetch unvoted activities (Upcoming Ideas)
+        const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+        setPendingActivities(pending); // <-- No more local storage .filter() hack needed!
+        setTotalPending(pending.length);
+      } catch (error) {
+        console.error("Failed to fetch pending activities:", error);
+      }
+
+      try {
+        // 2. Fetch liked activities (Awaiting Members)
+        const accepted = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=ACCEPTED`);
+        setLikedActivities(accepted);
+      } catch (error) {
+        console.error("Failed to fetch accepted activities:", error);
+      }
+
+      try {
+        // 3. Fetch passed activities (Rejected)
+        const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED`);
+        setDeclinedActivities(rejected);
+      } catch (error) {
+        console.error("Failed to fetch rejected activities:", error);
+      }
   }, 2000);
   return () => clearInterval(interval);
     }, [groupId, token]);
