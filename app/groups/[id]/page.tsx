@@ -14,7 +14,7 @@ import {
   MessageOutlined,
   SendOutlined,
 }from "@ant-design/icons";
-import { useEffect, useState , useRef } from "react";
+import { useEffect, useState , useRef, useCallback } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -235,7 +235,7 @@ const GroupPage: React.FC = () => {
     }
   };
 
-  const fetchMessages = async () => {
+  const fetchMessages = useCallback(async () => {
   try {
      const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
      setChatMessages((prev) => {
@@ -247,15 +247,16 @@ const GroupPage: React.FC = () => {
   } catch (error) {
     console.error("Failed to fetch messages:", error);
   }
-};
+}, [groupId, apiService, chatOpen]);
 
-// Polling für neue Messages wenn Chat offen ist
+
+// Polling für neue Messages immer
 useEffect(() => {
-  if (!chatOpen || !groupId || !token) return;
+  if (!groupId || !token) return;
   fetchMessages(); // initial laden
-  const interval = setInterval(fetchMessages, 3000);
+  const interval = setInterval(fetchMessages, 2000);
   return () => clearInterval(interval);
-}, [chatOpen, groupId, token]);
+}, [groupId, token, fetchMessages]);
 
 // Auto-scroll nach unten wenn neue Messages kommen
 useEffect(() => {
