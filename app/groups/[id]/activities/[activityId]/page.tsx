@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, Tag, Avatar } from "antd";
+import { Button, message, Tag, Avatar, Modal, Popconfirm } from "antd";
 import {
   ArrowLeftOutlined,
   UserOutlined,
@@ -13,6 +13,9 @@ import {
   TeamOutlined,
   ClockCircleOutlined,
   ThunderboltOutlined,
+  DeleteOutlined,
+  StopOutlined,
+  ExclamationCircleOutlined,
 } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import moment from "moment";
@@ -37,6 +40,12 @@ interface Activity {
   rainPreference?: string;
   creatorId?: number;
   isRecursive?: boolean;
+
+}
+
+interface GroupInfo {
+  
+  adminId?: number;
 }
  
 const ActivityDetailPage: React.FC = () => {
@@ -55,6 +64,8 @@ const ActivityDetailPage: React.FC = () => {
  
   const [activity, setActivity] = useState<Activity | null>(null);
   const [loading, setLoading] = useState(true);
+  const [groupAdminId, setGroupAdminId] = useState<number | null>(null);
+  const [actionLoading, setActionLoading] = useState(false);
  
   useEffect(() => {
     setMounted(true);
@@ -66,33 +77,49 @@ const ActivityDetailPage: React.FC = () => {
     }
   }, [mounted, token, router]);
  
-useEffect(() => {
-  if (!activityId || !token) return;
-  const fetchActivity = async () => {
-    try {
-      // Alle Activities holen (SCHEDULED + PENDING)
-      const [scheduled, pending] = await Promise.all([
-        apiService.get<Activity[]>(`/groups/${groupId}/activities?status=SCHEDULED`),
-        apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`),
-      ]);
-      
-      const all = [...scheduled, ...pending];
-      const found = all.find((a) => a.id === Number(activityId));
-      
-      if (found) {
-        setActivity(found);
-      } else {
-        messageApi.error("Activity not found.");
+  useEffect(() => {
+    if (!activityId || !token) return;
+    const fetchActivity = async () => {
+      try {
+        // Alle Activities holen (SCHEDULED + PENDING)
+        const [scheduled, pending] = await Promise.all([
+          apiService.get<Activity[]>(`/groups/${groupId}/activities?status=SCHEDULED`),
+          apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`),
+        ]);
+        
+        const all = [...scheduled, ...pending];
+        const found = all.find((a) => a.id === Number(activityId));
+        
+        if (found) {
+          setActivity(found);
+        } else {
+          messageApi.error("Activity not found.");
+        }
+      } catch (error) {
+        console.error("Failed to fetch activity:", error);
+        messageApi.error("Could not load activity.");
+      } finally {
+        setLoading(false);
       }
-    } catch (error) {
-      console.error("Failed to fetch activity:", error);
-      messageApi.error("Could not load activity.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  fetchActivity();
-}, [activityId, groupId, token]);
+    };
+    fetchActivity();
+  }, [activityId, groupId, token]);
+
+  // Fetch group info to get adminId
+  useEffect(() => {
+    if (!groupId || !token) return;
+    const fetchGroup = async () => {
+      try {
+        const groupData = await apiService.get<GroupInfo>(`/groups/${groupId}`);
+        if (groupData?.adminId) {
+          setGroupAdminId(groupData.adminId);
+        }
+      } catch (error) {
+        console.error("Failed to fetch group info:", error);
+      }
+    };
+    fetchGroup();
+  }, [groupId, token]);
  
 
  
@@ -100,6 +127,43 @@ useEffect(() => {
     clearToken();
     clearUserId();
     router.push("/login");
+  };
+
+  // Determine if current user is the activity creator or group admin
+  const currentUserIdNum = Number(userId);
+  const isCreator = activity?.creatorId === currentUserIdNum;
+  const isAdmin = groupAdminId !== null && groupAdminId === currentUserIdNum;
+  const canEdit = isCreator || isAdmin;
+
+  const handleStopRecursion = async () => {
+    if (!activity) return;
+    setActionLoading(true);
+    try {
+      await apiService.patch(`/groups/${groupId}/activities/${activityId}`, {
+        isRecursive: false,
+      });
+      setActivity((prev) => prev ? { ...prev, isRecursive: false } : prev);
+      messageApi.success("Recursion stopped. This activity will no longer repeat.");
+    } catch (error) {
+      console.error("Failed to stop recursion:", error);
+      messageApi.error("Could not stop recursion. Please try again.");
+    } finally {
+      setActionLoading(false);
+    }
+  };
+
+  const handleDeleteActivity = async () => {
+    if (!activity) return;
+    setActionLoading(true);
+    try {
+      await apiService.delete(`/groups/${groupId}/activities/${activityId}`);
+      messageApi.success("Activity deleted successfully.");
+      setTimeout(() => router.back(), 800);
+    } catch (error) {
+      console.error("Failed to delete activity:", error);
+      messageApi.error("Could not delete the activity. Please try again.");
+      setActionLoading(false);
+    }
   };
  
   const isFull =
@@ -170,13 +234,13 @@ useEffect(() => {
  
         {activity ? (
           <>
-            {/* Title + Status */}
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
+      {/* Title + Status */}
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "32px" }}>
               <div>
                 <h1 style={{ color: "white", fontSize: "36px", fontWeight: "bold", margin: "0 0 8px" }}>
                   {activity.name}
                 </h1>
-                <div style={{ display: "flex", gap: "8px" }}>
+                <div style={{ display: "flex", gap: "8px", flexWrap: "wrap" }}>
                   {isFull ? (
                     <Tag color="red">Full</Tag>
                   ) : (
@@ -187,6 +251,76 @@ useEffect(() => {
                   {activity.isRecursive && <Tag color="purple">Recurring</Tag>}
                 </div>
               </div>
+
+              {/* ── Edit Controls (only for creator or admin) ── */}
+              {canEdit && (
+                <div style={{ display: "flex", flexDirection: "column", gap: "10px", alignItems: "flex-end" }}>
+
+                  {/* Stop Recursion — only shown when activity is currently recursive */}
+                  {activity.isRecursive && (
+                    <Popconfirm
+                      title="Stop Recursion"
+                      description="This activity will no longer repeat after its current occurrence. Continue?"
+                      onConfirm={handleStopRecursion}
+                      okText="Yes, stop"
+                      cancelText="Cancel"
+                      okButtonProps={{ danger: true }}
+                      icon={<ExclamationCircleOutlined style={{ color: "#faad14" }} />}
+                    >
+                      <Button
+                        icon={<StopOutlined />}
+                        loading={actionLoading}
+                        style={{
+                          backgroundColor: "rgba(250, 173, 20, 0.12)",
+                          border: "1px solid rgba(250, 173, 20, 0.4)",
+                          color: "#faad14",
+                          borderRadius: "8px",
+                          fontWeight: 500,
+                          fontSize: "13px",
+                        }}
+                      >
+                        Stop Recursion
+                      </Button>
+                    </Popconfirm>
+                  )}
+
+                  {/* Delete Activity */}
+                  <Popconfirm
+                    title="Delete Activity"
+                    description="Are you sure you want to permanently delete this activity? This cannot be undone."
+                    onConfirm={handleDeleteActivity}
+                    okText="Delete"
+                    cancelText="Cancel"
+                    okButtonProps={{ danger: true }}
+                    icon={<ExclamationCircleOutlined style={{ color: "#ff4d4f" }} />}
+                  >
+                    <Button
+                      icon={<DeleteOutlined />}
+                      loading={actionLoading}
+                      style={{
+                        backgroundColor: "rgba(255, 77, 79, 0.12)",
+                        border: "1px solid rgba(255, 77, 79, 0.4)",
+                        color: "#ff4d4f",
+                        borderRadius: "8px",
+                        fontWeight: 500,
+                        fontSize: "13px",
+                      }}
+                    >
+                      Delete Activity
+                    </Button>
+                  </Popconfirm>
+
+                  {/* Role badge */}
+                  <span style={{
+                    color: "rgba(255,255,255,0.3)",
+                    fontSize: "11px",
+                    textAlign: "right",
+                    marginTop: "2px",
+                  }}>
+                    {isCreator && isAdmin ? "You created this · Admin" : isCreator ? "You created this" : "Group Admin"}
+                  </span>
+                </div>
+              )}
             </div>
 
  
