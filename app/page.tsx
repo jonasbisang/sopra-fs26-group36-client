@@ -55,7 +55,7 @@ export default function Home() {
           <div className={styles.character}>
             <div className={styles.charBody} style={{ background: 'rgba(255,220,0,0.12)' }}>
               <div className={styles.charHead} style={{ background: 'rgba(255,220,0,0.2)' }}>🧔</div>
-              <div className={styles.charBadge} style={{ background: '#ffdc00' }}>♥</div>
+              <div className={styles.charBadge} style={{ background: '#ffdc00' }}>✓</div>
             </div>
             <span className={styles.charName}>Joey</span>
           </div>
