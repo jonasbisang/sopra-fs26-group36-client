@@ -122,17 +122,18 @@ const handleDeleteAccount = async () => {
   try {
     setLoading(true);
     await apiService.delete(`/users/${userId}`, { 
-      oldPassword: deletePassword
+      oldPassword: deletePassword  // ← oldPassword, nicht password
     });
     message.success("Account permanently deleted.");
     localStorage.clear();
     router.push("/login");
-  } catch (error) {
-    message.error("Could not delete account. Wrong password?");
-  } finally {
-    setLoading(false);
-  }
-};
+} catch (error) {
+  message.error("Failed to delete account. Wrong password?");
+}  finally {      
+  setLoading(false);
+}}
+
+
 
 
   useEffect(() => {
