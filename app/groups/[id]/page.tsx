@@ -91,11 +91,15 @@ const GroupPage: React.FC = () => {
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
   const [, setVotedActivityIds] = useState<Set<number>>(new Set());
   const VOTED_KEY = `voted_${groupId}_${userId}`;
-  const votedActivityIdsRef = useRef<Set<number>>(new Set(JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]")));
+  const votedActivityIdsRef = useRef<Set<number>>(new Set(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]")
+      : []));
 
   const [totalPending, setTotalPending] = useState<number>(0);
   const [votedCount, setVotedCount] = useState<number>(
-  JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]").length);
+    typeof window !== "undefined" ? JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]").length : 0);
+
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -138,7 +142,7 @@ const GroupPage: React.FC = () => {
     try {
     // Fetch pending activities
     const pending = await apiService.get<Activity[]>(
-      `/groups/${groupId}/activities?status=PENDING`);
+      `/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
       setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
       setTotalPending(pending.length);
       } catch (error) {
@@ -177,11 +181,16 @@ const GroupPage: React.FC = () => {
         console.error("Failed to fetch calendar:", error);
       }
       try {
-        // Fetch rejected activities for the current user
+        // Fetch rejected activities for the current user - trying again with changed backend
         const rejected = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=REJECTED`
-        );
+          `/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
+
         setDeclinedActivities(rejected);
+
+        const accepted = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
+        setLikedActivities(accepted);
+
       } catch (error) {
         console.error("Failed to fetch rejected activities:", error);
       }
@@ -240,7 +249,7 @@ const GroupPage: React.FC = () => {
     
       try {
         // 1. Fetch unvoted activities (Upcoming Ideas)
-        const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+        const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
         setPendingActivities(pending); // <-- No more local storage .filter() hack needed!
         setTotalPending(pending.length);
       } catch (error) {
@@ -249,7 +258,7 @@ const GroupPage: React.FC = () => {
 
       try {
         // 2. Fetch liked activities (Awaiting Members)
-        const accepted = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=ACCEPTED`);
+        const accepted = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
         setLikedActivities(accepted);
       } catch (error) {
         console.error("Failed to fetch accepted activities:", error);
@@ -257,14 +266,15 @@ const GroupPage: React.FC = () => {
 
       try {
         // 3. Fetch passed activities (Rejected)
-        const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED`);
-        setDeclinedActivities(rejected);
-      } catch (error) {
-        console.error("Failed to fetch rejected activities:", error);
-      }
-  }, 2000);
-  return () => clearInterval(interval);
-    }, [groupId, token]);
+        const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
+          setDeclinedActivities(rejected);} 
+          
+        catch (error) {
+            console.error("Failed to fetch rejected activities:", error);}
+          }, 2000);
+
+        return () => clearInterval(interval);}, 
+        [groupId, token, userId]);
 
 
 
@@ -274,7 +284,7 @@ const GroupPage: React.FC = () => {
 
     if (!groupId) return;
     try {
-      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
       setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
      
     } catch (error) {
