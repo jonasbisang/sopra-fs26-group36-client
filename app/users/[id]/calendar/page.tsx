@@ -3,7 +3,13 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { Button, message, Spin, TimePicker } from "antd";
-import { ArrowLeftOutlined,} from "@ant-design/icons";
+import {
+  ArrowLeftOutlined,
+  CalendarOutlined,
+  EnvironmentOutlined,
+  TeamOutlined,
+  ClockCircleOutlined,
+} from "@ant-design/icons";
 import dayjs from "dayjs";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { getApiDomain } from "@/utils/domain";
@@ -241,6 +247,111 @@ const CalendarPage: React.FC = () => {
         <p style={{ color: "gray", marginBottom: 16, fontSize: 18 }}>
           How do you want to manage your availability?
         </p>
+      </div>
+
+      {/* ═══ SECTION 1: GROUP EVENTS ═══════════════════════════════════════ */}
+      <div style={{ maxWidth: 900, margin: "0 auto 56px" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10, marginBottom: 20,
+          borderBottom: "1px solid rgba(255,255,255,0.15)", paddingBottom: 12,
+        }}>
+          <CalendarOutlined style={{ color: "white", fontSize: 18 }} />
+          <h3 style={{ color: "white", margin: 0, fontSize: 20 }}>Upcoming Group Activities</h3>
+        </div>
+
+        {eventsLoading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+            <Spin size="large" />
+          </div>
+        ) : upcomingEvents.length === 0 ? (
+          <div style={{
+            backgroundColor: "rgba(126,126,126,0.12)",
+            borderRadius: 12, padding: "32px 20px", textAlign: "center",
+          }}>
+            <CalendarOutlined style={{ fontSize: 32, color: "rgba(255,255,255,0.2)", marginBottom: 12, display: "block" }} />
+            <p style={{ color: "rgba(255,255,255,0.35)", margin: 0 }}>
+              No upcoming scheduled activities across your groups yet.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {upcomingEvents.map((ev) => {
+              const isWeather = ev.isWeatherDependent || ev.weatherDependent;
+              const dt = ev.scheduledTime ? dayjs(ev.scheduledTime) : null;
+              const isToday = dt?.format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
+              const isTomorrow = dt?.format("YYYY-MM-DD") === dayjs().add(1, "day").format("YYYY-MM-DD");
+
+              return (
+                <div
+                  key={`${ev.groupId}-${ev.id}`}
+                  onClick={() => router.push(`/groups/${ev.groupId}/activities/${ev.id}`)}
+                  style={{
+                    backgroundColor: "rgba(126,126,126,0.15)",
+                    border: isToday
+                      ? "1px solid rgba(255,255,255,0.3)"
+                      : "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: 12, padding: "16px 20px",
+                    display: "flex", alignItems: "center",
+                    cursor: "pointer", gap: 16, transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(126,126,126,0.25)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(126,126,126,0.15)")}
+                >
+                  {/* Date block */}
+                  <div style={{
+                    minWidth: 54, textAlign: "center",
+                    backgroundColor: "rgba(255,255,255,0.07)",
+                    borderRadius: 8, padding: "8px 4px", flexShrink: 0,
+                  }}>
+                    <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>
+                      {dt?.format("MMM")}
+                    </div>
+                    <div style={{ color: "white", fontSize: 24, fontWeight: "bold", lineHeight: 1.1 }}>
+                      {dt?.format("D")}
+                    </div>
+                    <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 10 }}>
+                      {dt?.format("ddd")}
+                    </div>
+                  </div>
+
+                  {/* Info */}
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                      <span style={{ color: "white", fontWeight: 600, fontSize: 15 }}>{ev.name}</span>
+                      {isToday && <Tag color="gold" style={{ fontSize: 10, margin: 0 }}>Today</Tag>}
+                      {isTomorrow && <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>Tomorrow</Tag>}
+                      {isWeather && <Tag color="blue" style={{ fontSize: 10, margin: 0 }}>Weather</Tag>}
+                      {ev.isRecursive && <Tag color="purple" style={{ fontSize: 10, margin: 0 }}>Recurring</Tag>}
+                    </div>
+
+                    <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                      <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                        <TeamOutlined /> {ev.groupName ?? `Group ${ev.groupId}`}
+                      </span>
+                      {dt && (
+                        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                          <ClockCircleOutlined /> {dt.format("HH:mm")}{ev.duration ? ` · ${ev.duration}h` : ""}
+                        </span>
+                      )}
+                      {ev.location && (
+                        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                          <EnvironmentOutlined /> {ev.location}
+                        </span>
+                      )}
+                      {ev.maxSize != null && (
+                        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                          <TeamOutlined /> {ev.acceptVotes ?? 0}/{ev.maxSize}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 20, flexShrink: 0 }}>›</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div style={{ display: "flex", gap: 8, marginBottom: 24, justifyContent: "center" }}>
