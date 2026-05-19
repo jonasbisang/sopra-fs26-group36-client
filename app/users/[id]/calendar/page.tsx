@@ -1,9 +1,9 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { Button, message, Spin, TimePicker } from "antd";
-import { ArrowLeftOutlined } from "@ant-design/icons";
+import { ArrowLeftOutlined,} from "@ant-design/icons";
 import dayjs from "dayjs";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { getApiDomain } from "@/utils/domain";
@@ -17,6 +17,28 @@ interface UnavailabilityGetDTO {
   id: number;
   startDateTime: string;
   endDateTime: string;
+}
+
+interface Group {
+  id: number;
+  name: string;
+  members: number;
+}
+
+interface GroupActivity {
+  id: number;
+  name: string;
+  status: string;
+  scheduledTime?: string;
+  location?: string;
+  duration?: number;
+  acceptVotes?: number;
+  maxSize?: number;
+  isWeatherDependent?: boolean;
+  weatherDependent?: boolean;
+  isRecursive?: boolean;
+  groupId?: number;
+  groupName?: string;
 }
 
 type DayStatus = "available" | "unavailable_whole_day" | "unavailable_time_slot";
@@ -38,6 +60,8 @@ const CalendarPage: React.FC = () => {
   const {value: token} = useLocalStorage<string>("token", "");
   const [mounted, setMounted] = useState(false);
 
+  const [groupEvents, setGroupEvents] = useState<GroupActivity[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
 
   const [mode, setMode] = useState<null | "manual" | "google">(null);
@@ -135,6 +159,45 @@ const CalendarPage: React.FC = () => {
       console.error(error);
     }
   };
+  
+  // Fetch all scheduled activities from all groups 
+  const fetchGroupEvents = useCallback(async () => {
+    if (!userId) return;
+    try {
+      setEventsLoading(true);
+      const groups = await apiService.get<Group[]>(`/users/${userId}/groups`);
+      const allEvents: GroupActivity[] = [];
+
+      await Promise.all(
+        groups.map(async (group) => {
+          try {
+            const scheduled = await apiService.get<GroupActivity[]>(
+              `/groups/${group.id}/activities?status=SCHEDULED`
+            );
+            scheduled.forEach((a) => allEvents.push({ ...a, groupName: group.name, groupId: group.id }));
+          } catch {
+            // group may have no scheduled activities — skip silently
+          }
+        })
+      );
+
+      allEvents.sort((a, b) => {
+        if (!a.scheduledTime) return 1;
+        if (!b.scheduledTime) return -1;
+        return dayjs(a.scheduledTime).isBefore(dayjs(b.scheduledTime)) ? -1 : 1;
+      });
+
+      setGroupEvents(allEvents);
+    } catch (error) {
+      console.error("Failed to fetch group events:", error);
+    } finally {
+      setEventsLoading(false);
+    }
+  }, [userId, apiService]);
+
+  useEffect(() => {
+    if (mounted && token) fetchGroupEvents();
+  }, [mounted, token, fetchGroupEvents]);
 
   useEffect(() => {
     setMounted(true);
@@ -146,6 +209,19 @@ const CalendarPage: React.FC = () => {
       router.replace("/login");
     }
   }, [mounted, token, router]);
+
+  // Group events keyed by date for the calendar tiles
+  const eventsByDate: Record<string, GroupActivity[]> = {};
+  groupEvents.forEach((ev) => {
+    if (!ev.scheduledTime) return;
+    const date = ev.scheduledTime.split("T")[0];
+    if (!eventsByDate[date]) eventsByDate[date] = [];
+    eventsByDate[date].push(ev);
+  });
+
+  const upcomingEvents = groupEvents.filter(
+    (ev) => ev.scheduledTime && dayjs(ev.scheduledTime).isAfter(dayjs().subtract(1, "day"))
+  );
 
   return (
     <div style={{ backgroundColor: "#000", minHeight: "100vh", padding: "40px 20px", color: "white" }}>
