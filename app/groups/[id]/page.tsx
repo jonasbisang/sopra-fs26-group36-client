@@ -14,7 +14,9 @@ import {
   SettingOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
+  DownOutlined,
 }from "@ant-design/icons";
+import { Dropdown } from "antd";
 import { useEffect, useState , useRef } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -477,65 +479,49 @@ const GroupPage: React.FC = () => {
         </Button>
       </div>   
 
-        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
           
-     
-          <Button 
-            type="primary" 
-            shape="round" 
-            icon={<PlusOutlined />} 
-            onClick={() => setIsCreateModalVisible(true)}
-            style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
-          >
-            New Activity
-          </Button>
+<div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
 
-          <Button
-            type="text"
-            icon={<ClockCircleOutlined />}
-            onClick={() => router.push(`/groups/${groupId}/history`)}
-            style={{ color: "white" }}
-          >
-            History
-          </Button>
+  {/* New Activity + History als Spalte */}
+  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+    <Button 
+      type="primary" 
+      shape="round" 
+      icon={<PlusOutlined />} 
+      onClick={() => setIsCreateModalVisible(true)}
+      style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
+    >
+      New Activity
+    </Button>
+    <Button 
+      type="text" 
+      icon={<ClockCircleOutlined />} 
+      onClick={() => router.push(`/groups/${groupId}/history`)} 
+      style={{ color: "white", fontSize: "13px" }}
+    >
+      Activity History
+    </Button>
+  </div>
 
-          
-        <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
-        <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
-         Calendar
-        </Button>
+  <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
+  <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
+  <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
 
-          <Button
-            type="text"
-            icon={<UserOutlined />}
-            onClick={() => router.push(`/users/${userId}`)}
-            style={{ color: "white" }}
-          >
-            My Profile
-          </Button>
+  {group?.adminId.toString() === userId ? (
+    <Button type="primary" shape="round" icon={<SettingOutlined />} onClick={() => router.push(`/groups/${groupId}/settings`)} style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}>
+      Group Settings
+    </Button>
+  ) : (
+    <Button danger icon={<LogoutOutlined />} onClick={handleLeaveGroup} style={{ fontWeight: "bold" }}>
+      Leave Group
+    </Button>
+  )}
 
-          {group?.adminId.toString() === userId ? (
-          <Button
-            type="primary"
-            shape="round"
-            icon={<SettingOutlined />}
-            onClick={() => router.push(`/groups/${groupId}/settings`)}
-            style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}
-          >
-            Group Settings
-          </Button>
-        ) : (
-          <Button
-            danger
-            icon={<LogoutOutlined />}
-            onClick={handleLeaveGroup}
-            style={{ fontWeight: "bold" }}
-          >
-            Leave Group
-          </Button>
-        )}
+</div>
         </div>
-      </div>
+          </div>
+      
 
       
 

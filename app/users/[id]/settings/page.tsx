@@ -118,19 +118,23 @@ const EditProfile: React.FC = () => {
   };
 
 
-  const handleDeleteAccount = async () => {
-    try {
-      setLoading(true);
-      await apiService.delete(`/users/${userId}`, { oldPassword: deletePassword });
-      message.success("Account permanently deleted.");
-      localStorage.clear();
-      router.push("/login");
-    } catch (error) {
-      message.error("Could not delete account. Wrong password?");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleDeleteAccount = async () => {
+  try {
+    setLoading(true);
+    await apiService.delete(`/users/${userId}`, { 
+      oldPassword: deletePassword  // ← oldPassword, nicht password
+    });
+    message.success("Account permanently deleted.");
+    localStorage.clear();
+    router.push("/login");
+} catch (error) {
+  message.error("Failed to delete account. Wrong password?");
+}  finally {      
+  setLoading(false);
+}}
+
+
+
 
   useEffect(() => {
     setMounted(true);
@@ -307,22 +311,23 @@ return (
               </Button>
 
             {/* Delete Modal */}
-            <Modal
-              open={deleteModalVisible}
-              onOk={handleDeleteAccount}
-              onCancel={() => { setDeleteModalVisible(false); setDeletePassword(""); }}
-              okText="Yes, delete"
-              cancelText="Cancel"
-              okButtonProps={{ danger: true }}
-              title="Delete Account?"
-            >
-            <p style={{ color: "black" }}>This action is permanent. Please enter your password to confirm.</p>
-            <Input.Password
-              placeholder="Enter your password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-            />
-            </Modal>
+<Modal
+  open={deleteModalVisible}
+  onOk={handleDeleteAccount}
+  onCancel={() => { setDeleteModalVisible(false); setDeletePassword(""); }}
+  okText="Yes, delete"
+  cancelText="Cancel"
+  okButtonProps={{ danger: true }}
+  title="Delete Account?"
+>
+  <p style={{ color: "black", marginBottom: "12px" }}>This action is permanent. Please enter your password to confirm.</p>
+  <Input.Password
+    placeholder="Enter your password"
+    value={deletePassword}
+    onChange={(e) => setDeletePassword(e.target.value)}
+    style={{ backgroundColor: "white", color: "black", border: "1px solid #d9d9d9" }}
+  />
+</Modal>
 
             {/* Delete Button */}
             <Button
