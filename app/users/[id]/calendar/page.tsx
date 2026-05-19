@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
-import { Button, message, Spin, TimePicker } from "antd";
+import { Button, message, Spin, TimePicker, Tag, Tooltip} from "antd";
 import {
   ArrowLeftOutlined,
   CalendarOutlined,
@@ -174,6 +174,7 @@ const CalendarPage: React.FC = () => {
       const groups = await apiService.get<Group[]>(`/users/${userId}/groups`);
       const allEvents: GroupActivity[] = [];
 
+
       await Promise.all(
         groups.map(async (group) => {
           try {
@@ -209,7 +210,8 @@ const CalendarPage: React.FC = () => {
     setMounted(true);
   }, []);
 
-  
+  useEffect(() => { setMounted(true); }, []);
+
   useEffect(() => {
     if (mounted && (!token || token === "")) {
       router.replace("/login");
@@ -241,15 +243,15 @@ const CalendarPage: React.FC = () => {
       </Button>
 
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <h2 style={{ color: "white", marginBottom: 4 }}>My Calendar - Availabilities</h2>
+        <h2 style={{ color: "white", marginBottom: 4 }}>My Calendar </h2>
       </div>
       <div style={{ display: "flex", justifyContent: "center" }}>
-        <p style={{ color: "gray", marginBottom: 16, fontSize: 18 }}>
-          How do you want to manage your availability?
+        <p style={{ color: "gray", marginBottom: 40, fontSize: 18 }}>
+          Your availability and upcoming group activities.
         </p>
       </div>
 
-      {/* ═══ SECTION 1: GROUP EVENTS ═══════════════════════════════════════ */}
+      {/* SECTION 1: GROUP EVENTS  */}
       <div style={{ maxWidth: 900, margin: "0 auto 56px" }}>
         <div style={{
           display: "flex", alignItems: "center", gap: 10, marginBottom: 20,
@@ -354,7 +356,21 @@ const CalendarPage: React.FC = () => {
         )}
       </div>
 
-      <div style={{ display: "flex", gap: 8, marginBottom: 24, justifyContent: "center" }}>
+      {/*SECTION 2: AVAILABILITY */}
+      <div style={{ maxWidth: 900, margin: "0 auto" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10, marginBottom: 20,
+          borderBottom: "1px solid rgba(255,255,255,0.15)", paddingBottom: 12,
+        }}>
+          <ClockCircleOutlined style={{ color: "white", fontSize: 18 }} />
+          <h3 style={{ color: "white", margin: 0, fontSize: 20 }}>My Availability</h3>
+        </div>
+
+        <p style={{ color: "gray", marginBottom: 20, fontSize: 15 }}>
+          How do you want to manage your availability?
+        </p>
+
+      <div style={{ display: "flex", gap: 8, marginBottom: 24 }}>
         <Button
           type={mode === "manual" ? "primary" : "default"}
           onClick={() => setMode("manual")}
@@ -390,17 +406,14 @@ const CalendarPage: React.FC = () => {
       </div>
 
       {mode === "manual" && (
-        <div style={{ marginTop: 8 }}>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ color: "white", marginBottom: 8, fontSize: 18 }}>
+          <div style={{ marginTop: 8 }}>
+            <p style={{ color: "white", marginBottom: 4, fontSize: 16 }}>
               All days start off as available!
             </p>
-          </div>
-          <div style={{ textAlign: "center" }}>
-            <p style={{ color: "gray", marginBottom: 16, fontSize: 14 }}>
-              Click once: whole day unavailable | Click again: specific time slot | Click again: available
+            <p style={{ color: "gray", marginBottom: 20, fontSize: 13 }}>
+              Click once: whole day unavailable · Click again: specific time slot · Click again: available.
+              White badge = group activity on that day.
             </p>
-          </div>
 
           {loading ? (
             <Spin size="large" />
@@ -409,6 +422,7 @@ const CalendarPage: React.FC = () => {
               {next30Days.map((date) => {
                 const day = days[date];
                 const status = day?.status ?? "available";
+                const eventsOnDay = eventsByDate[date] ?? [];
 
                 let bgColor = "#28a55a";
                 let borderColor = "#27b133";
@@ -428,53 +442,77 @@ const CalendarPage: React.FC = () => {
                   <div key={date} style={{ display: "flex", flexDirection: "column", gap: 4 }}>
                     <div
                       onClick={() => handleDayClick(date)}
-                      style={{ border: `1px solid ${borderColor}`, borderRadius: 8, padding: "10px 6px", backgroundColor: bgColor, cursor: "pointer", textAlign: "center" }}
+                      style={{ border: `1px solid ${borderColor}`, borderRadius: 8, padding: "10px 6px", backgroundColor: bgColor, cursor: "pointer", textAlign: "center", position: "relative"}}
                     >
                       <div style={{ color: "rgba(0,0,0,0.75)", fontSize: 11 }}>{dayjs(date).format("ddd")}</div>
                       <div style={{ color: "white", fontSize: 20, fontWeight: "bold" }}>{dayjs(date).format("D")}</div>
                       <div style={{ fontSize: 11, color: "rgba(0,0,0,0.75)" }}>{dayjs(date).format("MMM")}</div>
                       <div style={{ color: "rgba(0,0,0,0.75)", fontSize: 10, marginTop: 4 }}>{label}</div>
-                    </div>
 
-                    {status === "unavailable_time_slot" && (
-                      <div style={{ display: "flex", flexDirection: "column", gap: 4, padding: "4px 2px" }}>
-                        <div style={{ fontSize: 10, color: "gray" }}>From</div>
-                        <TimePicker
-                          size="small"
-                          format="HH:mm"
-                          minuteStep={15}
-                          value={day?.startTime ? dayjs(day.startTime, "HH:mm") : null}
-                          onChange={(v) => handleTimeChange(date, "startTime", v)}
-                          style={{ width: "100%",color: "rgba(255, 255, 255, 0.75)" }}
-                        />
-                        <div style={{ fontSize: 10, color: "gray" }}>To</div>
-                        <TimePicker
-                          size="small"
-                          format="HH:mm"
-                          minuteStep={15}
-                          value={day?.endTime ? dayjs(day.endTime, "HH:mm") : null}
-                          onChange={(v) => handleTimeChange(date, "endTime", v)}
-                          style={{ width: "100%", color: "rgba(255, 255, 255, 0.75)" }}
-                        />
+                        {/* Group activity badge */}
+                        {eventsOnDay.length > 0 && (
+                          <div style={{
+                            position: "absolute", top: 4, right: 4,
+                            backgroundColor: "white", borderRadius: "50%",
+                            width: 15, height: 15,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 9, fontWeight: "bold", color: "#000",
+                          }}>
+                            {eventsOnDay.length}
+                          </div>
+                        )}
                       </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          )}
 
-          <Button
-            type="primary"
-            size="large"
-            loading={saving}
-            onClick={handleSave}
-            style={{ backgroundColor: "white", color: "black", fontWeight: "bold", border: "none", height: 50, width: "100%" }}
-          >
-            Save
-          </Button>
-        </div>
-      )}
+                      {/* Event chips below each tile */}
+                      {eventsOnDay.map((ev) => (
+                        <Tooltip key={ev.id} title={`${ev.groupName} · ${ev.scheduledTime ? dayjs(ev.scheduledTime).format("HH:mm") : ""}`}>
+                          <div
+                            onClick={(e) => { e.stopPropagation(); router.push(`/groups/${ev.groupId}/activities/${ev.id}`); }}
+                            style={{
+                              backgroundColor: "rgba(255,255,255,0.12)", borderRadius: 4,
+                              padding: "2px 5px", fontSize: 9, color: "white",
+                              cursor: "pointer", overflow: "hidden",
+                              whiteSpace: "nowrap", textOverflow: "ellipsis",
+                            }}
+                          >
+                            📅 {ev.name}
+                          </div>
+                        </Tooltip>
+                      ))}
+
+                      {status === "unavailable_time_slot" && (
+                        <div style={{ display: "flex", flexDirection: "column", gap: 4, padding: "4px 2px" }}>
+                          <div style={{ fontSize: 10, color: "gray" }}>From</div>
+                          <TimePicker
+                            size="small" format="HH:mm" minuteStep={15}
+                            value={day?.startTime ? dayjs(day.startTime, "HH:mm") : null}
+                            onChange={(v) => handleTimeChange(date, "startTime", v)}
+                            style={{ width: "100%", color: "rgba(255,255,255,0.75)" }}
+                          />
+                          <div style={{ fontSize: 10, color: "gray" }}>To</div>
+                          <TimePicker
+                            size="small" format="HH:mm" minuteStep={15}
+                            value={day?.endTime ? dayjs(day.endTime, "HH:mm") : null}
+                            onChange={(v) => handleTimeChange(date, "endTime", v)}
+                            style={{ width: "100%", color: "rgba(255,255,255,0.75)" }}
+                          />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })
+              })
+              </div>
+            )}
+            <Button
+              type="primary" size="large" loading={saving} onClick={handleSave}
+              style={{ backgroundColor: "white", color: "black", fontWeight: "bold", border: "none", height: 50, width: "100%" }}
+            >
+              Save
+            </Button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
