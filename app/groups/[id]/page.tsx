@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, Badge, DatePicker, Popconfirm } from "antd";
+import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, DatePicker, Popconfirm } from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -16,9 +16,7 @@ import {
   ClockCircleOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
-  DownOutlined,
 }from "@ant-design/icons";
-import { Dropdown } from "antd";
 import { useEffect, useState , useRef, useCallback } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -312,13 +310,18 @@ const GroupPage: React.FC = () => {
   const fetchMessages = useCallback(async () => {
   try {
      const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
+     const myUsername = members.find((m) => m.id.toString() === userId)?.username;
      setChatMessages((prev) => {
       if (lastSeenCountRef.current === null) {
         lastSeenCountRef.current = msgs.length;
         return msgs;
       }
        if (!chatOpen && msgs.length > lastSeenCountRef.current) {
-         setUnreadCount((u) => u + (msgs.length - lastSeenCountRef.current!));
+        const newMsgs = msgs.slice(lastSeenCountRef.current);
+        const otherMessages = newMsgs.filter((m) => m.senderName !== myUsername);
+          if (otherMessages.length > 0) {
+            setUnreadCount((u) => u + otherMessages.length);
+          }
          lastSeenCountRef.current = msgs.length;
        }
        return msgs;
@@ -675,8 +678,9 @@ useEffect(() => {
   )}
 
 </div>
-        </div>
-          </div>
+</div>
+</div>
+          
       
 
       
@@ -1151,7 +1155,7 @@ useEffect(() => {
     right: "32px",
     zIndex: 1000,
   }}> 
-    <Badge count={unreadCount} offset={[-4, 4]}>
+  <div style={{ position: "relative" }}>
   <Button
     type="primary"
     shape="circle"
@@ -1171,9 +1175,20 @@ useEffect(() => {
       fontSize: "20px",
     }}
   />
-  </Badge>
+  {unreadCount > 0 && (
+      <div style={{
+        position: "absolute",
+        top: 0,
+        right: 0,
+        width: "12px",
+        height: "12px",
+        backgroundColor: "#ff4238",
+        borderRadius: "50%",
+        border: "2px solid #000",
+      }} />
+    )}
 </div>
-      </div>
+</div>
     <CreateActivityModal 
       visible={isCreateModalVisible}
       onClose={() => setIsCreateModalVisible(false)}
@@ -1182,7 +1197,8 @@ useEffect(() => {
       onSuccess={handleActivityCreated}
       memberCount={members.length}
     />
-    </div>
+  </div>
+  </div>
   );
 };
 
