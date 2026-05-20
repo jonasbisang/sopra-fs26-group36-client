@@ -3,21 +3,23 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal, DatePicker, Popconfirm} from "antd";
+import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, Badge, DatePicker, Popcornfirm } from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
   PlusOutlined,
-  ClockCircleOutlined,
   SettingOutlined,
+  MessageOutlined,
+  SendOutlined,
+  ClockCircleOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
   DownOutlined,
 }from "@ant-design/icons";
 import { Dropdown } from "antd";
-import { useEffect, useState , useRef } from "react";
+import { useEffect, useState , useRef, useCallback } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -68,6 +70,13 @@ interface CalendarEvent {
   isFull?: boolean;
 }
 
+interface Message {
+  id: number;
+  text: string;
+  senderName: string;
+  createdAt?: string;
+}
+
 const GroupPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
@@ -106,6 +115,13 @@ const GroupPage: React.FC = () => {
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+
 
   useEffect(() => {
     setMounted(true);
@@ -290,8 +306,35 @@ const GroupPage: React.FC = () => {
     } catch (error) {
       console.error("Failed to fetch pending activities after creation:", error);
     }
-    
   };
+
+  const fetchMessages = useCallback(async () => {
+  try {
+     const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
+     setChatMessages((prev) => {
+       if (!chatOpen && msgs.length > prev.length) {
+         setUnreadCount((u) => u + (msgs.length - prev.length));
+       }
+       return msgs;
+     });
+  } catch (error) {
+    console.error("Failed to fetch messages:", error);
+  }
+}, [groupId, apiService, chatOpen]);
+
+
+// Polling für neue Messages immer
+useEffect(() => {
+  if (!groupId || !token) return;
+  fetchMessages(); // initial laden
+  const interval = setInterval(fetchMessages, 2000);
+  return () => clearInterval(interval);
+}, [groupId, token, fetchMessages]);
+
+// Auto-scroll nach unten wenn neue Messages kommen
+useEffect(() => {
+  chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [chatMessages]);
 
   const handleJoin = async (activityId: number) => {
     try {
@@ -398,6 +441,21 @@ const GroupPage: React.FC = () => {
     router.push("/login");
   };
 
+  const handleSendMessage = async () => {
+  if (!newMessage.trim()) return;
+  try {
+    await apiService.post(`/groups/${groupId}/messages`, {
+      text: newMessage,
+    });
+    setNewMessage("");
+    fetchMessages(); // sofort neu laden
+  } catch (error) {
+    messageApi.error("Failed to send message.");
+    console.error(error);
+  }
+};
+
+
   const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
 
   const sectionCard: React.CSSProperties = {
@@ -444,6 +502,87 @@ const GroupPage: React.FC = () => {
       )}
       </div>
       </Modal>
+
+      {/* Group Chat Drawer */}
+<Drawer
+  title={<span style={{ color: "white" }}>💬 Group Chat</span>}
+  placement="right"
+  onClose={() => setChatOpen(false)}
+  open={chatOpen}
+  width={380}
+  styles={{
+    body: { backgroundColor: "#111", padding: "16px", display: "flex", flexDirection: "column", height: "100%" },
+    header: { backgroundColor: "#111", borderBottom: "1px solid rgba(255,255,255,0.1)" },
+    mask: { backdropFilter: "blur(4px)" },
+  }}
+>
+  {/* Messages */}
+  <div style={{ flex: 1, overflowY: "auto", marginBottom: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+    {chatMessages.length === 0 ? (
+      <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", marginTop: "40px" }}>
+        No messages yet. Say hi! 👋
+      </div>
+    ) : (
+      chatMessages.map((msg) => {
+        const isOwn = msg.senderName === members.find((m) => m.id.toString() === userId)?.username;
+        return (
+          <div key={msg.id} style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: isOwn ? "flex-end" : "flex-start",
+          }}>
+            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "11px", marginBottom: "4px" }}>
+              {msg.senderName}
+            </span>
+            <div style={{
+              backgroundColor: isOwn ? "#42a2d6" : "rgba(255,255,255,0.1)",
+              color: "white",
+              borderRadius: isOwn ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+              padding: "10px 14px",
+              maxWidth: "80%",
+              fontSize: "14px",
+            }}>
+              {msg.text}
+            </div>
+            {msg.createdAt && (
+              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "10px", marginTop: "2px" }}>
+                {moment(msg.createdAt).format("HH:mm")}
+              </span>
+            )}
+          </div>
+        );
+      })
+    )}
+    <div ref={chatBottomRef} />
+  </div>
+
+  {/* Input */}
+  <div style={{ display: "flex", gap: "8px" }}>
+    <Input
+      value={newMessage}
+      onChange={(e) => setNewMessage(e.target.value)}
+      onPressEnter={handleSendMessage}
+      placeholder="Type a message..."
+      style={{
+        backgroundColor: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        color: "white",
+        borderRadius: "8px",
+      }}
+    />
+    <Button
+      icon={<SendOutlined />}
+      onClick={handleSendMessage}
+      style={{
+        backgroundColor: "#42a2d6",
+        border: "none",
+        color: "white",
+        borderRadius: "8px",
+      }}
+    />
+  </div>
+</Drawer>
+
 
        {/* Feedback Flash Overlay */}
       {feedbackType && (
@@ -997,7 +1136,32 @@ const GroupPage: React.FC = () => {
             />
           </div>
         </div>
-
+      {/* Floating Chat Button */}
+<div
+  style={{
+    position: "fixed",
+    bottom: "32px",
+    right: "32px",
+    zIndex: 1000,
+  }}> 
+    <Badge count={unreadCount} offset={[-4, 4]}>
+  <Button
+    type="primary"
+    shape="circle"
+    size="large"
+    icon={<MessageOutlined />}
+    onClick={() => {setChatOpen(true); setUnreadCount(0); }}
+    style={{
+      width: "56px",
+      height: "56px",
+      backgroundColor: "#42a2d6",
+      border: "none",
+      boxShadow: "0 4px 16px rgba(66,162,214,0.4)",
+      fontSize: "20px",
+    }}
+  />
+  </Badge>
+</div>
       </div>
     <CreateActivityModal 
       visible={isCreateModalVisible}
