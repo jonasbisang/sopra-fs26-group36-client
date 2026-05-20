@@ -202,7 +202,7 @@ const GroupPage: React.FC = () => {
         const rejected = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
 
-        setDeclinedActivities(rejected);
+        setDeclinedActivities(rejected.filter((a) => a.status !== "FAILED"));
 
         const accepted = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
