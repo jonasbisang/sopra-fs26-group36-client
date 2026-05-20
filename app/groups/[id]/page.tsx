@@ -121,6 +121,7 @@ const GroupPage: React.FC = () => {
   const [newMessage, setNewMessage] = useState("");
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const [unreadCount, setUnreadCount] = useState(0);
+  const lastSeenCountRef = useRef<number | null>(null);
 
 
   useEffect(() => {
@@ -312,8 +313,13 @@ const GroupPage: React.FC = () => {
   try {
      const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
      setChatMessages((prev) => {
-       if (!chatOpen && msgs.length > prev.length) {
-         setUnreadCount((u) => u + (msgs.length - prev.length));
+      if (lastSeenCountRef.current === null) {
+        lastSeenCountRef.current = msgs.length;
+        return msgs;
+      }
+       if (!chatOpen && msgs.length > lastSeenCountRef.current) {
+         setUnreadCount((u) => u + (msgs.length - lastSeenCountRef.current!));
+         lastSeenCountRef.current = msgs.length;
        }
        return msgs;
      });
@@ -1150,7 +1156,11 @@ useEffect(() => {
     shape="circle"
     size="large"
     icon={<MessageOutlined />}
-    onClick={() => {setChatOpen(true); setUnreadCount(0); }}
+    onClick={() => {
+      setChatOpen(true); 
+      setUnreadCount(0);
+      lastSeenCountRef.current = chatMessages.length;
+     }}
     style={{
       width: "56px",
       height: "56px",
