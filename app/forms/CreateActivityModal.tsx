@@ -185,6 +185,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
               name="location"
               label={<span style={labelStyle}>LOCATION</span>}
               rules={[{ required: true, message: "Please enter a location" }]}
+              extra={<span style={{ fontSize: "11px", color: "#999999" }}>Please enter location in English</span>}
             >
               <Input placeholder="e.g. Zermatt" style={inputStyle} />
             </Form.Item>
