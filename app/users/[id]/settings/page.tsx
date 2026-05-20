@@ -6,6 +6,7 @@ import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import { apiService } from "@/api/apiService"; 
 import useLocalStorage from "@/hooks/useLocalStorage";
 
+
 interface UserData {
   username: string;
   bio: string;
@@ -31,6 +32,7 @@ const EditProfile: React.FC = () => {
 
   const [deleteModalVisible, setDeleteModalVisible] = useState(false);
   const [deletePassword, setDeletePassword] = useState("");
+  const [showPasswordFields, setShowPasswordFields] = useState(false);
 
 
   //Daten vom server laden beim start
@@ -83,6 +85,14 @@ const EditProfile: React.FC = () => {
         anythingChanged = true;
       }
 
+      // Bio ändern → PUT /users/{id}/bio
+      if (values.bio !== userData.bio) {
+        await apiService.put(`/users/${userId}/bio`, {
+          newBio: values.bio,
+        });
+        anythingChanged = true;
+      }
+
       if (!anythingChanged) {
         message.info("No changes detected.");
         return;
@@ -108,19 +118,23 @@ const EditProfile: React.FC = () => {
   };
 
 
-  const handleDeleteAccount = async () => {
-    try {
-      setLoading(true);
-      await apiService.delete(`/users/${userId}`, { oldPassword: deletePassword });
-      message.success("Account permanently deleted.");
-      localStorage.clear();
-      router.push("/login");
-    } catch (error) {
-      message.error("Could not delete account. Wrong password?");
-    } finally {
-      setLoading(false);
-    }
-  };
+const handleDeleteAccount = async () => {
+  try {
+    setLoading(true);
+    await apiService.delete(`/users/${userId}`, { 
+      oldPassword: deletePassword  // ← oldPassword, nicht password
+    });
+    message.success("Account permanently deleted.");
+    localStorage.clear();
+    router.push("/login");
+} catch (error) {
+  message.error("Failed to delete account. Wrong password?");
+}  finally {      
+  setLoading(false);
+}}
+
+
+
 
   useEffect(() => {
     setMounted(true);
@@ -204,7 +218,7 @@ return (
           >
             {/* Username Field */}
             <Form.Item
-              label={<span style={labelStyle}>Username</span>}
+              label={<span style={labelStyle}>Change Username</span>}
               name="username"
               rules={[{ required: true, message: 'Username is required' }]}
             >
@@ -217,7 +231,7 @@ return (
 
             {/* Bio Field */}
             <Form.Item 
-              label={<span style={labelStyle}>Bio</span>} 
+              label={<span style={labelStyle}>Change Bio</span>} 
               name="bio"
             >
               <Input.TextArea 
@@ -234,15 +248,23 @@ return (
               name="oldPassword"
             >
             <Input.Password
-              placeholder="Enter current password"
+              placeholder="To change password, enter current one"
               style={{ backgroundColor: 'rgba(255,255,255,0.05)', color: 'white', border: '1px solid rgba(255,255,255,0.1)' }}
+              onChange={(e) => setShowPasswordFields(e.target.value.length > 0)}
             />
             </Form.Item>
 
             {/* new Password Field */}
-            <Form.Item 
-              label={<span style={labelStyle}>Change Password</span>} 
+            {showPasswordFields && (
+              <>
+              <Form.Item 
+              label={<span style={labelStyle}>New Password</span>} 
               name="password"
+              rules={[{ required: true, message: "Please input your password!" },
+              {pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*[*_#@%^&,.+/\-!?])[^\s]{4,25}$/,
+              message: "At least 4 characters. Special characters, lower and uppercase letters needed."
+              }
+              ]}
             >
               <Input.Password 
                 placeholder="Type to set new password" 
@@ -272,6 +294,8 @@ return (
                 />
               </Form.Item>
             )}
+            </>
+            )}
 
             <Space direction="vertical" style={{ width: '100%', marginTop: '20px' }} size="middle">
               <Button
@@ -287,22 +311,23 @@ return (
               </Button>
 
             {/* Delete Modal */}
-            <Modal
-              open={deleteModalVisible}
-              onOk={handleDeleteAccount}
-              onCancel={() => { setDeleteModalVisible(false); setDeletePassword(""); }}
-              okText="Yes, delete"
-              cancelText="Cancel"
-              okButtonProps={{ danger: true }}
-              title="Delete Account?"
-            >
-            <p style={{ color: "black" }}>This action is permanent. Please enter your password to confirm.</p>
-            <Input.Password
-              placeholder="Enter your password"
-              value={deletePassword}
-              onChange={(e) => setDeletePassword(e.target.value)}
-            />
-            </Modal>
+<Modal
+  open={deleteModalVisible}
+  onOk={handleDeleteAccount}
+  onCancel={() => { setDeleteModalVisible(false); setDeletePassword(""); }}
+  okText="Yes, delete"
+  cancelText="Cancel"
+  okButtonProps={{ danger: true }}
+  title="Delete Account?"
+>
+  <p style={{ color: "black", marginBottom: "12px" }}>This action is permanent. Please enter your password to confirm.</p>
+  <Input.Password
+    placeholder="Enter your password"
+    value={deletePassword}
+    onChange={(e) => setDeletePassword(e.target.value)}
+    style={{ backgroundColor: "white", color: "black", border: "1px solid #d9d9d9" }}
+  />
+</Modal>
 
             {/* Delete Button */}
             <Button
@@ -317,7 +342,7 @@ return (
             </Space>
           </Form>
         </Space>
-      </div>
+       </div>
     </div>
   );
 };

@@ -4,7 +4,7 @@
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { useRouter } from "next/navigation";  //use NextJS router for navigation
-import { Button, Card, Form, Input, Layout, Typography, Space, message } from "antd";
+import { Button, Card, Form, Input, Layout, Typography, Space, message, Modal } from "antd";
 import { 
   CalendarOutlined, 
   SettingOutlined, 
@@ -18,7 +18,6 @@ import { useState, useEffect } from "react";
 
 import NextImage from 'next/image';
 import logo from '../friendlerLogo.png';
-
 
 interface JoinGroupValues {
     groupId: string;
@@ -91,16 +90,21 @@ useEffect(() => {
 
     const handleCreateGroup = async (values: CreateGroupValues) => {
         try {
-        // //!!!!!!!!!!!!!!!!!// LOOK AT AGAIN FOR WHEN THE BACKEND GROUP CREATE GETS CREATED
-        await apiService.post("/groups", { name: values.newGroupName, joinPassword: values.password });
-        console.log("Creating group with values:", values);
-        messageApi.success(`Successfully created group: ${values.newGroupName}`);
-        await fetchGroups();
-        createForm.resetFields(); // Clear the form after success
+          const createdGroup = await apiService.post<{id: number, name: string}>("/groups", { 
+            name: values.newGroupName, 
+            joinPassword: values.password 
+          });
+          Modal.success({
+            title: "Group created!",
+            content: `Your group ID is ${createdGroup.id}; share this and the password with anyone who wants to join.`,
+            okText: "Got it!",
+          });
+          await fetchGroups();
+          createForm.resetFields(); // Clear the form after success
         } catch (error) {
-        messageApi.error("Failed to create the group.");
+          messageApi.error("Failed to create the group.");
         }
-    };
+      };
 
     const glassBoxStyle: React.CSSProperties = { // value created of translucent boxes 
         backgroundColor: 'rgba(126, 126, 126, 0.2)',
@@ -140,26 +144,6 @@ useEffect(() => {
         borderBottom: '1px solid rgba(255,255,255,0.1)' // Subtle separator line
     }}>
 
-    {/* <div style={{ cursor: "pointer" }} onClick={() => router.push("/dashboard")}> 
-          <h1 style={{ // the logo should take you to the dashboard when clicked
-            fontSize: '32px', // Smaller than login page, suitable for header
-            color: 'white', 
-            margin: 0,
-            fontFamily: '"Gabriel Weiss Friends Font", "Permanent Marker", cursive, sans-serif',
-            letterSpacing: '2px'
-          }}>
-            F<span style={{ color: '#ff4238' }}>·</span>
-            R<span style={{ color: '#ffdc00' }}>·</span>
-            I<span style={{ color: '#42a2d6' }}>·</span>
-            E<span style={{ color: '#ff4238' }}>·</span>
-            N<span style={{ color: '#ffdc00' }}>·</span>
-            D<span style={{ color: '#42a2d6' }}>·</span>
-            L<span style={{ color: '#ff4238' }}>·</span>
-            E<span style={{ color: '#ffdc00' }}>·</span>
-            R
-          </h1>
-        </div> */}
-
         <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
         <NextImage
           src={logo}
@@ -172,6 +156,7 @@ useEffect(() => {
         <div style={{ display: 'flex', gap: '20px' }}>
           <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
           <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
+           <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
           <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout} style={{ color: "white" }}>Logout</Button>
         </div>
     </div>

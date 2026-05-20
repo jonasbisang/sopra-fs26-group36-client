@@ -5,10 +5,10 @@ import { useRouter, useParams } from "next/navigation";
 import { Button, List, Form, Input, message, Modal, Popconfirm, Card, Typography, Space } from "antd";
 import { 
   ExclamationCircleOutlined, 
-  SettingOutlined,
   CalendarOutlined,
   UserOutlined,
   LogoutOutlined,
+  ArrowLeftOutlined
 } from "@ant-design/icons";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
@@ -222,17 +222,21 @@ const GroupSettings: React.FC = () => {
               alignItems: "center",
               borderBottom: "1px solid rgba(255,255,255,0.1)",
             }}>
-              <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-              </div>
-      
-                      <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                      <NextImage
-                        src={logo}
-                        alt="Friendler Logo"
-                        height={160}
-                        width={480}
-                      />
-                      </div>
+
+            {/* Left: Logo + Back Arrow */}
+            <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+            <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
+            </div>
+            <Button
+              type="text"
+              icon={<ArrowLeftOutlined />}
+              onClick={() => router.push(`/groups/${groupId}`)}
+              style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
+            >
+            Back to Group
+            </Button>
+            </div>  
       
               <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
                 <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }}>
@@ -275,9 +279,6 @@ const GroupSettings: React.FC = () => {
 
       {/* Main Content */}
       <div style={{ width: '100%', maxWidth: 800, padding: '40px 20px' }}>
-        <Button onClick={() => router.push(`/groups/${groupId}`)} style={{ marginBottom: 20 }}>
-          ← Back to Group
-        </Button>
 
         <Title level={2} style={{ color: 'white', marginBottom: 30 }}>
           Settings: {group?.name}

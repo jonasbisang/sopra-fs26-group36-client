@@ -3,7 +3,7 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, Badge } from "antd";
+import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, Badge, DatePicker, Popcornfirm } from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
@@ -13,7 +13,12 @@ import {
   SettingOutlined,
   MessageOutlined,
   SendOutlined,
+  ClockCircleOutlined,
+  DeleteOutlined,
+  ArrowLeftOutlined,
+  DownOutlined,
 }from "@ant-design/icons";
+import { Dropdown } from "antd";
 import { useEffect, useState , useRef, useCallback } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
@@ -40,6 +45,8 @@ interface Activity {
   id: number;
   name: string;
   status: string;
+  authorId?: number;
+  //isRecursive?: boolean; missing the is recursive booelan (but which has already been added by another branch)
   scheduledTime?: string;
   location?: string;
   minSize?: number;
@@ -48,9 +55,10 @@ interface Activity {
   isWeatherDependent?: boolean;
   acceptVotes?: number;
   participantUsernames?: string[];
-   minTemp?: number;       
+  minTemp?: number;       
   maxTemp?: number;        
-  rainPreference?: string; 
+  rainPreference?: string;
+  isRecursive?: boolean; 
 }
 
 interface CalendarEvent {
@@ -59,6 +67,7 @@ interface CalendarEvent {
   start: Date;
   end: Date;
   location?: string;
+  isFull?: boolean;
 }
 
 interface Message {
@@ -84,14 +93,22 @@ const GroupPage: React.FC = () => {
   const [members, setMembers] = useState<User[]>([]);
   const [pendingActivities, setPendingActivities] = useState<Activity[]>([]);
   const [plannedActivities, setPlannedActivities] = useState<Activity[]>([]);
+  const [declinedActivities, setDeclinedActivities] = useState<Activity[]>([]);
   const [calendarEvents, setCalendarEvents] = useState<CalendarEvent[]>([]);
+  const [calendarDate, setCalendarDate] = useState(new Date());
 
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
-  const [votedActivityIds, setVotedActivityIds] = useState<Set<number>>(new Set());
-  const votedActivityIdsRef = useRef<Set<number>>(new Set());
+  const [, setVotedActivityIds] = useState<Set<number>>(new Set());
+  const VOTED_KEY = `voted_${groupId}_${userId}`;
+  const votedActivityIdsRef = useRef<Set<number>>(new Set(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]")
+      : []));
 
   const [totalPending, setTotalPending] = useState<number>(0);
-  const [votedCount, setVotedCount] = useState<number>(0);
+  const [votedCount, setVotedCount] = useState<number>(
+    typeof window !== "undefined" ? JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]").length : 0);
+
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -141,14 +158,15 @@ const GroupPage: React.FC = () => {
     try {
     // Fetch pending activities
     const pending = await apiService.get<Activity[]>(
-      `/groups/${groupId}/activities?status=PENDING`);
+      `/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
       setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
       setTotalPending(pending.length);
       } catch (error) {
         console.error("Failed to fetch pending activities:", error);
     }
-      try {
-        //Fetch planned activities
+    
+    try {
+    //Fetch planned activities
         const planned = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=SCHEDULED`
         );
@@ -157,21 +175,40 @@ const GroupPage: React.FC = () => {
         console.error("Failed to fetch planned activities:", error);
       }
       
-
+    
       try {
         //Fetch calendar events
-        const events = await apiService.get<CalendarEvent[]>(
+        const events = await apiService.get<Activity[]>(
           `/groups/${groupId}/calendar`
         );
         // Convert date strings to Date objects for react-big-calendar
         const formatted = events.map((e) => ({
-          ...e,
-          start: new Date(e.start),
-          end: new Date(e.end),
+          id: e.id,
+          title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(
+            new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000
+          ),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
         }));
         setCalendarEvents(formatted);
       } catch (error) {
         console.error("Failed to fetch calendar:", error);
+      }
+      try {
+        // Fetch rejected activities for the current user - trying again with changed backend
+        const rejected = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
+
+        setDeclinedActivities(rejected);
+
+        const accepted = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
+        setLikedActivities(accepted);
+
+      } catch (error) {
+        console.error("Failed to fetch rejected activities:", error);
       }
    };
 
@@ -188,19 +225,35 @@ const GroupPage: React.FC = () => {
         const planned = await apiService.get<Activity[]>(
           `/groups/${groupId}/activities?status=SCHEDULED`
         );
+
+
         setPlannedActivities((prev) => {
           const newOnes = planned.filter(
             (a) => !prev.find((p) => p.id === a.id)
           );
           if (newOnes.length > 0) {
-            setNewEventPopup(newOnes[0]); // ← triggert Modal
+            setNewEventPopup(newOnes[0]);
+            setLikedActivities((liked) => liked.filter((a) => !newOnes.find((n) => n.id === a.id))); 
           }
           return planned;
         });
+
+
+        const events = await apiService.get<Activity[]>(`/groups/${groupId}/calendar`);
+        const formatted = events.map((e) => ({
+          id: e.id, title: e.name,
+          start: new Date(e.scheduledTime!),
+          end: new Date(new Date(e.scheduledTime!).getTime() + (e.duration ?? 1) * 60 * 60 * 1000),
+          location: e.location,
+          isFull: e.maxSize !== undefined && (e.acceptVotes ?? 0) >= e.maxSize,
+      }));
+
+      setCalendarEvents(formatted);
+      
       } catch (error) {
         console.error("Polling error:", error);
       }
-    }, 2000); // alle 10 Sekunden
+    }, 10000); // alle 10 Sekunden
 
     return () => clearInterval(interval);
   }, [groupId, token]);
@@ -209,17 +262,37 @@ const GroupPage: React.FC = () => {
   useEffect(() => {
     if (!groupId || !token) return;
     const interval = setInterval(async () => {
-    try {
-      const pending = await apiService.get<Activity[]>(
-        `/groups/${groupId}/activities?status=PENDING`
-      );
-      setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
-    } catch (error) {
-      console.error("Polling error:", error);
-    }
-  }, 2000);
-  return () => clearInterval(interval);
-    }, [groupId, token]);
+    
+      try {
+        // 1. Fetch unvoted activities (Upcoming Ideas)
+        const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
+        setPendingActivities(pending); // <-- No more local storage .filter() hack needed!
+        setTotalPending(pending.length);
+      } catch (error) {
+        console.error("Failed to fetch pending activities:", error);
+      }
+
+      try {
+        // 2. Fetch liked activities (Awaiting Members)
+        const accepted = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
+        setLikedActivities(accepted);
+      } catch (error) {
+        console.error("Failed to fetch accepted activities:", error);
+      }
+
+      try {
+        // 3. Fetch passed activities (Rejected)
+        const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
+          setDeclinedActivities(rejected);} 
+          
+        catch (error) {
+            console.error("Failed to fetch rejected activities:", error);}
+          }, 2000);
+
+        return () => clearInterval(interval);}, 
+        [groupId, token, userId]);
+
+
 
   //conect to backend and update the list of pending activities
   const handleActivityCreated = async () => {
@@ -227,7 +300,7 @@ const GroupPage: React.FC = () => {
 
     if (!groupId) return;
     try {
-      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
       setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
      
     } catch (error) {
@@ -270,6 +343,7 @@ useEffect(() => {
         userId: Number(userId),
       });
       messageApi.success("Successfully joined! 🎉");
+      setDeclinedActivities((prev) => prev.filter((a) => a.id !== activityId)); // achtung TEST --> maybe wieder entferne
     } catch (error) {
       messageApi.error("Activity is already full.");
         } finally {
@@ -289,16 +363,17 @@ useEffect(() => {
     if (feedbackTimeout.current) clearTimeout(feedbackTimeout.current);
       feedbackTimeout.current = setTimeout(() => setFeedbackType(null), 600);
 
-    setVotedActivityIds((prev) => {
-      const next = new Set([...prev, activityId]);
-      votedActivityIdsRef.current = next;
-      return next;
-      });
-
     try {
       await apiService.post(`/groups/${groupId}/activities/${activityId}/votes`, {
         wantsToJoin: voteType === "ACCEPT",
         userId: Number(userId),
+      });
+
+      setVotedActivityIds((prev) => {
+      const next = new Set([...prev, activityId]);
+      votedActivityIdsRef.current = next;
+      localStorage.setItem(VOTED_KEY, JSON.stringify([...next]));  // ← diese Zeile hinzufügen
+      return next;
       });
       
       setPendingActivities((prev) => {
@@ -309,8 +384,14 @@ useEffect(() => {
             liked.find((a) => a.id === activityId) ? liked : [...liked, updated]  // ← updated, not voted; with duplicate guard
           );
         }
+        if (voted && voteType === "DECLINE") {
+          setDeclinedActivities((d) =>
+          d.find((a) => a.id === activityId) ? d : [...d, voted]
+        );
+      }
         return prev.filter((a) => a.id !== activityId);
-      });
+        });
+
 
       setVotedCount((prev) => prev + 1);
       if (voteType === "DECLINE") {
@@ -323,6 +404,23 @@ useEffect(() => {
       console.error(error);
       }
     };
+
+  const handleDeleteActivity = async (activityId: number) => {
+    try {
+      await apiService.delete(`/groups/${groupId}/activities/${activityId}`);
+      messageApi.success("Activity deleted.");
+      
+      // Optimistically update lists
+      setPendingActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setPlannedActivities((prev) => prev.filter((a) => a.id !== activityId));
+      setLikedActivities((prev) => prev.filter((a) => a.id !== activityId));
+    } catch (error) {
+      messageApi.error("Failed to delete activity.");
+      console.error(error);
+    }
+  };
+
+  //here the function for removing the recursive function should be added (will complete it once the recursive features are finished)
 
 
   const handleLeaveGroup = async () => {
@@ -360,6 +458,12 @@ useEffect(() => {
 
   const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
 
+  const sectionCard: React.CSSProperties = {
+  backgroundColor: "rgba(126,126,126,0.2)",
+  borderRadius: "12px",
+  padding: "24px",
+};
+
   return (
     <div style={{
       backgroundColor: "#000000",
@@ -391,6 +495,11 @@ useEffect(() => {
       <p>⏱ {newEventPopup.duration} hours</p>
       )}
       <p style={{ color: "#999", fontSize: "12px" }}>The event has been added to the group calendar.</p>
+      {newEventPopup?.isRecursive && (
+        <p style={{ color: "#7c3aed", fontSize: "12px", marginTop: "6px" }}>
+          🔁 This is a recurring activity — it has automatically re-entered the voting pool so the group can do it again!
+        </p>
+      )}
       </div>
       </Modal>
 
@@ -503,78 +612,67 @@ useEffect(() => {
         borderBottom: "1px solid rgba(255,255,255,0.1)",
       }}>
         <div style={{ cursor: "pointer" }} onClick={() => router.push("/groups")}>
-
         </div>
-
-                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
-                <NextImage
-                  src={logo}
-                  alt="Friendler Logo"
-                  height={160}
-                  width={480}
-                />
-                </div>
-
-        <div style={{ display: "flex", gap: "20px", alignItems: "center" }}>
-          
-          <Button 
-            type="primary" 
-            shape="round" 
-            icon={<PlusOutlined />} 
-            onClick={() => setIsCreateModalVisible(true)}
-            style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
-          >
-            New Activity
-          </Button>
-          
-          {group?.adminId.toString() === userId && ( 
-          <Button
-          type="primary"
-          icon={<SettingOutlined />}
-          onClick={() => router.push(`/groups/${groupId}/settings`)}
-            >
-          Group Settings
-        </Button>
-        )}
-
-        <Button type="text" icon={<CalendarOutlined />} style={{ color: "white" }} onClick={() => router.push(`/users/${userId}/calendar`)}>
-         Calendar
-        </Button>
-
-          <Button
-            type="text"
-            icon={<UserOutlined />}
-            onClick={() => router.push(`/users/${userId}`)}
-            style={{ color: "white" }}
-          >
-            My Profile
-          </Button>
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={() => router.push("/groups")}
-            style={{ color: "white" }}
-          >
-            Change Group
-          </Button>
-          <Button
-            danger
-            icon={<LogoutOutlined />}
-            onClick={handleLeaveGroup}
-            style={{ fontWeight: "bold" }}
-          >
-            Leave Group
-          </Button>
-          <Button
-            type="text"
-            icon={<LogoutOutlined />}
-            onClick={handleLogout}
-            style={{ color: "white" }}
-          >
-            Logout
-          </Button>
+      {/* Left: Logo + Back Arrow */}
+      <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+          <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
         </div>
-      </div>
+        <Button
+          type="text"
+          icon={<ArrowLeftOutlined />}
+          onClick={() => router.push("/groups")}
+          style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
+        >
+          Back to Groups
+        </Button>
+      </div>   
+
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: "8px" }}>
+          
+<div style={{ display: "flex", gap: "8px", alignItems: "flex-start" }}>
+
+  {/* New Activity + History als Spalte */}
+  <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+    <Button 
+      type="primary" 
+      shape="round" 
+      icon={<PlusOutlined />} 
+      onClick={() => setIsCreateModalVisible(true)}
+      style={{ backgroundColor: "white", color: "black", fontWeight: "bold" }}
+    >
+      New Activity
+    </Button>
+    <Button 
+      type="text" 
+      icon={<ClockCircleOutlined />} 
+      onClick={() => router.push(`/groups/${groupId}/history`)} 
+      style={{ color: "white", fontSize: "13px" }}
+    >
+      Activity History
+    </Button>
+  </div>
+
+  <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/overview`)} style={{ color: "white" }}>User Overview</Button>
+  <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
+  <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
+
+  {group?.adminId.toString() === userId ? (
+    <Button type="primary" shape="round" icon={<SettingOutlined />} onClick={() => router.push(`/groups/${groupId}/settings`)} style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}>
+      Group Settings
+    </Button>
+  ) : (
+    <Button danger icon={<LogoutOutlined />} onClick={handleLeaveGroup} style={{ fontWeight: "bold" }}>
+      Leave Group
+    </Button>
+  )}
+
+</div>
+        </div>
+          </div>
+      
+
+      
 
       {/* Main Content */}
       <div style={{ padding: "40px 50px", display: "flex", flexDirection: "column", gap: "40px" }}>
@@ -583,13 +681,17 @@ useEffect(() => {
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "30px" }}>
 
           {/* Group Members */}
-          <div style={{
-            backgroundColor: "rgba(126,126,126,0.2)",
-            borderRadius: "12px",
-            padding: "24px",
-          }}>
-            <h3 style={{ color: "white", marginBottom: "16px", display: "flex", alignItems: "center", gap: "8px" }}>
-              <TeamOutlined /> Group Members
+          <div style={sectionCard}>
+            <h3
+              style={{
+                color: "white",
+                marginBottom: "16px",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+              }}
+            >
+              <TeamOutlined /> {group?.name ? `${group.name} Members` : "Group Members"}
             </h3>
             <List
               dataSource={members}
@@ -606,11 +708,7 @@ useEffect(() => {
           </div>
 
           {/* Pending Activities */}
-          <div style={{
-            backgroundColor: "rgba(126,126,126,0.2)",
-            borderRadius: "12px",
-            padding: "24px",
-          }}>
+          <div style={sectionCard}>
             <h3 style={{ color: "white", marginBottom: "16px" }}>💡 Upcoming Ideas</h3>
             
             {totalPending > 0 && (
@@ -666,7 +764,7 @@ useEffect(() => {
                     )}
                     {(pendingActivities[0].minSize || pendingActivities[0].maxSize) && (
                       <span style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px" }}>
-                        👥 Min {pendingActivities[0].minSize ?? "?"} · Max {pendingActivities[0].maxSize ?? "?"} participants
+                        👥 Min {pendingActivities[0].minSize ?? "?"} · Max {""} {pendingActivities[0].maxSize ?? "?"} participants
                       </span>
                     )}
                     {pendingActivities[0].duration && (
@@ -678,6 +776,9 @@ useEffect(() => {
                       <Tag color="blue">Pending votes</Tag>
                       {pendingActivities[0].isWeatherDependent && (
                         <Tag color="cyan">Weather-dependent</Tag>
+                      )}
+                      {pendingActivities[0].isRecursive && (
+                        <Tag color="purple">🔁 Recurring</Tag>
                       )}
                     </div>
                     {pendingActivities[0].minSize && (
@@ -700,9 +801,25 @@ useEffect(() => {
                     </div>
                   </div>
                 )}
-                  </div>
                 </div>
-
+                {pendingActivities[0].authorId?.toString() === userId && (
+                    <div style={{ display: "flex", gap: "8px", marginTop: "16px", paddingTop: "12px", borderTop: "1px solid rgba(255,255,255,0.1)" }}>
+                      <Popconfirm title="Delete this activity?" onConfirm={() => handleDeleteActivity(pendingActivities[0].id)}>
+                        <Button size="small" danger icon={<DeleteOutlined />} style={{ background: "transparent" }}>
+                          Delete
+                        </Button>
+                      </Popconfirm>
+                      {/*{pendingActivities[0].isRecursive && (
+                        <Popconfirm title="Stop recurring?" onConfirm={() => handleStopRecursion(pendingActivities[0].id)}>
+                          <Button size="small" icon={<StopOutlined />} style={{ color: "#d9d9d9", background: "transparent", borderColor: "#555" }}>
+                            Stop Recursion
+                          </Button>
+                        </Popconfirm>
+                      )}*/}
+                    </div>
+                    )}
+                </div>
+              
                 {/* Vote buttons */}
                 <div style={{ display: "flex", gap: "12px", marginTop: "16px" }}>
                   <Button
@@ -800,7 +917,11 @@ useEffect(() => {
                       + Join
                     </Button>
                   )}
-                <Tag color="green">Planned</Tag>
+                {activity.maxSize && (activity.acceptVotes ?? 0) >= activity.maxSize ? (
+                  <Tag color="red">Full</Tag>
+                ) : (
+                  <Tag color="green">{activity.acceptVotes ?? 0}/{activity.maxSize} joined</Tag>
+                )}
               </List.Item>
             )}
             locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>No scheduled activities</span> }}
@@ -843,6 +964,9 @@ useEffect(() => {
                       }
                     />
                     <Tag color="orange">Waiting</Tag>
+                      {activity.isRecursive && (
+                      <Tag color="purple">🔁 Recurring</Tag>
+                    )}
                   </List.Item>
                 )}
                 locale={{ emptyText: <span style={{ color: "rgba(255,255,255,0.3)" }}>None waiting</span> }}
@@ -850,13 +974,114 @@ useEffect(() => {
             </div>
           )}
 
+        {/* Rejected Activities */}
+        {/*
+          Shows activities whose status is REJECTED.
+          Uses the same list style as Scheduled Activities..
+
+        */}
+        <div style={sectionCard}>
+          <h3 style={{ color: "white", marginBottom: "4px" }}>❌ Rejected Activities</h3>
+          <p
+            style={{
+              color: "rgba(255,255,255,0.4)",
+              fontSize: "13px",
+              marginBottom: "16px",
+            }}
+          >
+            Activities the user passed on — hit <b style={{ color: "rgba(255,255,255,0.6)" }}>+ Join</b> to change your mind and participate.
+          </p>
+          <List
+            dataSource={declinedActivities}
+            renderItem={(activity) => (
+              <List.Item
+                style={{
+                  borderBottom: "1px solid rgba(255,255,255,0.1)",
+                  padding: "10px 0",
+                }}
+              >
+                <List.Item.Meta
+                  title={<span style={{ color: "white" }}>{activity.name}</span>}
+                  description={
+                    <div style={{ display: "flex", flexDirection: "column", gap: "2px" }}>
+                      {activity.location && (
+                        <span style={{ color: "rgba(255,255,255,0.5)", fontSize: "12px" }}>
+                          📍 {activity.location}
+                        </span>
+                      )}
+                      {activity.participantUsernames &&
+                        activity.participantUsernames.length > 0 && (
+                          <span
+                            style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}
+                          >
+                            {activity.participantUsernames.join(", ")}
+                          </span>
+                        )}
+                      {activity.isWeatherDependent && (
+                        <span
+                          style={{ color: "rgba(255,255,255,0.4)", fontSize: "12px" }}
+                        >
+                          Weather dependent
+                          {activity.minTemp != null ? ` · min ${activity.minTemp}°C` : ""}
+                          {activity.maxTemp != null ? ` · max ${activity.maxTemp}°C` : ""}
+                          {activity.rainPreference
+                            ? ` · ${activity.rainPreference}`
+                            : ""}
+                        </span>
+                      )}
+                    </div>
+                  }
+                />
+                {(!activity.maxSize || (activity.acceptVotes ?? 0) < activity.maxSize) &&
+                  !activity.participantUsernames?.includes(
+                     members.find((m) => m.id.toString() === userId)?.username ?? ""
+                    ) && (
+                     <Button
+                        size="small"
+                        onClick={() => handleJoin(activity.id)}
+                        style={{
+                            background: "rgba(66,214,120,0.15)",
+                            color: "#42d678",
+                            border: "1px solid rgba(66,214,120,0.4)",
+                            borderRadius: "8px",
+                            marginLeft: "12px",
+                         }}
+                         >
+                           + Join
+                         </Button>
+                       )}
+                <Tag color="red" style={{ marginLeft: "8px" }}>
+                  Rejected
+                </Tag>
+                {activity.isRecursive && <Tag color="purple">🔁 Recurring</Tag>}
+              </List.Item>
+            )}
+            locale={{
+              emptyText: (
+                <span style={{ color: "rgba(255,255,255,0.3)" }}>
+                  No rejected activities
+                </span>
+              ),
+            }}
+          />
+        </div>
+
         {/* Calendar */}
         <div style={{
           backgroundColor: "rgba(126,126,126,0.2)",
           borderRadius: "12px",
           padding: "24px",
         }}>
+         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "16px" }}>
           <h3 style={{ color: "white", marginBottom: "16px" }}>🗓 Group Calendar</h3>
+          <DatePicker
+            onChange={(date) => {
+              if (date) setCalendarDate(date.toDate());
+            }}
+            placeholder="Go to date"
+            style={{ backgroundColor: "rgba(255,255,255,0.1)", border: "1px solid rgba(255,255,255,0.3)", color: "white" }}
+          />
+          </div>
           <div style={{ height: "500px" }}>
             {/* Dark theme override for react-big-calendar */}
             <style>{`
@@ -872,6 +1097,20 @@ useEffect(() => {
               .rbc-date-cell { color: white; }
               .rbc-event { background-color: #42a2d6; }
 
+              .ant-picker {
+                background-color: rgba(255,255,255,0.08) !important;
+                border-color: rgba(255,255,255,0.2) !important;
+              }
+              .ant-picker input {
+                color: white !important;
+              }
+              .ant-picker input::placeholder {
+                color: rgba(255,255,255,0.4) !important;
+              }
+              .ant-picker-suffix {
+                color: rgba(255,255,255,0.4) !important;
+              }
+
               .ant-modal-body p,
               .ant-modal-body b,
               .ant-modal-body div {
@@ -883,7 +1122,17 @@ useEffect(() => {
               events={calendarEvents}
               startAccessor="start"
               endAccessor="end"
+              date={calendarDate}
+              onNavigate={(date) => setCalendarDate(date)}
               style={{ height: "100%" }}
+              onSelectEvent={(event) => router.push(`/groups/${groupId}/activities/${event.id}`)}
+              eventPropGetter={(event) => ({
+                style: {
+                backgroundColor: event.isFull ? "#ff4d4f" : "#42d678",
+                border: "none",
+                borderRadius: "4px",
+              }
+            })}
             />
           </div>
         </div>
@@ -920,6 +1169,7 @@ useEffect(() => {
       groupId={groupId as string}
       userId={userId}
       onSuccess={handleActivityCreated}
+      memberCount={members.length}
     />
     </div>
   );
