@@ -33,7 +33,7 @@ interface Group {
 }
 
 interface PasswordFormValues {
-  oldPassword: string;
+  oldPassword?: string;
   newPassword: string;
 }
 
@@ -328,9 +328,11 @@ const GroupSettings: React.FC = () => {
 
         <Card title="Change Group Password" style={{ marginBottom: 20, backgroundColor: 'rgba(126, 126, 126, 0.2)', border: 'none' }} headStyle={{ color: 'white' }}>
           <Form form={form} layout="vertical" onFinish={handleChangePassword}>
-          <Form.Item name="oldPassword" label={<span style={{ color: "white" }}>Current Password</span>}
-              rules={[{ required: true, message: 'Please enter old password' }]}>
-              <Input.Password placeholder="Enter current password" />
+          <Form.Item 
+              name="oldPassword" 
+              label={<span style={{ color: "white" }}>Current Password (if set)</span>}
+            >
+              <Input.Password placeholder="Leave blank if no password was set" />
             </Form.Item>
             <Form.Item 
               name="newPassword" 
