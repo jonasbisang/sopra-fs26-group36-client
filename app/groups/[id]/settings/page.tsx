@@ -33,6 +33,7 @@ interface Group {
 }
 
 interface PasswordFormValues {
+  oldPassword: string;
   newPassword: string;
 }
 
@@ -166,7 +167,8 @@ const GroupSettings: React.FC = () => {
   //Change password 
   const handleChangePassword = async (values: PasswordFormValues) => {
     try {
-      await apiService.put(`/groups/${groupId}/password`, {
+      await apiService.put(`/groups/${groupId}`, {
+        oldPassword: values.oldPassword,
         newPassword: values.newPassword,
       });
       messageApi.success("Password updated successfully.");
@@ -175,7 +177,6 @@ const GroupSettings: React.FC = () => {
       messageApi.error("Failed to change password.");
     }
   };
-
   // Delete group
   const showDeleteConfirm = () => {
     confirm({
@@ -327,6 +328,10 @@ const GroupSettings: React.FC = () => {
 
         <Card title="Change Group Password" style={{ marginBottom: 20, backgroundColor: 'rgba(126, 126, 126, 0.2)', border: 'none' }} headStyle={{ color: 'white' }}>
           <Form form={form} layout="vertical" onFinish={handleChangePassword}>
+          <Form.Item name="oldPassword" label={<span style={{ color: "white" }}>Current Password</span>}
+              rules={[{ required: true, message: 'Please enter old password' }]}>
+              <Input.Password placeholder="Enter current password" />
+            </Form.Item>
             <Form.Item 
               name="newPassword" 
               label={<span style={{ color: "white" }}>New Password</span>} 
