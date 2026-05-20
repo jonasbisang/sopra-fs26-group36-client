@@ -213,6 +213,14 @@ const GroupSettings: React.FC = () => {
   return (
     <div style={{ backgroundColor: "#000000", minHeight: '100vh', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
             {contextHolder}
+            <style>{`
+              .ant-input-password-icon {
+                color: white !important;
+              }
+              .ant-input-password-icon:hover {
+                color: rgba(255,255,255,0.7) !important;
+              }
+            `}</style>
 
             {/* Header */}
             <div style={{
@@ -332,14 +340,14 @@ const GroupSettings: React.FC = () => {
               name="oldPassword" 
               label={<span style={{ color: "white" }}>Current Password (if set)</span>}
             >
-              <Input.Password placeholder="Leave blank if no password was set" />
+              <Input.Password placeholder="Leave blank if no password was set" style={{ color: "white" }} />
             </Form.Item>
             <Form.Item 
               name="newPassword" 
               label={<span style={{ color: "white" }}>New Password</span>} 
               rules={[{ required: true, message: 'Please enter a new password' }]}
             >
-              <Input.Password placeholder="Enter new password" />
+              <Input.Password placeholder="Enter new password" style= {{ color: "white" }} />
             </Form.Item>
             <Button type="primary" htmlType="submit">Update Password</Button>
           </Form>
