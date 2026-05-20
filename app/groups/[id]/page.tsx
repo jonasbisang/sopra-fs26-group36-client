@@ -454,7 +454,8 @@ useEffect(() => {
       text: newMessage,
     });
     setNewMessage("");
-    fetchMessages(); // sofort neu laden
+    await fetchMessages();
+    lastSeenCountRef.current = chatMessages.length + 1; 
   } catch (error) {
     messageApi.error("Failed to send message.");
     console.error(error);
