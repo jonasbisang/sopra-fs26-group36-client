@@ -332,14 +332,17 @@ const GroupSettings: React.FC = () => {
               name="oldPassword" 
               label={<span style={{ color: "white" }}>Current Password (if set)</span>}
             >
-              <Input.Password placeholder="Leave blank if no password was set" />
+              <Input.Password placeholder="Leave blank if no password was set" 
+              style={{ color: "white" }} />
             </Form.Item>
             <Form.Item 
+          
               name="newPassword" 
               label={<span style={{ color: "white" }}>New Password</span>} 
               rules={[{ required: true, message: 'Please enter a new password' }]}
             >
-              <Input.Password placeholder="Enter new password" />
+              <Input.Password placeholder="Enter new password" 
+              style={{ color: "white" }} />
             </Form.Item>
             <Button type="primary" htmlType="submit">Update Password</Button>
           </Form>

@@ -126,7 +126,7 @@ const handleDeleteAccount = async () => {
     });
     message.success("Account permanently deleted.");
     localStorage.clear();
-    router.push("/login");
+    //router.push("/account-deleted");
 } catch (error) {
   message.error("Failed to delete account. Wrong password?");
 }  finally {      
@@ -335,7 +335,7 @@ return (
               type="text"
               block
               style={{ marginTop: '10px', opacity: 0.6 }}
-              onClick={() => setDeleteModalVisible(true)}
+              onClick={() => router.push("/account-deleted")}
             >
               Delete Account
             </Button>
