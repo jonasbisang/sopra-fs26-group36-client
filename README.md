@@ -53,48 +53,43 @@ For our application, we relied on the following TechStack:
 
 ## High Level Components
 
-### [ActivityService](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/src/main/java/ch/uzh/ifi/hase/soprafs26/service/ActivityService.java)
+### [GroupsIdPage](https://github.com/jonasbisang/sopra-fs26-group36-client/blob/main/app/groups/%5Bid%5D/page.tsx)
 
 The core of the application. Handles the full activity lifecycle from creation through scheduling. Key responsibilities:
 
-- Creating and validating activity proposals
-- Processing votes and triggering scheduling when minimum participants are reached
+- Creating activity proposals
+- Processing votes and triggering scheduling when the minimum number of participants is reached
 - Finding available time slots by cross-referencing all participant unavailabilities
-- Checking weather forecasts via Open-Meteo for weather-dependent activities
-- Marking activities as PAST via a scheduled job
-- Reviving failed or past activities back into the voting pool
+- Checking weather forecasts
+- Classifying activities into Scheduled, Pending, and Rejected states
+- Joining rejected or scheduled activities
+- Group Calendar
+- Group Chat 
 
-### [GroupService](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/src/main/java/ch/uzh/ifi/hase/soprafs26/service/GroupService.java)
+### [GroupsPage](https://github.com/jonasbisang/sopra-fs26-group36-client/blob/main/app/groups/page.tsx)
 
-Manages the group system that underpins all activity coordination. Handles:
+Manages the group system that underpins all group coordination. Handles:
 
 - Group creation
-- Joining, leaving, and kicking members
-- Admin promotion and group deletion
-- Password changes
+- Joining a group 
 
-### [GoogleCalendarService](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/src/main/java/ch/uzh/ifi/hase/soprafs26/service/GoogleCalendarService.java)
 
-Bridges Friendler with Google Calendar via OAuth2. Responsibilities include:
+### [UsersCalendar](https://github.com/jonasbisang/sopra-fs26-group36-client/tree/main/app/users/%5Bid%5D/calendar)
 
-- Building the Google OAuth2 authorization URL
-- Handling the OAuth2 callback and storing access/refresh tokens
-- Syncing Google Calendar events as unavailabilities every 90 seconds
-- Creating calendar events for scheduled activities directly in participants' Google Calendars
-- Refreshing expired access tokens automatically
+Bridges Friendler with the user's Calendar. Includes:
 
-### [EmailService](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/src/main/java/ch/uzh/ifi/hase/soprafs26/service/EmailService.java)
+- The user's upcoming events
+- The user's calendar containing all events
+- The user's marked unavailabilities
 
-Sends formatted email notifications to participants when an activity is successfully scheduled, including date, time, location, duration, participant list, and weather requirements.
 
-### [UserService](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/src/main/java/ch/uzh/ifi/hase/soprafs26/service/UserService.java)
+### [UserIdSettingsPage](https://github.com/jonasbisang/sopra-fs26-group36-client/tree/main/app/users/%5Bid%5D)
 
-Manages user accounts and authentication. Handles:
+Manages user account and authentication. Handles:
 
-- Registration with password hashing
-- Token-based login and logout
+- Data visualization 
 - Profile updates (username, bio, password)
-- Manual unavailability management
+
 
 
 ## Launch & Deployment
@@ -194,7 +189,46 @@ MAIL_PASSWORD=your-app-password
 Without these, the app still runs but Google Calendar sync and email notifications will be disabled.
 
 
+
 ## Illustrations
+
+### 1. Activity Lifecycle (GroupsIdPage)
+![Activity Creation & Voting](./assets/AvitityPage.png)
+
+*Users can easily propose new activities, set participant limits, and vote on what to do.*
+
+![Group Overview](./assets/GroupIdPage1.png)
+
+*The system automatically handles the lifecycle, calculating the optimal date once the minimum participant threshold is reached and the weather checks out. Users can vote and join activities. All members are displayed, along with a dedicated settings page for the group admin.*
+
+![Group Settings](./assets/GroupIdPage2.png)
+
+*Contains the group calendar.*
+
+![Group Calendar](./assets/GroupIdPage3.png)
+
+*Contains the group chat.*
+
+![Group Chat](./assets/ChatPage.png)
+
+
+### 2. Group Management (GroupsPage)
+![Group Dashboard 1](./assets/GroupPage1.png) 
+![Group Dashboard 2](./assets/GroupPage2.png)
+
+*The central hub for coordinating with friends. Users can create distinct groups, join existing ones via invite, and manage group administration seamlessly.*
+
+
+### 3. Users Calendar MISSING PICTURE (UsersCalendar)
+![Calendar Integration]
+
+*Friendler bridges directly with the user's calendar to seamlessly streamline group scheduling. The system provides a comprehensive calendar view containing all scheduled activities, and tracks marked unavailabilities to ensure no conflicting plans are made.*
+
+### 4. Users Settings MISSING PICTURE  (UserIdSettingsPage)
+![User Settings](./docs/assets/EmailConfPage.png)
+
+*This page provides intuitive data visualization to help users track their personal activity metrics, while also offering a direct interface for updating profile information such as usernames, personal bios, and passwords.*
+
 
 
 ## Roadmap
