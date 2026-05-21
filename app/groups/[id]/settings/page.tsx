@@ -154,11 +154,18 @@ const GroupSettings: React.FC = () => {
   // Promote member
   const handlePromoteMember = async (memberId: number) => {
     try {
-      await apiService.put(`/groups/${groupId}/members/${memberId}/role`, {
-        role: "ADMIN"
-      });
+      // 1. Send an empty request body (or null) to match your backend Controller
+      await apiService.put(`/groups/${groupId}/members/${memberId}/role`, {});
+      
       messageApi.success("Member promoted to admin.");
-      router.push(`/groups/${groupId}`);
+      
+      // 2. Update the UI locally instead of kicking the user off the Settings page!
+      setMembers((prevMembers) => 
+        prevMembers.map((m) => 
+          m.id === memberId ? { ...m, role: "ADMIN" } : m
+        )
+      );
+      
     } catch (error) {
       messageApi.error("Failed to promote member.");
     }
