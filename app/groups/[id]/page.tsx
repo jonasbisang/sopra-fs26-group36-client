@@ -37,6 +37,7 @@ interface Group { // needed to check if current user is admin
 interface User {
   id: number;
   username: string;
+  role?: string;
 }
 
 interface Activity {
@@ -667,7 +668,7 @@ useEffect(() => {
   <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
   <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
 
-  {group?.adminId.toString() === userId ? (
+  {group?.adminId.toString() === userId || members.find(m => m.id.toString() === userId)?.role === "ADMIN"? (
     <Button type="primary" shape="round" icon={<SettingOutlined />} onClick={() => router.push(`/groups/${groupId}/settings`)} style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}>
       Group Settings
     </Button>

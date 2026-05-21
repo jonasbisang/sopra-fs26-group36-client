@@ -94,18 +94,19 @@ const GroupSettings: React.FC = () => {
         const groupData = await apiService.get<Group>(`/groups/${groupId}`);
         setGroup(groupData);
 
-        //VALIDATION COMMENTED OUT FOR TESTING:
-        
-        if (groupData?.adminId.toString() !== currentUserId) {
+        const membersData = await apiService.get<Member[]>(`/groups/${groupId}/members`);
+        setMembers(membersData);
+
+        // --- THE NEW ADMIN CHECK ---
+        const currentMember = membersData.find(m => m.id.toString() === currentUserId);
+        const isOriginalCreator = groupData?.adminId.toString() === currentUserId;
+
+        // If they are not the original creator AND their role is not ADMIN, kick them out!
+        if (!isOriginalCreator && currentMember?.role !== "ADMIN") {
           messageApi.error("Access denied. Only administrators can view this page.");
           router.push(`/groups/${groupId}`);
           return;
         }
-        
-
-        // Using /users as defined in the REST specification
-        const membersData = await apiService.get<Member[]>(`/groups/${groupId}/members`);
-        setMembers(membersData);
 
        } catch (error) {
         console.error("Error fetching group details:", error);
@@ -296,12 +297,13 @@ const GroupSettings: React.FC = () => {
           <List
           dataSource={members}
             locale={{ emptyText: <span style={{ color: 'white' }}>No members found in this group.</span> }}
-            renderItem={(member) => (
+renderItem={(member) => (
               <List.Item
                 actions={[
-                  member.id.toString() !== currentUserId && (
+                  // ONLY show buttons if it's not the current user AND the target isn't an admin
+                  member.id.toString() !== currentUserId && member.role !== "ADMIN" && (
                     <Space key="actions">
-                      <Popconfirm  //traps users in a confirmation pop-up to prevent accidental promotions or kicks of members
+                      <Popconfirm 
                             title="Promote to Admin?" 
                             description="Are you sure you want to give admin rights to this user?"
                             onConfirm={() => handlePromoteMember(member.id)}
@@ -320,8 +322,8 @@ const GroupSettings: React.FC = () => {
                         >
                             <Button danger>Kick</Button>
                         </Popconfirm>
-                        </Space>
-                    )
+                    </Space>
+                  )
                 ]}
               >
                 <List.Item.Meta 
