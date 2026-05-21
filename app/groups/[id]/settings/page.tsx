@@ -33,6 +33,7 @@ interface Group {
 }
 
 interface PasswordFormValues {
+  oldPassword?: string;
   newPassword: string;
 }
 
@@ -93,18 +94,19 @@ const GroupSettings: React.FC = () => {
         const groupData = await apiService.get<Group>(`/groups/${groupId}`);
         setGroup(groupData);
 
-        //VALIDATION COMMENTED OUT FOR TESTING:
-        
-        if (groupData?.adminId.toString() !== currentUserId) {
+        const membersData = await apiService.get<Member[]>(`/groups/${groupId}/members`);
+        setMembers(membersData);
+
+        // --- THE NEW ADMIN CHECK ---
+        const currentMember = membersData.find(m => m.id.toString() === currentUserId);
+        const isOriginalCreator = groupData?.adminId.toString() === currentUserId;
+
+        // If they are not the original creator AND their role is not ADMIN, kick them out!
+        if (!isOriginalCreator && currentMember?.role !== "ADMIN") {
           messageApi.error("Access denied. Only administrators can view this page.");
           router.push(`/groups/${groupId}`);
           return;
         }
-        
-
-        // Using /users as defined in the REST specification
-        const membersData = await apiService.get<Member[]>(`/groups/${groupId}/members`);
-        setMembers(membersData);
 
        } catch (error) {
         console.error("Error fetching group details:", error);
@@ -153,11 +155,18 @@ const GroupSettings: React.FC = () => {
   // Promote member
   const handlePromoteMember = async (memberId: number) => {
     try {
-      await apiService.put(`/groups/${groupId}/members/${memberId}/role`, {
-        role: "ADMIN"
-      });
+      // 1. Send an empty request body (or null) to match your backend Controller
+      await apiService.put(`/groups/${groupId}/members/${memberId}/role`, {});
+      
       messageApi.success("Member promoted to admin.");
-      router.push(`/groups/${groupId}`);
+      
+      // 2. Update the UI locally instead of kicking the user off the Settings page!
+      setMembers((prevMembers) => 
+        prevMembers.map((m) => 
+          m.id === memberId ? { ...m, role: "ADMIN" } : m
+        )
+      );
+      
     } catch (error) {
       messageApi.error("Failed to promote member.");
     }
@@ -166,7 +175,8 @@ const GroupSettings: React.FC = () => {
   //Change password 
   const handleChangePassword = async (values: PasswordFormValues) => {
     try {
-      await apiService.put(`/groups/${groupId}/password`, {
+      await apiService.put(`/groups/${groupId}`, {
+        oldPassword: values.oldPassword,
         newPassword: values.newPassword,
       });
       messageApi.success("Password updated successfully.");
@@ -175,7 +185,6 @@ const GroupSettings: React.FC = () => {
       messageApi.error("Failed to change password.");
     }
   };
-
   // Delete group
   const showDeleteConfirm = () => {
     confirm({
@@ -288,12 +297,13 @@ const GroupSettings: React.FC = () => {
           <List
           dataSource={members}
             locale={{ emptyText: <span style={{ color: 'white' }}>No members found in this group.</span> }}
-            renderItem={(member) => (
+renderItem={(member) => (
               <List.Item
                 actions={[
-                  member.id.toString() !== currentUserId && (
+                  // ONLY show buttons if it's not the current user AND the target isn't an admin
+                  member.id.toString() !== currentUserId && member.role !== "ADMIN" && (
                     <Space key="actions">
-                      <Popconfirm  //traps users in a confirmation pop-up to prevent accidental promotions or kicks of members
+                      <Popconfirm 
                             title="Promote to Admin?" 
                             description="Are you sure you want to give admin rights to this user?"
                             onConfirm={() => handlePromoteMember(member.id)}
@@ -312,8 +322,8 @@ const GroupSettings: React.FC = () => {
                         >
                             <Button danger>Kick</Button>
                         </Popconfirm>
-                        </Space>
-                    )
+                    </Space>
+                  )
                 ]}
               >
                 <List.Item.Meta 
@@ -327,12 +337,21 @@ const GroupSettings: React.FC = () => {
 
         <Card title="Change Group Password" style={{ marginBottom: 20, backgroundColor: 'rgba(126, 126, 126, 0.2)', border: 'none' }} headStyle={{ color: 'white' }}>
           <Form form={form} layout="vertical" onFinish={handleChangePassword}>
+          <Form.Item 
+              name="oldPassword" 
+              label={<span style={{ color: "white" }}>Current Password (if set)</span>}
+            >
+              <Input.Password placeholder="Leave blank if no password was set" 
+              style={{ color: "white" }} />
+            </Form.Item>
             <Form.Item 
+          
               name="newPassword" 
               label={<span style={{ color: "white" }}>New Password</span>} 
               rules={[{ required: true, message: 'Please enter a new password' }]}
             >
-              <Input.Password placeholder="Enter new password" />
+              <Input.Password placeholder="Enter new password" 
+              style={{ color: "white" }} />
             </Form.Item>
             <Button type="primary" htmlType="submit">Update Password</Button>
           </Form>

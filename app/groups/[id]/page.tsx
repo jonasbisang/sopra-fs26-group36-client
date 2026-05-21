@@ -3,21 +3,21 @@
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { Button, message, List, Avatar, Tag , Modal, DatePicker, Popconfirm} from "antd";
+import { Button, message, List, Avatar, Tag , Modal, Drawer, Input, DatePicker, Popconfirm } from "antd";
 import {
   CalendarOutlined,
   UserOutlined,
   LogoutOutlined,
   TeamOutlined,
   PlusOutlined,
-  ClockCircleOutlined,
   SettingOutlined,
+  MessageOutlined,
+  SendOutlined,
+  ClockCircleOutlined,
   DeleteOutlined,
   ArrowLeftOutlined,
-  DownOutlined,
 }from "@ant-design/icons";
-import { Dropdown } from "antd";
-import { useEffect, useState , useRef } from "react";
+import { useEffect, useState , useRef, useCallback } from "react";
 import { Calendar, momentLocalizer } from "react-big-calendar";
 import moment from "moment";
 import "react-big-calendar/lib/css/react-big-calendar.css";
@@ -37,6 +37,7 @@ interface Group { // needed to check if current user is admin
 interface User {
   id: number;
   username: string;
+  role?: string;
 }
 
 interface Activity {
@@ -68,6 +69,13 @@ interface CalendarEvent {
   isFull?: boolean;
 }
 
+interface Message {
+  id: number;
+  text: string;
+  senderName: string;
+  createdAt?: string;
+}
+
 const GroupPage: React.FC = () => {
   const router = useRouter();
   const params = useParams();
@@ -91,17 +99,29 @@ const GroupPage: React.FC = () => {
   const [likedActivities, setLikedActivities] = useState<Activity[]>([]);
   const [, setVotedActivityIds] = useState<Set<number>>(new Set());
   const VOTED_KEY = `voted_${groupId}_${userId}`;
-  const votedActivityIdsRef = useRef<Set<number>>(new Set(JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]")));
+  const votedActivityIdsRef = useRef<Set<number>>(new Set(
+    typeof window !== "undefined"
+      ? JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]")
+      : []));
 
   const [totalPending, setTotalPending] = useState<number>(0);
   const [votedCount, setVotedCount] = useState<number>(
-  JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]").length);
+    typeof window !== "undefined" ? JSON.parse(localStorage.getItem(`voted_${groupId}_${userId}`) ?? "[]").length : 0);
+
   const [feedbackType, setFeedbackType] = useState<"ACCEPT" | "DECLINE" | null>(null);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const [isCreateModalVisible, setIsCreateModalVisible] = useState(false); // to check the pop up visibility
   const [newEventPopup, setNewEventPopup] = useState<Activity | null>(null);
   const [mounted, setMounted] = useState(false);
+
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [newMessage, setNewMessage] = useState("");
+  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const [unreadCount, setUnreadCount] = useState(0);
+  const lastSeenCountRef = useRef<number | null>(null);
+
 
   useEffect(() => {
     setMounted(true);
@@ -138,7 +158,7 @@ const GroupPage: React.FC = () => {
     try {
     // Fetch pending activities
     const pending = await apiService.get<Activity[]>(
-      `/groups/${groupId}/activities?status=PENDING`);
+      `/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
       setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
       setTotalPending(pending.length);
       } catch (error) {
@@ -177,11 +197,16 @@ const GroupPage: React.FC = () => {
         console.error("Failed to fetch calendar:", error);
       }
       try {
-        // Fetch rejected activities for the current user
+        // Fetch rejected activities for the current user - trying again with changed backend
         const rejected = await apiService.get<Activity[]>(
-          `/groups/${groupId}/activities?status=REJECTED`
-        );
-        setDeclinedActivities(rejected);
+          `/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
+
+        setDeclinedActivities(rejected.filter((a) => a.status !== "FAILED"));
+
+        const accepted = await apiService.get<Activity[]>(
+          `/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
+        setLikedActivities(accepted);
+
       } catch (error) {
         console.error("Failed to fetch rejected activities:", error);
       }
@@ -240,7 +265,7 @@ const GroupPage: React.FC = () => {
     
       try {
         // 1. Fetch unvoted activities (Upcoming Ideas)
-        const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+        const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
         setPendingActivities(pending); // <-- No more local storage .filter() hack needed!
         setTotalPending(pending.length);
       } catch (error) {
@@ -249,7 +274,7 @@ const GroupPage: React.FC = () => {
 
       try {
         // 2. Fetch liked activities (Awaiting Members)
-        const accepted = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=ACCEPTED`);
+        const accepted = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=ACCEPTED&userId=${userId}`);
         setLikedActivities(accepted);
       } catch (error) {
         console.error("Failed to fetch accepted activities:", error);
@@ -257,14 +282,15 @@ const GroupPage: React.FC = () => {
 
       try {
         // 3. Fetch passed activities (Rejected)
-        const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED`);
-        setDeclinedActivities(rejected);
-      } catch (error) {
-        console.error("Failed to fetch rejected activities:", error);
-      }
-  }, 2000);
-  return () => clearInterval(interval);
-    }, [groupId, token]);
+        const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
+          setDeclinedActivities(rejected);} 
+          
+        catch (error) {
+            console.error("Failed to fetch rejected activities:", error);}
+          }, 2000);
+
+        return () => clearInterval(interval);}, 
+        [groupId, token, userId]);
 
 
 
@@ -274,14 +300,51 @@ const GroupPage: React.FC = () => {
 
     if (!groupId) return;
     try {
-      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING`);
+      const pending = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=PENDING&userId=${userId}`);
       setPendingActivities(pending.filter((a) => !votedActivityIdsRef.current.has(a.id)));
      
     } catch (error) {
       console.error("Failed to fetch pending activities after creation:", error);
     }
-    
   };
+
+  const fetchMessages = useCallback(async () => {
+  try {
+     const msgs = await apiService.get<Message[]>(`/groups/${groupId}/messages`);
+     const myUsername = members.find((m) => m.id.toString() === userId)?.username;
+     setChatMessages((prev) => {
+      if (lastSeenCountRef.current === null) {
+        lastSeenCountRef.current = msgs.length;
+        return msgs;
+      }
+       if (!chatOpen && msgs.length > lastSeenCountRef.current) {
+        const newMsgs = msgs.slice(lastSeenCountRef.current);
+        const otherMessages = newMsgs.filter((m) => m.senderName !== myUsername);
+          if (otherMessages.length > 0) {
+            setUnreadCount((u) => u + otherMessages.length);
+          }
+         lastSeenCountRef.current = msgs.length;
+       }
+       return msgs;
+     });
+  } catch (error) {
+    console.error("Failed to fetch messages:", error);
+  }
+}, [groupId, apiService, chatOpen]);
+
+
+// Polling für neue Messages immer
+useEffect(() => {
+  if (!groupId || !token) return;
+  fetchMessages(); // initial laden
+  const interval = setInterval(fetchMessages, 2000);
+  return () => clearInterval(interval);
+}, [groupId, token, fetchMessages]);
+
+// Auto-scroll nach unten wenn neue Messages kommen
+useEffect(() => {
+  chatBottomRef.current?.scrollIntoView({ behavior: "smooth" });
+}, [chatMessages]);
 
   const handleJoin = async (activityId: number) => {
     try {
@@ -388,6 +451,22 @@ const GroupPage: React.FC = () => {
     router.push("/login");
   };
 
+  const handleSendMessage = async () => {
+  if (!newMessage.trim()) return;
+  try {
+    await apiService.post(`/groups/${groupId}/messages`, {
+      text: newMessage,
+    });
+    setNewMessage("");
+    await fetchMessages();
+    lastSeenCountRef.current = chatMessages.length + 1; 
+  } catch (error) {
+    messageApi.error("Failed to send message.");
+    console.error(error);
+  }
+};
+
+
   const progressPercent = totalPending > 0 ? Math.round((votedCount / totalPending) * 100) : 0;
 
   const sectionCard: React.CSSProperties = {
@@ -434,6 +513,87 @@ const GroupPage: React.FC = () => {
       )}
       </div>
       </Modal>
+
+      {/* Group Chat Drawer */}
+<Drawer
+  title={<span style={{ color: "white" }}>💬 Group Chat</span>}
+  placement="right"
+  onClose={() => setChatOpen(false)}
+  open={chatOpen}
+  width={380}
+  styles={{
+    body: { backgroundColor: "#111", padding: "16px", display: "flex", flexDirection: "column", height: "100%" },
+    header: { backgroundColor: "#111", borderBottom: "1px solid rgba(255,255,255,0.1)" },
+    mask: { backdropFilter: "blur(4px)" },
+  }}
+>
+  {/* Messages */}
+  <div style={{ flex: 1, overflowY: "auto", marginBottom: "16px", display: "flex", flexDirection: "column", gap: "12px" }}>
+    {chatMessages.length === 0 ? (
+      <div style={{ color: "rgba(255,255,255,0.3)", textAlign: "center", marginTop: "40px" }}>
+        No messages yet. Say hi! 👋
+      </div>
+    ) : (
+      chatMessages.map((msg) => {
+        const isOwn = msg.senderName === members.find((m) => m.id.toString() === userId)?.username;
+        return (
+          <div key={msg.id} style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: isOwn ? "flex-end" : "flex-start",
+          }}>
+            <span style={{ color: "rgba(255,255,255,0.4)", fontSize: "11px", marginBottom: "4px" }}>
+              {msg.senderName}
+            </span>
+            <div style={{
+              backgroundColor: isOwn ? "#42a2d6" : "rgba(255,255,255,0.1)",
+              color: "white",
+              borderRadius: isOwn ? "12px 12px 2px 12px" : "12px 12px 12px 2px",
+              padding: "10px 14px",
+              maxWidth: "80%",
+              fontSize: "14px",
+            }}>
+              {msg.text}
+            </div>
+            {msg.createdAt && (
+              <span style={{ color: "rgba(255,255,255,0.2)", fontSize: "10px", marginTop: "2px" }}>
+                {moment(msg.createdAt).format("HH:mm")}
+              </span>
+            )}
+          </div>
+        );
+      })
+    )}
+    <div ref={chatBottomRef} />
+  </div>
+
+  {/* Input */}
+  <div style={{ display: "flex", gap: "8px" }}>
+    <Input
+      value={newMessage}
+      onChange={(e) => setNewMessage(e.target.value)}
+      onPressEnter={handleSendMessage}
+      placeholder="Type a message..."
+      style={{
+        backgroundColor: "rgba(255,255,255,0.05)",
+        border: "1px solid rgba(255,255,255,0.1)",
+        color: "white",
+        borderRadius: "8px",
+      }}
+    />
+    <Button
+      icon={<SendOutlined />}
+      onClick={handleSendMessage}
+      style={{
+        backgroundColor: "#42a2d6",
+        border: "none",
+        color: "white",
+        borderRadius: "8px",
+      }}
+    />
+  </div>
+</Drawer>
+
 
        {/* Feedback Flash Overlay */}
       {feedbackType && (
@@ -508,7 +668,7 @@ const GroupPage: React.FC = () => {
   <Button type="text" icon={<CalendarOutlined />} onClick={() => router.push(`/users/${userId}/calendar`)} style={{ color: "white" }}>Calendar</Button>
   <Button type="text" icon={<UserOutlined />} onClick={() => router.push(`/users/${userId}`)} style={{ color: "white" }}>My Profile</Button>
 
-  {group?.adminId.toString() === userId ? (
+  {group?.adminId.toString() === userId || members.find(m => m.id.toString() === userId)?.role === "ADMIN"? (
     <Button type="primary" shape="round" icon={<SettingOutlined />} onClick={() => router.push(`/groups/${groupId}/settings`)} style={{ backgroundColor: "#42a2d6", border: "none", fontWeight: "bold" }}>
       Group Settings
     </Button>
@@ -519,8 +679,9 @@ const GroupPage: React.FC = () => {
   )}
 
 </div>
-        </div>
-          </div>
+</div>
+</div>
+          
       
 
       
@@ -987,8 +1148,48 @@ const GroupPage: React.FC = () => {
             />
           </div>
         </div>
-
-      </div>
+      {/* Floating Chat Button */}
+<div
+  style={{
+    position: "fixed",
+    bottom: "32px",
+    right: "32px",
+    zIndex: 1000,
+  }}> 
+  <div style={{ position: "relative" }}>
+  <Button
+    type="primary"
+    shape="circle"
+    size="large"
+    icon={<MessageOutlined />}
+    onClick={() => {
+      setChatOpen(true); 
+      setUnreadCount(0);
+      lastSeenCountRef.current = chatMessages.length;
+     }}
+    style={{
+      width: "56px",
+      height: "56px",
+      backgroundColor: "#42a2d6",
+      border: "none",
+      boxShadow: "0 4px 16px rgba(66,162,214,0.4)",
+      fontSize: "20px",
+    }}
+  />
+  {unreadCount > 0 && (
+      <div style={{
+        position: "absolute",
+        top: 0,
+        right: 0,
+        width: "12px",
+        height: "12px",
+        backgroundColor: "#ff4238",
+        borderRadius: "50%",
+        border: "2px solid #000",
+      }} />
+    )}
+</div>
+</div>
     <CreateActivityModal 
       visible={isCreateModalVisible}
       onClose={() => setIsCreateModalVisible(false)}
@@ -997,7 +1198,8 @@ const GroupPage: React.FC = () => {
       onSuccess={handleActivityCreated}
       memberCount={members.length}
     />
-    </div>
+  </div>
+  </div>
   );
 };
 
