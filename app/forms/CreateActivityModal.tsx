@@ -20,7 +20,6 @@ interface ActivityFormValues {
   minTemp?: number;
   maxTemp?: number;
   rainPreference?: string;
-  timePreference: string;
 }
 
 interface CreateActivityModalProps {
@@ -62,7 +61,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
     }
   
     try {
-      const isCustomTime = values.timePreference === "CUSTOM";
+      //const isCustomTime = values.timePreference === "CUSTOM";
       // all the data that is then organizedly sent to backend      
     const payload = {
       name: values.title,
@@ -70,8 +69,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       minSize: values.minParticipants,
       maxSize: values.maxParticipants,
       duration: values.duration, 
-      timePreference: "CUSTOM", // since we have a custom time range input
-      isRecursive: values.isRecursive || false,
+      timePreference: "CUSTOM", //values.timePreference hard coded
       isWeatherDependent: values.isWeatherDependent || false,
       startTime: values.timeRange ? values.timeRange[0].format("HH:mm:ss") : null,
       endTime: values.timeRange ? values.timeRange[1].format("HH:mm:ss") : null,
@@ -139,6 +137,8 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
       }
         .ant-picker {
         background-color: #f0f0f0 !important;
+        border: 1px solid #d9d9d9 !important; 
+        border-radius: 6px !important;
       }
        .ant-picker-separator,
        .ant-picker-suffix {
@@ -207,16 +207,9 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
                 rules={[{ required: true, message: "Please select a time window" }]}
                 style={{ flex: 1 }}
               >
-                {/* Notice ConfigProvider is gone from here! It's wrapping the form now. */}
-                <Select placeholder="Select a time window..." style={{ width: "100%", ...inputStyle }}>
-                  {/* <Option value="MORNING">Morning (06:00 - 12:00)</Option>
-                      <Option value="AFTERNOON">Afternoon (12:00 - 18:00)</Option>
-                      <Option value="EVENING">Evening (18:00 - 22:00)</Option>
-                      <Option value="NIGHT">Night (22:00 - 06:00)</Option>
-                        */}
-                  <Option value="CUSTOM">Custom Time</Option>
-                </Select>
+                  <TimePicker.RangePicker format="HH:mm" style={{ width: "100%", ...inputStyle }} />
               </Form.Item>
+
             </div>
 
             <Form.Item

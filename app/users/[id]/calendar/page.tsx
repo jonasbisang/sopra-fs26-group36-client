@@ -1,9 +1,27 @@
 "use client";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
-import { Button, message, Spin, TimePicker, DatePicker, Modal } from "antd";
-import { ArrowLeftOutlined, LeftOutlined, RightOutlined } from "@ant-design/icons";
+import { Button,
+        message,
+        Spin,
+        TimePicker,
+        DatePicker,
+        Modal,
+        Tag,
+        Tooltip
+} from "antd";
+
+import {
+  ArrowLeftOutlined, 
+  LeftOutlined,
+  RightOutlined,
+  CalendarOutlined,
+  EnvironmentOutlined,
+  TeamOutlined, 
+  ClockCircleOutlined,
+} from "@ant-design/icons";
+
 import dayjs from "dayjs";
 import useLocalStorage from "@/hooks/useLocalStorage";
 import { getApiDomain } from "@/utils/domain";
@@ -17,6 +35,28 @@ interface UnavailabilityGetDTO {
   id: number;
   startDateTime: string;
   endDateTime: string;
+}
+
+interface Group {
+  id: number;
+  name: string;
+  members: number;
+}
+
+interface GroupActivity {
+  id: number;
+  name: string;
+  status: string;
+  scheduledTime?: string;
+  location?: string;
+  duration?: number;
+  acceptVotes?: number;
+  maxSize?: number;
+  isWeatherDependent?: boolean;
+  weatherDependent?: boolean;
+  isRecursive?: boolean;
+  groupId?: number;
+  groupName?: string;
 }
 
 type DayStatus = "available" | "unavailable_whole_day" | "unavailable_time_slot";
@@ -38,6 +78,8 @@ const CalendarPage: React.FC = () => {
   const {value: token} = useLocalStorage<string>("token", "");
   const [mounted, setMounted] = useState(false);
 
+  const [groupEvents, setGroupEvents] = useState<GroupActivity[]>([]);
+  const [eventsLoading, setEventsLoading] = useState(false);
 
 
   const [mode, setMode] = useState<null | "manual" | "google">(null);
@@ -51,9 +93,6 @@ const CalendarPage: React.FC = () => {
   const [tempStart, setTempStart] = useState<dayjs.Dayjs | null>(null);
   const [tempEnd, setTempEnd] = useState<dayjs.Dayjs | null>(null);
 
-  const next30Days = Array.from({ length: 30 }, (_, i) =>
-    dayjs().add(i, "day").format("YYYY-MM-DD")
-  );
 
   useEffect(() => {
     if (mode !== "manual") return;
@@ -166,12 +205,51 @@ const CalendarPage: React.FC = () => {
       console.error(error);
     }
   };
+  
+  // Fetch all scheduled activities from all groups 
+  const fetchGroupEvents = useCallback(async () => {
+    if (!userId) return;
+    try {
+      setEventsLoading(true);
+      const groups = await apiService.get<Group[]>(`/users/${userId}/groups`);
+      const allEvents: GroupActivity[] = [];
+
+
+      await Promise.all(
+        groups.map(async (group) => {
+          try {
+            const scheduled = await apiService.get<GroupActivity[]>(
+              `/groups/${group.id}/activities?status=SCHEDULED`
+            );
+            scheduled.forEach((a) => allEvents.push({ ...a, groupName: group.name, groupId: group.id }));
+          } catch {
+            // group may have no scheduled activities — skip silently
+          }
+        })
+      );
+
+      allEvents.sort((a, b) => {
+        if (!a.scheduledTime) return 1;
+        if (!b.scheduledTime) return -1;
+        return dayjs(a.scheduledTime).isBefore(dayjs(b.scheduledTime)) ? -1 : 1;
+      });
+
+      setGroupEvents(allEvents);
+    } catch (error) {
+      console.error("Failed to fetch group events:", error);
+    } finally {
+      setEventsLoading(false);
+    }
+  }, [userId, apiService]);
+
+  useEffect(() => {
+    if (mounted && token) fetchGroupEvents();
+  }, [mounted, token, fetchGroupEvents]);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
-  
   useEffect(() => {
     if (mounted && (!token || token === "")) {
       router.replace("/login");
@@ -198,6 +276,17 @@ const CalendarPage: React.FC = () => {
  
   const isToday = (date: string) => dayjs(date).isSame(dayjs(), "day");
 
+  const eventsByDate: Record<string, GroupActivity[]> = {};
+  groupEvents.forEach((ev) => {
+  if (!ev.scheduledTime) return;
+  const date = ev.scheduledTime.split("T")[0];
+  if (!eventsByDate[date]) eventsByDate[date] = [];
+  eventsByDate[date].push(ev);
+  });
+
+  const upcomingEvents = groupEvents.filter(
+    (ev) => ev.scheduledTime && dayjs(ev.scheduledTime).isAfter(dayjs().subtract(1, "day"))
+  );
   return (
     <div style={{ backgroundColor: "#000", minHeight: "100vh", padding: "32px 40px", color: "white" }}>
       
@@ -248,7 +337,6 @@ const CalendarPage: React.FC = () => {
       </div>
     </Modal>
  
-      {/* Header */}
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 32 }}>
         <Button icon={<ArrowLeftOutlined />} type="text" style={{ color: "white" }} onClick={() => router.push("/groups")}>
           Back
@@ -260,7 +348,6 @@ const CalendarPage: React.FC = () => {
         <div style={{ width: 80 }} />
       </div>
  
-      {/* Mode buttons */}
       <div style={{ display: "flex", gap: 8, justifyContent: "center", marginBottom: 32 }}>
         <Button
           onClick={() => setMode("manual")}
@@ -285,7 +372,99 @@ const CalendarPage: React.FC = () => {
           Google Calendar
         </Button>
       </div>
- 
+      
+ {/* group events */}
+      <div style={{ maxWidth: 900, margin: "0 auto 56px" }}>
+        <div style={{
+          display: "flex", alignItems: "center", gap: 10, marginBottom: 20,
+          borderBottom: "1px solid rgba(255,255,255,0.15)", paddingBottom: 12,
+        }}>
+          <CalendarOutlined style={{ color: "white", fontSize: 18 }} />
+          <h3 style={{ color: "white", margin: 0, fontSize: 20 }}>Upcoming Group Activities</h3>
+        </div>
+
+        {eventsLoading ? (
+          <div style={{ display: "flex", justifyContent: "center", padding: "40px 0" }}>
+            <Spin size="large" />
+          </div>
+        ) : upcomingEvents.length === 0 ? (
+          <div style={{
+            backgroundColor: "rgba(126,126,126,0.12)",
+            borderRadius: 12, padding: "32px 20px", textAlign: "center",
+          }}>
+            <CalendarOutlined style={{ fontSize: 32, color: "rgba(255,255,255,0.2)", marginBottom: 12, display: "block" }} />
+            <p style={{ color: "rgba(255,255,255,0.35)", margin: 0 }}>
+              No upcoming scheduled activities across your groups yet.
+            </p>
+          </div>
+        ) : (
+          <div style={{ display: "flex", flexDirection: "column", gap: 10 }}>
+            {upcomingEvents.map((ev) => {
+              const isWeather = ev.isWeatherDependent || ev.weatherDependent;
+              const dt = ev.scheduledTime ? dayjs(ev.scheduledTime) : null;
+              const isEvToday = dt?.format("YYYY-MM-DD") === dayjs().format("YYYY-MM-DD");
+              const isTomorrow = dt?.format("YYYY-MM-DD") === dayjs().add(1, "day").format("YYYY-MM-DD");
+              return (
+                <div
+                  key={`${ev.groupId}-${ev.id}`}
+                  onClick={() => router.push(`/groups/${ev.groupId}/activities/${ev.id}`)}
+                  style={{
+                    backgroundColor: "rgba(126,126,126,0.15)",
+                    border: isEvToday ? "1px solid rgba(255,255,255,0.3)" : "1px solid rgba(255,255,255,0.07)",
+                    borderRadius: 12, padding: "16px 20px",
+                    display: "flex", alignItems: "center",
+                    cursor: "pointer", gap: 16, transition: "background 0.15s",
+                  }}
+                  onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(126,126,126,0.25)")}
+                  onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "rgba(126,126,126,0.15)")}
+                >
+                  <div style={{
+                    minWidth: 54, textAlign: "center",
+                    backgroundColor: "rgba(255,255,255,0.07)",
+                    borderRadius: 8, padding: "8px 4px", flexShrink: 0,
+                  }}>
+                    <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 10, textTransform: "uppercase", letterSpacing: 1 }}>
+                      {dt?.format("MMM")}
+                    </div>
+                    <div style={{ color: "white", fontSize: 24, fontWeight: "bold", lineHeight: 1.1 }}>
+                      {dt?.format("D")}
+                    </div>
+                    <div style={{ color: "rgba(255,255,255,0.45)", fontSize: 10 }}>
+                      {dt?.format("ddd")}
+                    </div>
+                  </div>
+                  <div style={{ flex: 1, minWidth: 0 }}>
+                    <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 6, flexWrap: "wrap" }}>
+                      <span style={{ color: "white", fontWeight: 600, fontSize: 15 }}>{ev.name}</span>
+                      {isEvToday && <Tag color="gold" style={{ fontSize: 10, margin: 0 }}>Today</Tag>}
+                      {isTomorrow && <Tag color="cyan" style={{ fontSize: 10, margin: 0 }}>Tomorrow</Tag>}
+                      {isWeather && <Tag color="blue" style={{ fontSize: 10, margin: 0 }}>Weather</Tag>}
+                      {ev.isRecursive && <Tag color="purple" style={{ fontSize: 10, margin: 0 }}>Recurring</Tag>}
+                    </div>
+                    <div style={{ display: "flex", gap: 14, flexWrap: "wrap" }}>
+                      <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                        <TeamOutlined /> {ev.groupName ?? `Group ${ev.groupId}`}
+                      </span>
+                      {dt && (
+                        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                          <ClockCircleOutlined /> {dt.format("HH:mm")}{ev.duration ? ` · ${ev.duration}h` : ""}
+                        </span>
+                      )}
+                      {ev.location && (
+                        <span style={{ color: "rgba(255,255,255,0.4)", fontSize: 12, display: "flex", alignItems: "center", gap: 4 }}>
+                          <EnvironmentOutlined /> {ev.location}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                  <span style={{ color: "rgba(255,255,255,0.2)", fontSize: 20, flexShrink: 0 }}>›</span>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+      
       {/* Google mode */}
       {mode === "google" && (
         <div style={{ display: "flex", justifyContent: "center" }}>
@@ -380,6 +559,7 @@ const CalendarPage: React.FC = () => {
                       onClick={() => handleDayClick(date)}
                       style={{
                         backgroundColor: colors.bg,
+                        position: "relative", 
                         border: `1px solid ${isToday(date) ? "rgba(255,255,255,0.6)" : colors.border}`,
                         borderRadius: 8,
                         padding: "10px 6px",
@@ -399,8 +579,22 @@ const CalendarPage: React.FC = () => {
                         </div>
                       )}
                       {status === "unavailable_whole_day" && (
-                        <div style={{ color: "rgba(255,66,56,0.8)", fontSize: 9, marginTop: 2 }}>all day</div>
+                        <div style={{ color: "rgba(255,66,56,0.8)", fontSize: 9, marginTop: 2 }}>all day</div>)}
+
+                      {(eventsByDate[date] ?? []).length > 0 && (
+                        <Tooltip title={(eventsByDate[date] ?? []).map(ev => ev.name).join(", ")}>
+                          <div style={{
+                            position: "absolute", top: 4, right: 4,
+                            backgroundColor: "white", borderRadius: "50%",
+                            width: 15, height: 15,
+                            display: "flex", alignItems: "center", justifyContent: "center",
+                            fontSize: 9, fontWeight: "bold", color: "#000",
+                          }}>
+                            {eventsByDate[date].length}
+                          </div>
+                        </Tooltip>
                       )}
+                     
                     </div>
                   );
                 })}
