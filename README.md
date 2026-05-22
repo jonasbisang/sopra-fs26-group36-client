@@ -100,40 +100,6 @@ Manages user account and authentication. Handles:
 - Node.js 18+
 - Gradle
 
-### Backend
-
-#### Build
-
-```bash
-./gradlew build
-```
-
-#### Run
-
-```bash
-./gradlew bootRun
-```
-
-The server runs at `http://localhost:8080`. Verify it is running by visiting that URL in your browser.
-
-#### Development Mode (auto-reload)
-
-In two separate terminals:
-
-```bash
-./gradlew build --continuous -xtest
-```
-
-```bash
-./gradlew bootRun
-```
-
-#### Run Tests
-
-```bash
-./gradlew test
-```
-
 ### Frontend
 
 #### Install dependencies
@@ -157,24 +123,6 @@ Create a `.env.local` file in the frontend root:
 ```
 NEXT_PUBLIC_PROD_API_URL=https://your-backend-url.com
 ```
-
-### External Service Configuration
-
-The backend requires the following environment variables for full functionality:
-
-```
-GOOGLE_CLIENT_ID=your-google-client-id
-GOOGLE_CLIENT_SECRET=your-google-client-secret
-GOOGLE_REDIRECT_URI=https://your-backend-url/auth/google/callback
-MAIL_HOST=smtp.gmail.com
-MAIL_PORT=587
-MAIL_USERNAME=your-email@gmail.com
-MAIL_PASSWORD=your-app-password
-```
-
-Without these, the app still runs but Google Calendar sync and email notifications will be disabled.
-
-
 
 ## Illustrations
 
