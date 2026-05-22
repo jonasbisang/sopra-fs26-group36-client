@@ -283,9 +283,10 @@ const GroupPage: React.FC = () => {
       try {
         // 3. Fetch passed activities (Rejected)
         const rejected = await apiService.get<Activity[]>(`/groups/${groupId}/activities?status=REJECTED&userId=${userId}`);
-          setDeclinedActivities(rejected);} 
+        setDeclinedActivities(rejected.filter((a) => a.status !== "FAILED"));
+
           
-        catch (error) {
+       } catch (error) {
             console.error("Failed to fetch rejected activities:", error);}
           }, 2000);
 
@@ -883,7 +884,13 @@ useEffect(() => {
           <List
             dataSource={plannedActivities}
             renderItem={(activity) => (
-              <List.Item style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "10px 0" }}>
+              <List.Item 
+                style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "10px 0", cursor: "pointer", borderRadius: "8px", transition: "background 0.15s" }}
+                onClick={() => router.push(`/groups/${groupId}/activities/${activity.id}`)}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+              >
+
                 <List.Item.Meta
                   title={<span style={{ color: "white" }}>{activity.name}</span>}
                     description={
@@ -957,7 +964,12 @@ useEffect(() => {
                   (a) => (a.acceptVotes ?? 0) < (a.minSize ?? Infinity)
                 )}
                 renderItem={(activity) => (
-                  <List.Item style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "12px 0" }}>
+                  <List.Item 
+                    style={{ borderBottom: "1px solid rgba(255,255,255,0.1)", padding: "12px 0", cursor: "pointer", borderRadius: "8px", transition: "background 0.15s" }}
+                    onClick={() => router.push(`/groups/${groupId}/activities/${activity.id}`)}
+                    onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
+                    onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+                  >
                     <List.Item.Meta
                       title={<span style={{ color: "white" }}>{activity.name}</span>}
                       description={
@@ -1010,7 +1022,13 @@ useEffect(() => {
                 style={{
                   borderBottom: "1px solid rgba(255,255,255,0.1)",
                   padding: "10px 0",
+                  cursor: "pointer",
+                  borderRadius: "8px",
+                  transition: "background 0.15s"
                 }}
+                onClick={() => router.push(`/groups/${groupId}/activities/${activity.id}`)}
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.05)")}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
               >
                 <List.Item.Meta
                   title={<span style={{ color: "white" }}>{activity.name}</span>}
@@ -1107,7 +1125,8 @@ useEffect(() => {
               .rbc-toolbar button:hover { background: rgba(255,255,255,0.1); }
               .rbc-toolbar button.rbc-active { background: rgba(255,255,255,0.2); }
               .rbc-date-cell { color: white; }
-              .rbc-event { background-color: #42a2d6; }
+              .rbc-event { background-color: #42a2d6; cursor: pointer;}
+              .rbc-event:hover { filter: brightness(1.2); transition: filter 0.15s; }
 
               .ant-picker {
                 background-color: rgba(255,255,255,0.08) !important;
