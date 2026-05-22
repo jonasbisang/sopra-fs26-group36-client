@@ -89,7 +89,8 @@ return(
     
     
     <div style={{ width: "100%", padding: "10px 25px", display: "flex", justifyContent: "space-between", alignItems: "center", borderBottom: "1px solid rgba(255,255,255,0.1)" }}>
-      <div style={{ display: "flex", justifyContent: "center" }}>
+      <div style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
+      onClick={() => router.push("/groups")}>
         <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
       </div>
 

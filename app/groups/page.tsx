@@ -144,7 +144,8 @@ useEffect(() => {
         borderBottom: '1px solid rgba(255,255,255,0.1)' // Subtle separator line
     }}>
 
-        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px' }}>
+        <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '20px', cursor: "pointer" }}
+      onClick={() => router.push("/groups")}>
         <NextImage
           src={logo}
           alt="Friendler Logo"

@@ -234,7 +234,8 @@ const GroupSettings: React.FC = () => {
 
             {/* Left: Logo + Back Arrow */}
             <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
-            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px' }}>
+            <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '0px', cursor: "pointer" }}
+            onClick={() => router.push("/groups")}>
             <NextImage src={logo} alt="Friendler Logo" height={160} width={480} />
             </div>
             <Button

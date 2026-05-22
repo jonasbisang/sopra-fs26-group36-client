@@ -248,7 +248,8 @@ return (
         Back to Group
     </Button>
 
-    <div style={{ display: "flex", justifyContent: "center" }}>
+    <div style={{ display: "flex", justifyContent: "center", cursor: "pointer" }}
+      onClick={() => router.push("/groups")}>
         <NextImage src={logo} alt="Friendler Logo" width={120} height={40} />
     </div>
 
