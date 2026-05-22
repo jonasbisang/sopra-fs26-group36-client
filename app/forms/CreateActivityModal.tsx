@@ -1,11 +1,10 @@
 "use client";
 
 import React from "react";
-import { Modal, Form, Input, TimePicker, InputNumber, Checkbox, Select, message, DatePicker, ConfigProvider } from "antd"; //Modal = popup window; selct  dropdown menu
+import { Modal, Form, Input, TimePicker, InputNumber, Checkbox, Select, message, ConfigProvider } from "antd";
 import { useApi } from "@/hooks/useApi";
-import moment from "moment"; //handle time
+import moment from "moment";
 
-const { TextArea } = Input;
 const { Option } = Select;
 
 interface ActivityFormValues {
@@ -31,83 +30,74 @@ interface CreateActivityModalProps {
   memberCount: number;
 }
 
-
-
 const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onClose, groupId, userId, onSuccess, memberCount }) => {
   const [form] = Form.useForm();
   const apiService = useApi();
   const [messageApi, contextHolder] = message.useMessage();
 
-  // when pop up is successfully completed, this gets sent 
   const onFinish = async (values: ActivityFormValues) => {
-      // Prüfen ob Duration zur Zeitspanne passt
-      if (values.timeRange && values.timeRange[0] && values.timeRange[1]) {
-        const windowHours = (values.timeRange[1].valueOf() - values.timeRange[0].valueOf()) / (1000 * 60 * 60);
+    if (values.timeRange && values.timeRange[0] && values.timeRange[1]) {
+      const windowHours = (values.timeRange[1].valueOf() - values.timeRange[0].valueOf()) / (1000 * 60 * 60);
 
-        if (values.duration > windowHours) {
-          const totalMinutes = Math.round(windowHours * 60);
-          const hours = Math.floor(totalMinutes / 60);
-          const minutes = totalMinutes % 60;
-  
-          const display = hours === 0 
+      if (values.duration > windowHours) {
+        const totalMinutes = Math.round(windowHours * 60);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+
+        const display = hours === 0
           ? `${minutes}min`
-          : minutes === 0 
-          ? `${hours}h` 
+          : minutes === 0
+          ? `${hours}h`
           : `${hours}h ${minutes}min`;
 
-          messageApi.error(`Duration (${values.duration}h) cannot exceed the time window (${display})`);
-          return;
+        messageApi.error(`Duration (${values.duration}h) cannot exceed the time window (${display})`);
+        return;
       }
     }
-  
+
     try {
-      //const isCustomTime = values.timePreference === "CUSTOM";
-      // all the data that is then organizedly sent to backend      
-    const payload = {
-      name: values.title,
-      location: values.location,
-      minSize: values.minParticipants,
-      maxSize: values.maxParticipants,
-      duration: values.duration, 
-      timePreference: "CUSTOM", //values.timePreference hard coded
-      isWeatherDependent: values.isWeatherDependent || false,
-      startTime: values.timeRange ? values.timeRange[0].format("HH:mm:ss") : null,
-      endTime: values.timeRange ? values.timeRange[1].format("HH:mm:ss") : null,
-      createdBy: Number(userId),
+      const payload = {
+        name: values.title,
+        location: values.location,
+        minSize: values.minParticipants,
+        maxSize: values.maxParticipants,
+        duration: values.duration,
+        timePreference: "CUSTOM",
+        isRecursive: values.isRecursive || false,
+        isWeatherDependent: values.isWeatherDependent || false,
+        startTime: values.timeRange ? values.timeRange[0].format("HH:mm:ss") : null,
+        endTime: values.timeRange ? values.timeRange[1].format("HH:mm:ss") : null,
+        createdBy: Number(userId),
 
+        ...(values.isWeatherDependent && {
+          minTemp: values.minTemp,
+          maxTemp: values.maxTemp,
+          rainPreference: values.rainPreference,
+        })
+      };
 
-      ...(values.isWeatherDependent && {
-        minTemp: values.minTemp,
-        maxTemp: values.maxTemp,
-        rainPreference: values.rainPreference,
-      })
-  };
-
-      //REST call based on the REST specifications
       await apiService.post(`/groups/${groupId}/activities`, payload);
-      
+
       messageApi.success("Activity proposed successfully!");
       form.resetFields();
-      onSuccess(); // refresh
-      onClose(); // close popup 
+      onSuccess();
+      onClose();
     } catch (error) {
       console.error("Failed to create activity:", error);
       messageApi.error("Failed to create activity. Please try again.");
     }
   };
 
-
-  const inputStyle = { // for where the user writtes the info
-    backgroundColor: "#f0f0f0", // Light grey
-    color: "#000000",           // Black text
-    borderColor: "#d9d9d9"      // Standard Ant Design border
+  const inputStyle = {
+    backgroundColor: "#f0f0f0",
+    color: "#000000",
+    borderColor: "#d9d9d9"
   };
-  
-  // Black labels
-  const labelStyle = { 
-    color: "#000000", 
-    fontWeight: 600, //boldness
-    fontSize: "13px" 
+
+  const labelStyle = {
+    color: "#000000",
+    fontWeight: 600,
+    fontSize: "13px"
   };
 
   const selectTheme = {
@@ -125,48 +115,42 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
     <>
       {contextHolder}
       <style>{`
-      .ant-form-item-explain-error,
-      div[class*="explain-error"] {
-      font-size: 11px !important;
-      color: #ff4d4f !important;
-      }
-
-        /* TimePicker Fix */
+        .ant-form-item-explain-error,
+        div[class*="explain-error"] {
+          font-size: 11px !important;
+          color: #ff4d4f !important;
+        }
         .ant-picker-input input {
-        color: #000000 !important;
-      }
+          color: #000000 !important;
+        }
         .ant-picker {
-        background-color: #f0f0f0 !important;
-        border: 1px solid #d9d9d9 !important; 
-        border-radius: 6px !important;
-      }
-       .ant-picker-separator,
-       .ant-picker-suffix {
-       color: #000000 !important;
-      }
-      .ant-picker-input input::placeholder {
-  color: #999999 !important;
-}
-.ant-picker-input input {
-  color: #000000 !important;
-}
-     `}</style>
-      <Modal // starting of the modal window 
+          background-color: #f0f0f0 !important;
+          border: 1px solid #d9d9d9 !important;
+          border-radius: 6px !important;
+        }
+        .ant-picker-separator,
+        .ant-picker-suffix {
+          color: #000000 !important;
+        }
+        .ant-picker-input input::placeholder {
+          color: #999999 !important;
+        }
+      `}</style>
+      <Modal
         title={<span style={{ color: "black", fontSize: "22px", fontWeight: "bold" }}>New Activity</span>}
-        open={visible} //controlls when it pops up
-        onCancel={onClose} //function from parent 
-        onOk={() => form.submit()}// when submitt button is pressed onFinish
+        open={visible}
+        onCancel={onClose}
+        onOk={() => form.submit()}
         okText="Create"
         cancelText="Cancel"
-        // Style the buttons to match the clean look
         okButtonProps={{ style: { backgroundColor: "black", color: "white", fontWeight: "bold", borderRadius: "6px" } }}
         cancelButtonProps={{ style: { color: "black", borderColor: "#d9d9d9", borderRadius: "6px" } }}
         styles={{
-          body: { backgroundColor: "#ffffff", borderRadius: "12px" }, // Clean white background
+          body: { backgroundColor: "#ffffff", borderRadius: "12px" },
           header: { backgroundColor: "#ffffff", borderBottom: "none", paddingBottom: "10px" }
         }}
       >
-<ConfigProvider theme={selectTheme}>
+        <ConfigProvider theme={selectTheme}>
           <Form
             form={form}
             layout="vertical"
@@ -195,45 +179,27 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
                 name="duration"
                 label={<span style={labelStyle}>DURATION (hours)</span>}
                 rules={[{ required: true, message: "Required" }]}
-                      
                 style={{ flex: 1 }}
               >
-                 <InputNumber min={1} max={24} style={{ width: "100%", ...inputStyle }} />
+                <InputNumber min={1} max={24} style={{ width: "100%", ...inputStyle }} />
               </Form.Item>
-              
+
               <Form.Item
-                name="timePreference"
+                name="timeRange"
                 label={<span style={labelStyle}>TIME PREFERENCE</span>}
                 rules={[{ required: true, message: "Please select a time window" }]}
                 style={{ flex: 1 }}
               >
-                  <TimePicker.RangePicker format="HH:mm" style={{ width: "100%", ...inputStyle }} />
+                <TimePicker.RangePicker format="HH:mm" style={{ width: "100%", ...inputStyle }} />
               </Form.Item>
-
             </div>
-
-            <Form.Item
-              noStyle
-              shouldUpdate={(prevValues, currentValues) => prevValues.timePreference !== currentValues.timePreference}
-            >
-              {({ getFieldValue }) =>
-                getFieldValue('timePreference') === 'CUSTOM' ? (
-                  <Form.Item
-                    name="timeRange"
-                    label={<span style={labelStyle}>CUSTOM TIME WINDOW</span>}
-                    rules={[{ required: true, message: "Required for custom time" }]}
-                  >
-                    <TimePicker.RangePicker format="HH:mm" style={{ width: "100%", ...inputStyle }} />
-                  </Form.Item>
-                ) : null
-              }
-            </Form.Item>
 
             <div style={{ display: "flex", gap: "16px" }}>
               <Form.Item
                 name="minParticipants"
                 label={<span style={labelStyle}>MIN PARTICIPANTS</span>}
-                rules={[{ required: true, message: "Required" },
+                rules={[
+                  { required: true, message: "Required" },
                   ({ getFieldValue }) => ({
                     validator(_, value) {
                       if (!value || value <= memberCount) {
@@ -247,7 +213,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
               >
                 <InputNumber min={1} style={{ width: "100%", ...inputStyle }} />
               </Form.Item>
-              
+
               <Form.Item
                 name="maxParticipants"
                 label={<span style={labelStyle}>MAX PARTICIPANTS</span>}
@@ -293,7 +259,7 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
                       >
                         <InputNumber style={{ width: "100%", ...inputStyle }} />
                       </Form.Item>
-                      
+
                       <Form.Item
                         name="maxTemp"
                         label={<span style={labelStyle}>MAX TEMPERATURE (°C)</span>}
@@ -314,13 +280,12 @@ const CreateActivityModal: React.FC<CreateActivityModalProps> = ({ visible, onCl
                         <InputNumber style={{ width: "100%", ...inputStyle }} />
                       </Form.Item>
                     </div>
-                    
+
                     <Form.Item
                       name="rainPreference"
                       label={<span style={labelStyle}>RAIN PREFERENCE</span>}
                       rules={[{ required: true, message: "Select a preference" }]}
                     >
-                      {/* Notice ConfigProvider is gone from here too! */}
                       <Select placeholder="Select a preference..." style={{ width: "100%", ...inputStyle }}>
                         <Option value="Rain">Should Rain</Option>
                         <Option value="NoRain">No Rain</Option>
