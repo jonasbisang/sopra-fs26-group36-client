@@ -127,44 +127,51 @@ NEXT_PUBLIC_PROD_API_URL=https://your-backend-url.com
 ## Illustrations
 
 ### 1. Activity Lifecycle (GroupsIdPage)
-![Activity Creation & Voting](./assets/AvitityPage.png)
 
 *Users can easily propose new activities, set participant limits, and vote on what to do.*
 
-![Group Overview](./assets/GroupIdPage1.png)
+<img src="./assets/AvitityPage.png" width="800" alt="Activity Creation & Voting">
 
 *The system automatically handles the lifecycle, calculating the optimal date once the minimum participant threshold is reached and the weather checks out. Users can vote and join activities. All members are displayed, along with a dedicated settings page for the group admin.*
 
-![Group Settings](./assets/GroupIdPage2.png)
+<img src="./assets/GroupIdPage1.png" width="800" alt="Group Overview">
+
+*Contains the group settings.*
+
+<img src="./assets/GroupIdPage2.png" width="800" alt="Group Settings">
 
 *Contains the group calendar.*
 
-![Group Calendar](./assets/GroupIdPage3.png)
+<img src="./assets/GroupIdPage3.png" width="800" alt="Group Calendar">
 
 *Contains the group chat.*
 
-![Group Chat](./assets/ChatPage.png)
+<img src="./assets/ChatPage.png" width="800" alt="Group Chat">
 
 
 ### 2. Group Management (GroupsPage)
  
-*The central hub for coordinating with friends and manage group administration seamlessly. Users join existing ones via invite,
+*The central hub for coordinating with friends and manage group administration seamlessly. Users join existing ones via invite, as well as create their own distinct groups.*
 
-![Group Dashboard 1](./assets/GroupPage1.png)
-
-as well as create their own distinct groups. 
-
-![Group Dashboard 2](./assets/GroupPage2.png)
+<table>
+  <tr>
+    <td><img src="./assets/GroupPage1.png" width="400" alt="Group Dashboard 1"></td>
+    <td><img src="./assets/GroupPage2.png" width="400" alt="Group Dashboard 2"></td>
+  </tr>
+</table>
 
 ### 3. Users Calendar (UsersCalendar)
-![Calendar Integration](./assets/CalendarPage.png)
 
 *Friendler bridges directly with the user's calendar to seamlessly streamline group scheduling. The system provides a comprehensive calendar view containing all scheduled activities, and tracks marked unavailabilities to ensure no conflicting plans are made.*
 
+<img src="./assets/CalendarPage.png" width="800" alt="Calendar Integration">
+
+
 ### 4. Users Settings (UserIdSettingsPage)
-![User Settings](./assets/UserIdPage.png)
 
 *This page provides intuitive data visualization to help users track their personal activity metrics, while also offering a direct interface for updating profile information such as usernames, personal bios, and passwords.*
+
+<img src="./assets/UserIdPage.png" width="800" alt="User Settings">
 
 
 
