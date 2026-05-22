@@ -147,19 +147,22 @@ NEXT_PUBLIC_PROD_API_URL=https://your-backend-url.com
 
 
 ### 2. Group Management (GroupsPage)
-![Group Dashboard 1](./assets/GroupPage1.png) 
+ 
+*The central hub for coordinating with friends and manage group administration seamlessly. Users join existing ones via invite,
+
+![Group Dashboard 1](./assets/GroupPage1.png)
+
+as well as create their own distinct groups. 
+
 ![Group Dashboard 2](./assets/GroupPage2.png)
 
-*The central hub for coordinating with friends. Users can create distinct groups, join existing ones via invite, and manage group administration seamlessly.*
-
-
 ### 3. Users Calendar (UsersCalendar)
-![Calendar Integration](./docs/assets/CalendarPage.png)
+![Calendar Integration](./assets/CalendarPage.png)
 
 *Friendler bridges directly with the user's calendar to seamlessly streamline group scheduling. The system provides a comprehensive calendar view containing all scheduled activities, and tracks marked unavailabilities to ensure no conflicting plans are made.*
 
 ### 4. Users Settings (UserIdSettingsPage)
-![User Settings](./docs/assets/UserIdPage.png)
+![User Settings](./assets/UserIdPage.png)
 
 *This page provides intuitive data visualization to help users track their personal activity metrics, while also offering a direct interface for updating profile information such as usernames, personal bios, and passwords.*
 
