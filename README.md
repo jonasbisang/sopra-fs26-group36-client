@@ -100,20 +100,6 @@ Manages user account and authentication. Handles:
 - Node.js 18+
 - Gradle
 
-#### Build
-
-```bash
-./gradlew build
-```
-
-#### Run
-
-```bash
-./gradlew bootRun
-```
-
-The server runs at http://localhost:8080. Verify it's running by visiting that URL in your browser.
-
 ### Backend
 
 #### Build
