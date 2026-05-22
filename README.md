@@ -130,7 +130,7 @@ NEXT_PUBLIC_PROD_API_URL=https://your-backend-url.com
 
 *Users can easily propose new activities, set participant limits, and vote on what to do.*
 
-<img src="./assets/AvitityPage.png" width="800" alt="Activity Creation & Voting">
+<img src="./assets/AvitityPage.png" width="400" alt="Activity Creation & Voting">
 
 *The system automatically handles the lifecycle, calculating the optimal date once the minimum participant threshold is reached and the weather checks out. Users can vote and join activities. All members are displayed, along with a dedicated settings page for the group admin.*
 
