@@ -219,13 +219,13 @@ Without these, the app still runs but Google Calendar sync and email notificatio
 *The central hub for coordinating with friends. Users can create distinct groups, join existing ones via invite, and manage group administration seamlessly.*
 
 
-### 3. Users Calendar MISSING PICTURE (UsersCalendar)
-![Calendar Integration]
+### 3. Users Calendar (UsersCalendar)
+![Calendar Integration](./docs/assets/CalendarPage.png)
 
 *Friendler bridges directly with the user's calendar to seamlessly streamline group scheduling. The system provides a comprehensive calendar view containing all scheduled activities, and tracks marked unavailabilities to ensure no conflicting plans are made.*
 
-### 4. Users Settings MISSING PICTURE  (UserIdSettingsPage)
-![User Settings](./docs/assets/EmailConfPage.png)
+### 4. Users Settings (UserIdSettingsPage)
+![User Settings](./docs/assets/UserIdPage.png)
 
 *This page provides intuitive data visualization to help users track their personal activity metrics, while also offering a direct interface for updating profile information such as usernames, personal bios, and passwords.*
 
