@@ -1,6 +1,6 @@
 "use client";
 import React, { useEffect, useState, useCallback } from "react";
-import { useRouter, useParams } from "next/navigation";
+import { useRouter, useParams, useSearchParams } from "next/navigation";
 import { useApi } from "@/hooks/useApi";
 import { Button,
         message,
@@ -92,6 +92,7 @@ const CalendarPage: React.FC = () => {
   const [timeModalOpen, setTimeModalOpen] = useState(false);
   const [tempStart, setTempStart] = useState<dayjs.Dayjs | null>(null);
   const [tempEnd, setTempEnd] = useState<dayjs.Dayjs | null>(null);
+  const searchParams = useSearchParams();
 
 
   useEffect(() => {
@@ -255,6 +256,12 @@ const CalendarPage: React.FC = () => {
       router.replace("/login");
     }
   }, [mounted, token, router]);
+
+  useEffect(() => {
+    if (searchParams.get("googleConnected") === "true") {
+      message.success("Google Calendar connected successfully! 🎉");
+    }
+  }, [searchParams]);
 
   const startDay = currentMonth.startOf("month").day();
   const daysInMonth = currentMonth.endOf("month").date();

@@ -207,7 +207,7 @@ const ActivityDetailPage: React.FC = () => {
         onClick={() => router.back()}
         style={{ color: "rgba(255,255,255,0.6)", fontSize: "13px", alignSelf: "flex-start" }}
       >
-        Back to Group
+        Back
       </Button>
     </div>
 

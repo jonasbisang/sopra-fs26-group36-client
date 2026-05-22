@@ -224,4 +224,4 @@ And a special thank you to our Teaching Assistant [Ceyhun Acikmese](https://gith
 
 ## License
 
-This Project SpyQuest is licensed under Apache License 2.0 -see the [LICENSE](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/LICENSE) file for further details.
+This Project Friendler is licensed under Apache License 2.0 -see the [LICENSE](https://github.com/jonasbisang/sopra-fs26-group36-server/blob/main/LICENSE) file for further details.

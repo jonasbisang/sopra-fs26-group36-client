@@ -144,7 +144,10 @@ reason).
 |                     | [11.05.2026]   | [https://github.com/jonasbisang/sopra-fs26-group36-server/pull/190/changes/33445623ed709029f1e50ff58e51f12fd7524c34] | [Email Specifications] | [So that the email contains all relevant info for the event] |
 | **@vonhollym-art**         |  10.05.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/b6463898470f100d8d6765c67b6013a78288f405 https://github.com/jonasbisang/sopra-fs26-group36-server/commit/b6463898470f100d8d6765c67b6013a78288f405| change bio | for consistency (bc makes no sense that user can change everything except bio)  |
 |                     | 11.05.2026  | https://github.com/jonasbisang/sopra-fs26-group36-server/commit/c5922e12185cfc28604097327c28ab8ab8d906dd | create google calendar event | To sync ppls calendar with the activities they join  |
-| **[user5]**         | [date]   | [link1] | [what] | [why] |
-|                     | [date]   | [link2] | [what] | [why] |
 
-_Continue with the same table format as above._
+---
+
+## Contributions Week 7 - 14.05.2026 to 20.05.2026
+| **Student**        | **Date** | **Link to Commit** | **Description**                 | **Relevance**                       |
+| ------------------ | -------- | ------------------ | ------------------------------- | ----------------------------------- |
+| all teammates        | -   | - | took joker | - |
