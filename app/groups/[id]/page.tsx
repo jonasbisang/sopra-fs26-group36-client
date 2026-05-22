@@ -924,7 +924,7 @@ useEffect(() => {
                   ) && (
                     <Button
                       size="small"
-                      onClick={() => handleJoin(activity.id)}
+                      onClick={(e) => { e.stopPropagation(); handleJoin(activity.id); }}
                       style={{
                         background: "rgba(66,214,120,0.15)",
                         color: "#42d678",
@@ -1068,7 +1068,7 @@ useEffect(() => {
                     ) && (
                      <Button
                         size="small"
-                        onClick={() => handleJoin(activity.id)}
+                        onClick={(e) => { e.stopPropagation(); handleJoin(activity.id); }}
                         style={{
                             background: "rgba(66,214,120,0.15)",
                             color: "#42d678",
